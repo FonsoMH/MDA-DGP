@@ -8,7 +8,7 @@ Aquí encontrarás toda la documentación, código fuente y materiales relaciona
 ---
 
 ## 🚀 Objetivo del Proyecto
-El propósito principal es aplicar metodologías de desarrollo ágiles en la construcción de un sistema software, siguiendo prácticas de trabajo en equipo, comunicación y gestión de calidad.  
+El propósito principal es aplicar metodologías de desarrollo ágiles en la construcción de un sistema software, siguiendo prácticas de trabajo en equipo, comunicación y gestión de calidad. Todo en colaboración del centro educativo "Nombre del insti"  
 
 ---
 
