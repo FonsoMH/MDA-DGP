@@ -1,0 +1,27 @@
+# Node / Frontend
+node_modules/
+.expo/
+npm-debug.log
+yarn-error.log
+dist/
+web-build/
+
+# Python / Backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+venv/
+.env
+.env.local
+*.log
+
+# Docker
+*.env.backup
+pgdata/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
