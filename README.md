@@ -32,7 +32,7 @@ Nuestro grupo está compuesto por seis integrantes, cada uno con un rol específ
 - Expo CLI (npm install -g expo-cli)
 - Python 3.10+ (instalador oficial)
 - Git
-- Docker
+- Docker (Tenerlo actualizado)
 
 ### Configuración inicial backend
 
