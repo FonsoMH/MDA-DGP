@@ -1,126 +1,128 @@
-CREATE TYPE IF NOT EXISTS nivel_dificultad AS ENUM (
-    'facil', 
+-- ========= CUSTOM TYPES =========
+
+CREATE TYPE IF NOT EXISTS difficulty_level AS ENUM (
+    'facil',  -- Kept Spanish data as requested by enum definition
     'medio', 
     'dificil'
 );
 
--- ========= CREACIÓN DE TABLAS =========
+-- ========= TABLE CREATION =========
 
---Tabla de Roles
+-- Roles Table
 CREATE TABLE IF NOT EXISTS roles (
-    id_rol SERIAL PRIMARY KEY,
-    nombre_rol VARCHAR(50) NOT NULL UNIQUE
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL UNIQUE
 );
 
---Tabla de Usuarios (Central)
-CREATE TABLE IF NOT EXISTS usuarios (
-    id_usuario SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    correo VARCHAR(100) NOT NULL UNIQUE,
-    contrasena_hash VARCHAR(255) NOT NULL,
+-- Users Table (Central)
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
     
-    id_rol INTEGER NOT NULL REFERENCES roles(id_rol),
+    role_id INTEGER NOT NULL REFERENCES roles(role_id),
     
-    -- Relación Docente -> Estudiante (solo para estudiantes)
-    id_docente_asignado INTEGER REFERENCES usuarios(id_usuario) NULL
+    -- Relationship Teacher -> Student (only for students)
+    assigned_teacher_id INTEGER REFERENCES users(user_id) NULL
 );
 
--- Tabla de Juegos (Catálogo)
-CREATE TABLE IF NOT EXISTS juegos (
-    id_juego SERIAL PRIMARY KEY,
+-- Games Table (Catalog)
+CREATE TABLE IF NOT EXISTS games (
+    game_id SERIAL PRIMARY KEY,
     slug VARCHAR(50) NOT NULL UNIQUE,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT
+    name VARCHAR(100) NOT NULL,
+    description TEXT
 );
 
---Ajustes de Accesibilidad (1 a 1 con Estudiante)
-CREATE TABLE IF NOT EXISTS ajustes_accesibilidad (
-    id_estudiante INTEGER PRIMARY KEY REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    color_fondo VARCHAR(7) DEFAULT '#D9D9D9',
-    color_foreground VARCHAR(7) DEFAULT '#000000',
-    iconos_posicion VARCHAR(10) DEFAULT 'izquierda' CHECK (iconos_posicion IN ('izquierda', 'derecha')),
-    modo_alto_contraste BOOLEAN DEFAULT false,
-    modo_ver_numeros BOOLEAN DEFAULT true, 
-    tamano_fuente INTEGER DEFAULT 16 CHECK (tamano_fuente > 8)
+-- Accessibility Settings (1-to-1 with Student)
+CREATE TABLE IF NOT EXISTS accessibility_settings (
+    student_id INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    background_color VARCHAR(7) DEFAULT '#D9D9D9',
+    foreground_color VARCHAR(7) DEFAULT '#000000',
+    icon_position VARCHAR(10) DEFAULT 'izquierda' CHECK (icon_position IN ('izquierda', 'derecha')),
+    high_contrast_mode BOOLEAN DEFAULT false,
+    show_numbers_mode BOOLEAN DEFAULT true, 
+    font_size INTEGER DEFAULT 16 CHECK (font_size > 8)
 );
 
--- Configuración de Dificultad (Tabla PIVOTE)
-CREATE TABLE IF NOT EXISTS configuracion_juegos_estudiante (
-    id_estudiante INTEGER NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    id_juego INTEGER NOT NULL REFERENCES juegos(id_juego) ON DELETE CASCADE,
-    dificultad nivel_dificultad NOT NULL DEFAULT 'facil',
+-- Student Game Configuration (PIVOT Table)
+CREATE TABLE IF NOT EXISTS student_game_configuration (
+    student_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+    difficulty difficulty_level NOT NULL DEFAULT 'facil',
     
-    PRIMARY KEY (id_estudiante, id_juego)
+    PRIMARY KEY (student_id, game_id)
 );
 
---  Resultados de Partidas
-CREATE TABLE IF NOT EXISTS resultados_juegos (
-    id_resultado SERIAL PRIMARY KEY,
-    id_estudiante INTEGER NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    id_juego INTEGER NOT NULL REFERENCES juegos(id_juego) ON DELETE RESTRICT,
+-- Game Results
+CREATE TABLE IF NOT EXISTS game_results (
+    result_id SERIAL PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE RESTRICT,
     
-    fecha TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    puntuacion INTEGER NOT NULL,
-    tiempo_segundos INTEGER NOT NULL,
+    played_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    score INTEGER NOT NULL,
+    time_seconds INTEGER NOT NULL,
     
-    dificultad_jugada nivel_dificultad NOT NULL 
+    played_difficulty difficulty_level NOT NULL 
 );
 
--- Índices en claves foráneas
-CREATE INDEX IF NOT EXISTS idx_usuario_rol ON usuarios(id_rol);
-CREATE INDEX IF NOT EXISTS idx_id_docente_asignado ON usuarios(id_docente_asignado);
-CREATE INDEX IF NOT EXISTS idx_resultados_estudiante ON resultados_juegos(id_estudiante);
-CREATE INDEX IF NOT EXISTS idx_resultados_juego ON resultados_juegos(id_juego);
+-- Indexes on foreign keys
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role_id);
+CREATE INDEX IF NOT EXISTS idx_users_assigned_teacher ON users(assigned_teacher_id);
+CREATE INDEX IF NOT EXISTS idx_game_results_student ON game_results(student_id);
+CREATE INDEX IF NOT EXISTS idx_game_results_game ON game_results(game_id);
 
 
--- ========= RELLENO DE DATOS INICIALES =========
--- Se usa 'ON CONFLICT DO NOTHING' para que el script no falle si ya existen
+-- ========= INITIAL DATA POPULATION =========
+-- Using 'ON CONFLICT DO NOTHING' to make the script idempotent
 
--- Rellenar Roles
-INSERT INTO roles (nombre_rol) VALUES
-('estudiante'),
-('docente'),
+-- Populate Roles
+INSERT INTO roles (role_name) VALUES
+('student'),
+('teacher'),
 ('admin')
-ON CONFLICT (nombre_rol) DO NOTHING;
+ON CONFLICT (role_name) DO NOTHING;
 
--- Rellenar Juegos
-INSERT INTO juegos (slug, nombre, descripcion) VALUES
+-- Populate Games (Game names/descriptions remain in Spanish as they are content)
+INSERT INTO games (slug, name, description) VALUES
 ('toca-numero', 'Toca el número que suena', 'Se escucha un número y se escoge el correspondiente de entre los mostrados en pantalla.'),
 ('ordena-secuencia', 'Ordena la secuencia', 'Se muestra una fila con números desordenados y hay que colocarlos ordenados.'),
 ('reparte-igual', 'Reparte el mismo número', 'Mover objetos/bolas a recipientes para que todos tengan la misma cantidad (suma).'),
 ('deja-igual', 'Deja el mismo número', 'Sacar objetos/bolas de recipientes para que todos tengan la misma cantidad (resta).')
 ON CONFLICT (slug) DO NOTHING;
 
--- Rellenar Usuarios
-INSERT INTO usuarios (nombre, correo, contrasena_hash, id_rol) 
-VALUES ('Ana Admin', 'admin@app.com', 'hash_falso_123', (SELECT id_rol FROM roles WHERE nombre_rol = 'admin'))
-ON CONFLICT (correo) DO NOTHING;
+-- Populate Users (with English placeholder names)
+INSERT INTO users (name, email, password_hash, role_id) 
+VALUES ('Anne Admin', 'admin@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'admin'))
+ON CONFLICT (email) DO NOTHING;
 
-INSERT INTO usuarios (nombre, correo, contrasena_hash, id_rol) 
-VALUES ('Profesor Pablo', 'pablo@app.com', 'hash_falso_123', (SELECT id_rol FROM roles WHERE nombre_rol = 'docente'))
-ON CONFLICT (correo) DO NOTHING;
+INSERT INTO users (name, email, password_hash, role_id) 
+VALUES ('Professor Paul', 'paul@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'teacher'))
+ON CONFLICT (email) DO NOTHING;
 
-INSERT INTO usuarios (nombre, correo, contrasena_hash, id_rol, id_docente_asignado) 
+INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id) 
 VALUES 
-('Eva Estudiante', 'eva@app.com', 'hash_falso_123', (SELECT id_rol FROM roles WHERE nombre_rol = 'estudiante'), (SELECT id_usuario FROM usuarios WHERE correo = 'pablo@app.com')),
-('Leo Lector', 'leo@app.com', 'hash_falso_123', (SELECT id_rol FROM roles WHERE nombre_rol = 'estudiante'), (SELECT id_usuario FROM usuarios WHERE correo = 'pablo@app.com'))
-ON CONFLICT (correo) DO NOTHING;
+('Eva Student', 'eva@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com')),
+('Leo Reader', 'leo@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'))
+ON CONFLICT (email) DO NOTHING;
 
--- Rellenar Ajustes para 1 estudiante (Eva)
-INSERT INTO ajustes_accesibilidad (id_estudiante, modo_alto_contraste, tamano_fuente, iconos_posicion)
-SELECT id_usuario, true, 20, 'derecha' FROM usuarios WHERE correo = 'eva@app.com'
-ON CONFLICT (id_estudiante) DO NOTHING;
+-- Populate Settings for 1 student (Eva)
+INSERT INTO accessibility_settings (student_id, high_contrast_mode, font_size, icon_position)
+SELECT user_id, true, 20, 'derecha' FROM users WHERE email = 'eva@app.com'
+ON CONFLICT (student_id) DO NOTHING;
 
--- Rellenar Configuraciones (Docente asigna dificultad)
-INSERT INTO configuracion_juegos_estudiante (id_estudiante, id_juego, dificultad)
+-- Populate Configurations (Teacher assigns difficulty)
+INSERT INTO student_game_configuration (student_id, game_id, difficulty)
 VALUES
-((SELECT id_usuario FROM usuarios WHERE correo = 'eva@app.com'), (SELECT id_juego FROM juegos WHERE slug = 'toca-numero'), 'medio'),
-((SELECT id_usuario FROM usuarios WHERE correo = 'eva@app.com'), (SELECT id_juego FROM juegos WHERE slug = 'ordena-secuencia'), 'facil'),
-((SELECT id_usuario FROM usuarios WHERE correo = 'leo@app.com'), (SELECT id_juego FROM juegos WHERE slug = 'toca-numero'), 'facil')
-ON CONFLICT (id_estudiante, id_juego) DO NOTHING;
+((SELECT user_id FROM users WHERE email = 'eva@app.com'), (SELECT game_id FROM games WHERE slug = 'toca-numero'), 'medio'),
+((SELECT user_id FROM users WHERE email = 'eva@app.com'), (SELECT game_id FROM games WHERE slug = 'ordena-secuencia'), 'facil'),
+((SELECT user_id FROM users WHERE email = 'leo@app.com'), (SELECT game_id FROM games WHERE slug = 'toca-numero'), 'facil')
+ON CONFLICT (student_id, game_id) DO NOTHING;
 
--- Rellenar Resultados de partidas (Aquí sí queremos duplicados, así que NO usamos ON CONFLICT)
-INSERT INTO resultados_juegos (id_estudiante, id_juego, puntuacion, tiempo_segundos, dificultad_jugada)
+-- Populate Game Results (We want duplicates here, so NO ON CONFLICT)
+INSERT INTO game_results (student_id, game_id, score, time_seconds, played_difficulty)
 VALUES
-((SELECT id_usuario FROM usuarios WHERE correo = 'eva@app.com'), (SELECT id_juego FROM juegos WHERE slug = 'toca-numero'), 100, 45, 'medio'),
-((SELECT id_usuario FROM usuarios WHERE correo = 'leo@app.com'), (SELECT id_juego FROM juegos WHERE slug = 'toca-numero'), 80, 60, 'facil');
+((SELECT user_id FROM users WHERE email = 'eva@app.com'), (SELECT game_id FROM games WHERE slug = 'toca-numero'), 100, 45, 'medio'),
+((SELECT user_id FROM users WHERE email = 'leo@app.com'), (SELECT game_id FROM games WHERE slug = 'toca-numero'), 80, 60, 'facil');
