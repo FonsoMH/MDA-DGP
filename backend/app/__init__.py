@@ -29,7 +29,7 @@ def create_app():
     @app.route("/hello")
     def hello():
         cur = get_db_cursor()
-        cur.execute("SELECT id_usuario, id_rol FROM users")
+        cur.execute("SELECT user_id, name FROM users")
         rows = cur.fetchall()
         cur.close()
         return jsonify(rows)
