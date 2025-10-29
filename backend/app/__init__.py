@@ -25,11 +25,15 @@ def create_app():
     init_app(app)
     with app.app_context():
         init_db()
+    
+    from . import feedback
+    app.register_blueprint(feedback.bp)
+
 
     @app.route("/hello")
     def hello():
         cur = get_db_cursor()
-        cur.execute("SELECT id, name, score FROM test_table")
+        cur.execute("SELECT user_id, name FROM users")
         rows = cur.fetchall()
         cur.close()
         return jsonify(rows)
