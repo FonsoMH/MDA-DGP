@@ -30,6 +30,9 @@ def create_app():
     app.register_blueprint(feedback.bp)
 
 
+    from . import games
+    app.register_blueprint(games.bp)
+
     @app.route("/hello")
     def hello():
         cur = get_db_cursor()
