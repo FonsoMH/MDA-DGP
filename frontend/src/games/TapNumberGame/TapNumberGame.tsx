@@ -1,24 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+
+import Sound from 'react-native-sound';
+
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
+import BackButton from '../../components/common/BackButton/BackButton';
+import { useGameConfig } from '../hooks/useGameConfig';
 
-
-type RangeOption = 10 | 20 | 100 | 1000;
-type OptionsCount = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-
-interface GameProps {
-  maxRange: RangeOption;
-  optionsCount: OptionsCount;
-  buttonSize?: number;
-}
-
-//TODO esto a lo mejor se puede mover a otro archivo
 
 const getRandomNumber = (max: number): number => {
-  return Math.floor(Math.random() * (max + 1));
+    return Math.floor(Math.random() * (max + 1));
 };
 
-const generateUniqueOptions = (target: number, max: RangeOption, count: OptionsCount): number[] => {
+//TODO esto a lo mejor se puede mover a otro archivo
+const generateUniqueOptions = (target: number, max: number, count: number): number[] => {
   const uniqueOptions = new Set<number>();
   uniqueOptions.add(target);
 
@@ -35,34 +30,60 @@ const generateUniqueOptions = (target: number, max: RangeOption, count: OptionsC
   return Array.from(uniqueOptions).sort(() => Math.random() - 0.5);
 };
 
-function TapNumberGame({maxRange, optionsCount, buttonSize}: GameProps) {
+export const playNumberSound = (numero: number) => {
+  const soundName = `n_${numero}`; 
+
+  const audioLocation = Sound.MAIN_BUNDLE; 
+
+  const soundObject = new Sound(soundName, audioLocation, (error) => {
+    if (error) {
+      console.log('Error al cargar el archivo de sonido: ', error);
+      return;
+    }
+    
+    soundObject.play((success) => {
+      if (!success) {
+        console.log(`Fallo en la reproducción del audio de ${numero}`);
+      }
+      soundObject.release();
+    });
+  });
+};
+
+//TODO esto deberia depender de login pero no esta hecho aun
+const STUDENT_ID = 3; 
+const GAME_ID = 1; 
+
+
+function TapNumberGame() {
+
+    const { config, isLoading } = useGameConfig(STUDENT_ID, GAME_ID);
 
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
+    const [isGameInitialized, setIsGameInitialized] = useState<boolean>(false); 
 
     //TODO aqui faltaría mostrar el mensaje de exito
     //TODO calcular el score
 
-   const initializeGame = useCallback(() => {
+    const maxRange: number = config?.ranges ?? 10;
+    const optionsCount = (config?.numElements ?? 9) as number;
 
+   const initializeGame = useCallback(() => {    
         const newTarget = getRandomNumber(maxRange);
         const newOptions = generateUniqueOptions(newTarget, maxRange, optionsCount);
         
         setTargetNumber(newTarget);
         setOptions(newOptions);
         
-        console.log(`Juego iniciado. Target: ${newTarget}, Opciones: ${newOptions.join(', ')}`);
-        
-
+        playNumberSound(newTarget);
         return null;
         
     }, [maxRange, optionsCount]);
 
     const handleSelection = (selectedNumber: number) => {
         // TODO Lógica de acierto/error (Pendiente de implementar completamente)
-        console.log("Selected:", selectedNumber);
         
-        // Aquí se llamaría a initializeGame() si la respuesta fuera correcta
         // setScore(score + 1); 
         if(selectedNumber == targetNumber){
             initializeGame(); 
@@ -70,11 +91,24 @@ function TapNumberGame({maxRange, optionsCount, buttonSize}: GameProps) {
     };
 
     useEffect(() => {
-        initializeGame();
-    }, [initializeGame]);
+        if (!isLoading && config && !isGameInitialized) {
+            initializeGame();
+            setIsGameInitialized(true); 
+        }
+    }, [isLoading, config, initializeGame, isGameInitialized]);
 
     return (
-        <View style={styles.screenContainer}> 
+        
+        <View style={styles.screenContainer}>
+            <BackButton width={215} height={76}></BackButton>
+            <TouchableOpacity onPress={() => playNumberSound(targetNumber)}  style={styles.imageWrapper}>
+                <Image
+                source={require('../../../assets/icons/listen.png')}
+                style={styles.clickableImage}
+                accessibilityLabel="Botón de imagen"
+                />
+            </TouchableOpacity>
+
             <View style={styles.header}>
                 <Text style={styles.title}>Escucha atentamente y toca el número correcto</Text>
             </View>
@@ -88,25 +122,35 @@ function TapNumberGame({maxRange, optionsCount, buttonSize}: GameProps) {
                     >
                         <NumberDisplay key={index}
                             numberProp={num} 
-                            size={buttonSize}
+                            size={155}
                         />
                     </TouchableOpacity>
                 ))}
-            </View>
-            <View>
-                <Text>{targetNumber}</Text>
             </View>
         </View>
 
     );
 }
 
-const styles = StyleSheet.create({ 
+const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
         backgroundColor: '#F7F8FA',
         alignItems: 'center',
+        padding: 20,
     },
+
+    imageWrapper: {
+        padding: 10,
+        borderRadius: 10,
+    },
+
+    clickableImage: {
+        width: 155,
+        height: 155,
+        resizeMode: 'contain',
+    },
+
     header: {
         width: '100%',
         padding: 20,
