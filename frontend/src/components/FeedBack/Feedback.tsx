@@ -1,35 +1,89 @@
-import { useEffect, useState } from "react";
+import { View, Text, Button, ImageBackground, StyleSheet } from "react-native";
+import { FeedBackHook } from "./FeedBackHook";
 
-export default function FeedbackScreen({ result }) {
-    const [feedback, setFeedback] = useState(null);
+export default function FeedbackScreen() {
+
+    const {feedback, loading} = FeedBackHook();
+
+    if (loading){
+        <View>
+            <Text>Cargando feedback</Text>
+        </View>
+    }
     
-    useEffect(() => {
-        fetch(`/feedback?result=${result}`)
-            .then(res => res.json())
-            .then(data => setFeedback(data))
-            .catch(err => console.error("Error al obtener feedback:", err));
-    }, [result]);
 
     if (!feedback) {
         return <div>Cargando feedback...</div>;
     }
 
     return (
-        <div
-        className="flex flex-col justify-center items-center h-screen bg-cover bg-center"
-        style={{ backgroundImage: `url(${feedback.url})` }}
+        <ImageBackground
+            source={{ uri: feedback.url }}
+            style={styles.fullScreen}
+            resizeMode="cover" 
         >
-        <div className="bg-white bg-opacity-70 rounded-2xl p-6 shadow-lg text-center">
-            {/* Cambiar por un mensaje autogenerado o guardar en multimedia frases del estilo ¡Bien Jugado! y cargarlas de la BD */}
-            <h2 className="text-2xl font-bold">{feedback.message}</h2>
-            <button
-            onClick={() => window.location.reload()}
-            className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700"
-            >
-            Jugar de nuevo
-            </button>
-        </div>
-        </div>
-    );  
+            <View style={styles.contentContainer}>
+                
+
+                <View style={styles.card}>
+                    
+
+                    <Text style={styles.messageText}>
+                        {feedback.texto || "¡Bien Jugado!"} 
+                    </Text>
+                    
+                    <View style={styles.buttonWrapper}>
+                        {/* TODO hacer jugar de nuevo */}
+                        {/* <Button
+                            onPress={handlePlayAgain}
+                            title="Jugar de nuevo"
+                            color="#2563EB" 
+                        /> */}
+                    </View>
+                </View>
+            </View>
+        </ImageBackground>
+    );
 
 }
+
+const styles = StyleSheet.create({
+    fullScreen: {
+        flex: 1, 
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    contentContainer: {
+        flex: 1, 
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+    },
+    card: {
+        
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        borderRadius: 16, 
+        padding: 24, 
+        marginHorizontal: 20, 
+        alignItems: 'center',
+        
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.30,
+        shadowRadius: 4.65,
+        elevation: 8, 
+    },
+    messageText: {
+        
+        fontSize: 24, 
+        fontWeight: '700', 
+        marginBottom: 20,
+        color: '#1F2937', 
+    },
+    buttonWrapper: {
+        
+        marginTop: 16, 
+        
+    }
+});

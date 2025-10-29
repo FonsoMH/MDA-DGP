@@ -1,33 +1,32 @@
-import axios from "axios"
+import axios, { AxiosError } from "axios"
+import { FeedbackData } from "../../types/feedback";
 
 //TODO sacar de las variables de entorno
 const API_URl = 'http://localhost:5000';
 
 //TODO definir
-const DEFAULT_INFO;
-
-export interface FeedbackData {
-    url: string;
-    texto: string;
-}
-
-interface BackendResponse<T> {
-    success: boolean,
-    data?: T,
-    message?: string
+const DEFAULT_INFO: FeedbackData = {
+    url: "",
+    texto: "Sigue asi makina"
 }
 
 export const FeedBackApi = async () => {
     try {
 
-        const response: BackendResponse<FeedbackData> = axios.get< BackendResponse<FeedbackData> >(`${API_URl}/feedback`);
+        const response = await axios.get< FeedbackData>(`${API_URl}/feedback`);
 
-        if (response.success){
-            return 
-        }
+        return response.data;
+
+        
 
     } catch (error) {
+
+        const axiosError = error as AxiosError;
+
+        console.error(`Error: ${axiosError.message}`);
+        console.error(`Code: ${axiosError.code}`);
         
+        return DEFAULT_INFO;
     }
 }
 
