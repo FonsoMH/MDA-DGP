@@ -25,6 +25,10 @@ def create_app():
     init_app(app)
     with app.app_context():
         init_db()
+    
+    from . import feedback
+    app.register_blueprint(feedback.bp)
+
 
     @app.route("/hello")
     def hello():
