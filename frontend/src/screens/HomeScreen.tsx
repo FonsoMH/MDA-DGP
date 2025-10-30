@@ -17,6 +17,10 @@ export default function HomeScreen({ navigation }: HomeProps) {
       <Button
         title="Intentar ir a Details sin parámetro"
       />
+      <Button
+        title="Ir a Pantalla de Login"
+        onPress={() => navigation.navigate('Login')} 
+      />
     </View>
   );
 }

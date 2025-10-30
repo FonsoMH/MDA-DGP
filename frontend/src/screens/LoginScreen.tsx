@@ -1,0 +1,56 @@
+import * as React from 'react'
+import { View ,Text , Button , StyleSheet, Pressable} from 'react-native';
+import LoginOptionButton from '../components/LoginOptionButton';
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    titleContainer: {
+        height: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    title: {
+        fontSize: 48,
+        fontWeight: 'bold',
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#666',
+    },
+    optionsContainer:{
+        padding: 20,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        gap: 10,
+    }
+});
+
+export default function LoginScreen(){
+
+    const handleSubmit = () => {
+        console.log("Iniciando sesión");
+    }
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.titleContainer}>
+                <Text style={styles.title}>🎓 Tiki Matemáticas</Text>
+                <Text style={styles.subtitle}>Aprende matemáticas de forma divertida</Text>
+            </View>
+            <View style={styles.optionsContainer}>
+
+                <LoginOptionButton icon="👦" label="Soy Estudiante" onPress={handleSubmit} />
+
+                <LoginOptionButton icon="👩‍🏫" label="Soy Profesor" onPress={handleSubmit} />
+                
+            </View>
+        </View>
+    )
+}

@@ -2,6 +2,8 @@ export type RootStackParamList = {
   Home: undefined; 
 
   Details: { itemId: number };
+
+  Login: undefined;
   
   // Resto de rutas
 };
