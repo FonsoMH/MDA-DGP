@@ -1,6 +1,8 @@
-import { View, Text, Button, ImageBackground, StyleSheet, Modal, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, Button, ImageBackground, StyleSheet, Modal, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 import { FeedBackHook } from "./FeedBackHook";
 import { useNavigation } from "@react-navigation/native";
+import React from "react";
+
 
 interface FeedBackProps {
     onNotify: (data: string) => void;
@@ -29,53 +31,61 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
 
     return (
         <Modal
-            animationType="fade"
-            transparent={true}
-            visible={visible}
-        >
-            {loading ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#FFFFFF" />
-                    <Text style={styles.loadingText}>Cargando...</Text>
-                </View>
+        animationType="fade"
+        transparent={true}
+        visible={visible}
+    >
+        {loading ? (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#FFFFFF" />
+                <Text style={styles.loadingText}>Cargando...</Text>
+            </View>
 
-            ) : (
-                <ImageBackground
-                    source={{ uri: feedback?.url }}
-                    style={styles.fullScreen}
-                    resizeMode="cover" 
-                >
-                    <View style={styles.contentContainer}>
-                        
-                        <View style={styles.card}>
-                            
-                            <Text style={styles.messageText}>
-                                {feedback?.texto || "¡Bien Jugado!"} 
-                            </Text>
+        ) : (
+            <ImageBackground
+                source={{ uri: feedback?.url }}
+                style={styles.fullScreen}
+                resizeMode="cover"
+            >
+                <View style={styles.contentContainer}>
+                    <View style={styles.card}>
+                        <Text style={styles.messageText}>
+                            {feedback?.texto || "¡Bien Jugado!"} 
+                        </Text>
 
-                            <View style={styles.buttonWrapper}>
-                                <TouchableOpacity
-                                    style={[styles.button, styles.playAgainButton]}
-                                    onPress={() => navigation.goBack()}
-                                >
-                                    <Text style={styles.buttonText}>Inicio</Text>
-                                </TouchableOpacity>
+                        <View style={styles.buttonWrapper}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.homeButton]}
+                                accessibilityRole="button"
+                                accessibilityLabel="Volver al inicio"
+                                activeOpacity={0.7}
+                                onPress={() => navigation.goBack()}
+                            >
+                                <Image
+                                    source={require("../../../assets/casa.png")} // ruta de tu imagen
+                                    style={styles.buttonIcon}
+                                    resizeMode="contain"
+                                />
+                                <Text style={styles.buttonText}> Inicio</Text>
+                                
+                            </TouchableOpacity>
 
-                                <TouchableOpacity
-                                    style={[styles.button, styles.homeButton]}
-                                    onPress={handlePress}
-                                >
-                                    <Text style={styles.buttonText}>Volver a Jugar</Text>
-                                </TouchableOpacity>
-                            </View>
-
+                            <TouchableOpacity
+                                style={[styles.button, styles.playAgainButton]}
+                                accessibilityRole="button"
+                                accessibilityLabel="Volver a jugar"
+                                activeOpacity={0.7}
+                                onPress={handlePress}
+                            >
+                                <Text style={styles.buttonText}> Volver a Jugar</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
-                    
-                </ImageBackground> 
-            )}
-
-        </Modal>    
+                </View>
+            </ImageBackground> 
+        )}
+    </Modal>
+    
       
     );
 }
@@ -83,28 +93,30 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
 
 const styles = StyleSheet.create({
     fullScreen: {
-        flex: 1, 
-        justifyContent: 'center',
-        alignItems: 'center',
+        flex: 1,
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
     },
     contentContainer: {
-        flex: 1, 
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%',
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        backgroundColor: "rgba(0,0,0,0.5)", // fondo semitransparente
     },
     card: {
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        borderRadius: 16, 
-        padding: 24, 
-        marginHorizontal: 20, 
-        alignItems: 'center',
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 30,
+        width: "85%", // más grande que antes
+        alignItems: "center",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.30,
-        shadowRadius: 4.65,
-        elevation: 8, 
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     },
     messageText: {
         fontSize: 24, 
@@ -112,29 +124,45 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         color: '#1F2937', 
     },
+
     buttonWrapper: {
         flexDirection: "row",
         justifyContent: "space-between",
         width: "100%",
-        marginTop: 16,  
+        marginTop: 20,
     },
+
     button: {
         flex: 1,
-        paddingVertical: 12,
-        borderRadius: 12,
-        alignItems: "center",
-        marginHorizontal: 6,
+        alignItems: "center", // centra contenido horizontalmente
+        justifyContent: "center",
+        paddingVertical: 18,
+        marginHorizontal: 8,
+        borderRadius: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
-    playAgainButton: {
-        backgroundColor: "#2563EB",
+
+    buttonIcon: {
+        width: 200,
+        height: 200,
     },
     homeButton: {
-        backgroundColor: "#2563EB",
+        backgroundColor: "#1E3A8A", // azul oscuro para contraste
     },
+
+    playAgainButton: {
+        backgroundColor: "#059669", // verde brillante
+    },
+
     buttonText: {
         color: "white",
-        fontWeight: "600",
-        fontSize: 16,
+        fontSize: 26,
+        fontWeight: "700",
+        textAlign: "center",
     },
 
     buttonText_playAgain: {
