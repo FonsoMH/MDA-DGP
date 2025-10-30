@@ -77,6 +77,11 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
                                 activeOpacity={0.7}
                                 onPress={handlePress}
                             >
+                                <Image
+                                    source={require("../../../assets/de_nuevo.png")} // ruta de tu imagen
+                                    style={styles.buttonIcon}
+                                    resizeMode="contain"
+                                />
                                 <Text style={styles.buttonText}> Volver a Jugar</Text>
                             </TouchableOpacity>
                         </View>
