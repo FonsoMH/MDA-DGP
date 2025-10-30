@@ -1,19 +1,19 @@
 import axios, { AxiosError } from "axios"
 import { FeedbackData } from "../../types/feedback";
+import Constants from 'expo-constants'; 
 
-//TODO sacar de las variables de entorno
-const API_URl = 'http://localhost:5000';
+const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
 
 //TODO definir
 const DEFAULT_INFO: FeedbackData = {
-    url: "",
+    url: '../../../assets/favicon.png',
     texto: "Sigue asi makina"
 }
 
 export const FeedBackApi = async () => {
     try {
 
-        const response = await axios.get< FeedbackData>(`${API_URl}/feedback`);
+        const response = await axios.get< FeedbackData>(`${BASE_URL}/feedback`);
 
         return response.data;
 
@@ -29,8 +29,3 @@ export const FeedBackApi = async () => {
         return DEFAULT_INFO;
     }
 }
-
-// return jsonify({
-//     "background_url": "/static/default_bg.jpg",
-//     "message": "No se encontró feedback para este resultado."
-//     }) 
