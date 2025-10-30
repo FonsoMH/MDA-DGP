@@ -5,7 +5,7 @@ import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay'
 import BackButton from '../../components/common/BackButton/BackButton';
 import { useGameConfig } from '../hooks/useGameConfig';
 import FeedbackScreen from '../../components/FeedBack/Feedback';
-import { initializeTtsListeners, playTTS } from '../../components/ttsListener';
+import { playTTS } from '../../components/ttsListener';
 
 
 const getRandomNumber = (max: number): number => {
@@ -59,10 +59,6 @@ function TapNumberGame() {
 
     const maxRange: number = config?.ranges ?? 10;
     const optionsCount = (config?.numElements ?? 9) as number;
-
-    useEffect(() => {
-        initializeTtsListeners();
-    }, []);
 
    const initializeGame = useCallback(() => {    
         const newTarget = getRandomNumber(maxRange);
