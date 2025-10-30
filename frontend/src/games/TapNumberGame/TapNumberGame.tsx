@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
 
 import Sound from 'react-native-sound';
 
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
 import BackButton from '../../components/common/BackButton/BackButton';
 import { useGameConfig } from '../hooks/useGameConfig';
+import FeedbackScreen from '../../components/FeedBack/Feedback';
 
 
 const getRandomNumber = (max: number): number => {
@@ -54,6 +55,8 @@ export const playNumberSound = (numero: number) => {
 const STUDENT_ID = 3; 
 const GAME_ID = 1; 
 
+const REPEATS = 2;
+
 
 function TapNumberGame() {
 
@@ -63,7 +66,15 @@ function TapNumberGame() {
     const [options, setOptions] = useState<number[]>([]);
     const [isGameInitialized, setIsGameInitialized] = useState<boolean>(false); 
 
-    //TODO aqui faltaría mostrar el mensaje de exito
+    const [games, setGames] = useState(1);
+    const [modalVisible, setModalVisible] = useState(false);
+    
+    const handlePlayAgain = () => {
+        setGames(1);
+        setModalVisible(false);
+        initializeGame();
+    };
+
     //TODO calcular el score
 
     const maxRange: number = config?.ranges ?? 10;
@@ -86,7 +97,16 @@ function TapNumberGame() {
         
         // setScore(score + 1); 
         if(selectedNumber == targetNumber){
-            initializeGame(); 
+            if (games == REPEATS) {
+                setModalVisible(true);
+                console.log("¡Máximo de juegos alcanzado!");
+            }
+            else{
+                initializeGame(); 
+                setGames(prevGames => prevGames + 1 );
+                console.log("aumentamos");
+                
+            }
         }
     };
 
@@ -96,6 +116,7 @@ function TapNumberGame() {
             setIsGameInitialized(true); 
         }
     }, [isLoading, config, initializeGame, isGameInitialized]);
+
 
     return (
         
@@ -127,6 +148,8 @@ function TapNumberGame() {
                     </TouchableOpacity>
                 ))}
             </View>
+
+            <FeedbackScreen visible={modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
 
     );
