@@ -55,7 +55,7 @@ export const playNumberSound = (numero: number) => {
 const STUDENT_ID = 3; 
 const GAME_ID = 1; 
 
-const REPEATS = 5;
+const REPEATS = 2;
 
 
 function TapNumberGame() {
