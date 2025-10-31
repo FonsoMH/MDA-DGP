@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation'; 
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
+import GameMenuScreen from '../games/gameMenuScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -12,6 +13,15 @@ export default function AppNavigator() {
     <Stack.Navigator 
       initialRouteName="Home"
     >
+      <Stack.Screen 
+        name="GameMenu" 
+        component={GameMenuScreen} 
+        options={{ 
+            title: 'Selecciona un Juego',
+            headerShown: false
+        }} 
+
+      />
       <Stack.Screen 
         name="Home" 
         component={HomeScreen} 
@@ -30,6 +40,7 @@ export default function AppNavigator() {
         }} 
 
       />
+      {/** Pantalla alternativa eliminado: GameSelected */}
     </Stack.Navigator>
   );
 }

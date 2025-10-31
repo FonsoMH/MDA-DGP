@@ -1,5 +1,8 @@
 export type RootStackParamList = {
   Home: undefined; 
+  GameMenu: undefined;
+  GameSelected: undefined;
+  Play:{gameId: string};
 
   Details: { itemId: number };
   
