@@ -6,7 +6,7 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
-from .create_teacher import teacher_bp
+
 
 load_dotenv()  # carga las variables del .env
 
@@ -30,12 +30,15 @@ def create_app():
     from . import feedback
     app.register_blueprint(feedback.bp)
 
-
     from . import games
     app.register_blueprint(games.bp)
 
-    # Registrar blueprints
+    from .create_teacher import teacher_bp
     app.register_blueprint(teacher_bp)
+
+    from .update_user import user_bp
+    app.register_blueprint(user_bp)
+
 
     @app.route("/hello")
     def hello():
