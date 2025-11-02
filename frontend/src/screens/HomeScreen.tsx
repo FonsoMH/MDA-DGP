@@ -21,6 +21,12 @@ export default function HomeScreen({ navigation }: HomeProps) {
       <Button
         title="Intentar ir a Details sin parámetro"
       />
+      <Button
+        title="Ir a la Lista de Usuarios"
+        onPress={() => navigation.navigate('UserList')} 
+      />
+
+      
     </View>
   );
 }

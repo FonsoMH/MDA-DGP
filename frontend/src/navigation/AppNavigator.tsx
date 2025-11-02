@@ -5,6 +5,8 @@ import { RootStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import TapNumberGame from '../games/TapNumberGame/TapNumberGame';
+import UserListScreen from '../screens/UserListScreen';
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -36,6 +38,14 @@ export default function AppNavigator() {
         component={TapNumberGame} 
         options={{ 
           title: 'Juego de Números',
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="UserList" 
+        component={UserListScreen} 
+        options={{ 
+          title: 'Lista de Usuarios',
           headerShown: false
         }} 
       />

@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
 from .db import get_db_cursor
 
-users_bp = Blueprint('users', __name__)
+bp = Blueprint('users', __name__)
 
-@users_bp.route('/users', methods=['GET'])
+
+@bp.route('/users', methods=['GET'])
 def get_users():
     # filter by role
     role = request.args.get('role')
@@ -52,7 +53,7 @@ def get_users():
 
     return jsonify(users)
 
-@users_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     cur = get_db_cursor()
     cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
