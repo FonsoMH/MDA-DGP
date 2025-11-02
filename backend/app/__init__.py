@@ -7,6 +7,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
 
+
 load_dotenv()  # carga las variables del .env
 
 def create_app():
@@ -39,6 +40,8 @@ def create_app():
     app.register_blueprint(accessibility.bp)
     
 
+
+    # Registrar blueprints
 
     @app.route("/hello")
     def hello():
