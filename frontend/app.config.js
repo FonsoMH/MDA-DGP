@@ -34,6 +34,7 @@ export default ({ config }) => {
 
     extra: {
       REACT_APP_API_BASE_URL: process.env.REACT_APP_API_BASE_URL,
+      API_TIMEOUT: process.env.API_TIMEOUT,
     }
   };
 };
