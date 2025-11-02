@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify, current_app
-from .db import get_db_cursor
-from .update_user_common import get_user_by_id, email_in_use, commit_or_rollback
+from ..db import get_db_cursor
+from .user_common import get_user_by_id, email_in_use, commit_or_rollback
 
-update_student_bp = Blueprint('update_student', __name__)
+student_bp = Blueprint('student', __name__)
 
-@update_student_bp.route('/api/user/update_student/<int:user_id>', methods=['PUT'])
+#TODO : Poner aquí el create_student cuando se haga merge de la gestion de students
+
+@student_bp.route('/api/student/<int:user_id>', methods=['PUT'])
 def update_student(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -47,5 +49,24 @@ def update_student(user_id):
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()
+#TODO : queda hacer la logica para cambiar la contraseña
 
-#TODO --> queda hacer la logica para cambiar la contraseña
+@student_bp.route('/api/student/<int:user_id>', methods=['DELETE'])
+def delete_student(user_id):
+    cur = get_db_cursor()
+    try:
+        user = get_user_by_id(cur, user_id)
+        if not user:
+            return jsonify({'error': 'Student not found.'}), 404
+
+        cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+
+        commit_or_rollback(cur, True)
+        return jsonify({'message': 'Student deleted successfully.'}), 200
+
+    except Exception as e:
+        commit_or_rollback(cur, False)
+        current_app.logger.error(f"Error deleting student {user_id}: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()

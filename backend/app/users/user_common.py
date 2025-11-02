@@ -1,5 +1,5 @@
 from flask import jsonify
-from .db import get_db_cursor
+from ..db import get_db_cursor
 
 def get_user_by_id(cur, user_id):
     cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
