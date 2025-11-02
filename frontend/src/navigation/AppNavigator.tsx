@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation'; 
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
+import TapNumberGame from '../games/TapNumberGame/TapNumberGame';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -29,6 +30,14 @@ export default function AppNavigator() {
             headerShown: false
         }} 
 
+      />
+      <Stack.Screen 
+        name="TapNumberGame" 
+        component={TapNumberGame} 
+        options={{ 
+          title: 'Juego de Números',
+          headerShown: false
+        }} 
       />
     </Stack.Navigator>
   );

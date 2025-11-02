@@ -1,5 +1,8 @@
-{
-  "expo": {
+require('dotenv').config();
+
+export default ({ config }) => {
+  return {
+    ...config,
     "name": "frontend",
     "slug": "frontend",
     "version": "1.0.0",
@@ -13,7 +16,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.frontend"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,10 +25,15 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.frontend"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+
+    extra: {
+      REACT_APP_API_BASE_URL: process.env.REACT_APP_API_BASE_URL,
     }
-  }
-}
+  };
+};

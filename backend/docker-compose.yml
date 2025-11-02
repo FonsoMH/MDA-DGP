@@ -14,15 +14,18 @@ services:
   web:
     build: .
     container_name: tato-backend
-    command: flask run --host=0.0.0.0
+    command: flask run --host=0.0.0.0 --debugger --reload 
     volumes:
-      - .:/app
+      - .:/app 
     ports:
       - "5000:5000"
     env_file:
       - .env
+    environment:
+      - FLASK_ENV=development 
     depends_on:
       - db
+
 
 volumes:
   pgdata:
