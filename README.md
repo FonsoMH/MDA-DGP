@@ -1,4 +1,11 @@
+IMPORTANTE:
+Para probar las cosas hay que reiniciar las tablas porque ya las tendreis creadas y faltaran columnas.
+Ejecutar este Script de la siguiente forma:
+docker compose exec -T db psql -U TU_USER -h localhost -d tato_db < app/sql/cleanup.sql
+w
+
 # Equipo Los Especialistas
+
 
 Bienvenido al repositorio oficial del grupo **Los especialistas**.  
 Este espacio está dedicado al desarrollo colaborativo de nuestro proyecto dentro de la asignatura **Metodologías de Desarrollo Ágiles** (Grado en Ingeniería Informática, Universidad de Granada, curso 2025/2026).  
