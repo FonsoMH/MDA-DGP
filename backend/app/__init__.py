@@ -33,6 +33,9 @@ def create_app():
     from . import games
     app.register_blueprint(games.bp)
 
+    from . import accessibility
+    app.register_blueprint(accessibility.bp)
+
     @app.route("/hello")
     def hello():
         cur = get_db_cursor()
