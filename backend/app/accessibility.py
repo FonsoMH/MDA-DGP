@@ -8,7 +8,7 @@ bp = Blueprint("accessibility", __name__, url_prefix="/accessibility")
 def validate_color_hex(color):
     if not isinstance(color, str):
         return False
-    # Solo acepta formato #RRGGBB (6 dígitos)
+    # #RRGGBB format
     return bool(re.fullmatch(r"#[0-9a-fA-F]{6}", color))
 
 def validate_icon_position(pos):
@@ -49,6 +49,8 @@ def update_accessibility(student_id):
     font_size = data.get("font_size", 16)
 
     # --- Validation ---
+
+    #TODO no se si las validaciones sobran
     errores = []
 
     if not validate_color_hex(background_color):
@@ -71,7 +73,6 @@ def update_accessibility(student_id):
     if errores:
         return jsonify({"errors": errores}), 400
 
-    # --- Actualizar en la DB ---
     cur = get_db_cursor()
     db = get_db()
 
