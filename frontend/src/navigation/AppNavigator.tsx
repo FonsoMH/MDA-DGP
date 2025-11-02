@@ -3,9 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '../types/navigation'; 
 import HomeScreen from '../screens/HomeScreen';
-import DetailsScreen from '../screens/DetailsScreen';
-import TapNumberGame from '../games/TapNumberGame/TapNumberGame';
-import SequenceGame from '../games/SequenceGame/SequenceGame';
+import GameMenuScreen from '../games/gameMenuScreen';
+import GameNavigator from './GameNavigator';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -13,42 +12,22 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator 
       initialRouteName="Home"
+      screenOptions={{
+            headerShown: false
+        }}
     >
       <Stack.Screen 
         name="Home" 
-        component={HomeScreen} 
-        options={{ 
-            title: 'Listado Principal',
-            headerShown: false
-        }} 
-
-      />
-      <Stack.Screen 
-        name="Details" 
-        component={DetailsScreen} 
-        options={{ 
-            title: 'Detalles del Ítem',
-            headerShown: false
-        }} 
-
-      />
-      <Stack.Screen 
-        name="TapNumberGame" 
-        component={TapNumberGame} 
-        options={{ 
-          title: 'Juego de Números',
-          headerShown: false
-        }} 
+        component={HomeScreen}
       />
 
       <Stack.Screen 
-        name="SequenceGame" 
-        component={SequenceGame} 
-        options={{ 
-          title: 'Juego de Números',
-          headerShown: false
-        }} 
+        name="GameMenu" 
+        component={GameMenuScreen}
       />
+      
+      <Stack.Screen name="Games" component={GameNavigator} />
+
     </Stack.Navigator>
   );
 }
