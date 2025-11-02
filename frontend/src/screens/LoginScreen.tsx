@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { View ,Text , Button , StyleSheet, Pressable} from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LoginOptionButton from '../components/LoginOptionButton';
 
 const styles = StyleSheet.create({
@@ -32,10 +33,16 @@ const styles = StyleSheet.create({
     }
 });
 
-export default function LoginScreen(){
+type LoginProps = NativeStackScreenProps<any, 'Login'>;
 
-    const handleSubmit = () => {
-        console.log("Iniciando sesión");
+export default function LoginScreen({ navigation }: LoginProps){
+
+    const handleStudentLogin = () => {
+        navigation.navigate('StudentLogin');
+    }
+
+    const handleTeacherLogin = () => {
+        navigation.navigate('TeacherLogin');
     }
 
     return (
@@ -46,9 +53,9 @@ export default function LoginScreen(){
             </View>
             <View style={styles.optionsContainer}>
 
-                <LoginOptionButton icon="👦" label="Soy Estudiante" onPress={handleSubmit} />
+                <LoginOptionButton icon="👦" label="Soy Estudiante" onPress={handleStudentLogin} />
 
-                <LoginOptionButton icon="👩‍🏫" label="Soy Profesor" onPress={handleSubmit} />
+                <LoginOptionButton icon="👩‍🏫" label="Soy Profesor" onPress={handleTeacherLogin} />
                 
             </View>
         </View>

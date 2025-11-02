@@ -4,6 +4,12 @@ export type RootStackParamList = {
   Details: { itemId: number };
 
   Login: undefined;
+
+  StudentLogin: undefined;
+
+  StudentPassword: undefined;
+
+  TeacherLogin: undefined;
   
   // Resto de rutas
 };
