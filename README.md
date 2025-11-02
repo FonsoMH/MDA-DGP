@@ -1,9 +1,3 @@
-IMPORTANTE:
-Para probar las cosas hay que reiniciar las tablas porque ya las tendreis creadas y faltaran columnas.
-Ejecutar este Script de la siguiente forma:
-docker compose exec -T db psql -U TU_USER -h localhost -d tato_db < app/sql/cleanup.sql
-w
-
 # Equipo Los Especialistas
 
 
@@ -84,3 +78,9 @@ npm start
 ```
 http://TU_IP_LOCAL:5000/hello
 ```
+
+
+### IMPORTANTE:
+Para probar las cosas hay que reiniciar las tablas porque ya las tendreis creadas y faltaran columnas.
+Ejecutar este Script de la siguiente forma:
+docker compose exec -T db psql -U TU_USER -h localhost -d tato_db < app/sql/cleanup.sql
