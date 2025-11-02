@@ -13,9 +13,6 @@ export const playTTS = async (message: string) => {
     Speech.stop();
     isSpeaking = false;
   }
-
-  console.log('TTS reproducirá:', message);
-
   
   Speech.speak(message, {
     language: 'es-ES',       
