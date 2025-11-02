@@ -117,4 +117,8 @@ def update_accessibility(student_id):
     return jsonify({
         "message": "Configuración actualizada correctamente",
         "updated_settings": updated_settings
+<<<<<<< HEAD
     }), 200
+=======
+    }), 200
+>>>>>>> a21dab1 ("Cambios para PR")
