@@ -14,21 +14,6 @@ export default function HomeScreen({ navigation }: HomeProps) {
         title="Ver juegos disponibles"
         onPress={() => navigation.navigate('GameMenu')}
       />
-      <Button
-        title="Ir a Detalles del Producto (ID 42)"
-        onPress={() => navigation.navigate('Details', { itemId: 42 })} 
-      />
-      <Button
-        title="Ir a Juego 1"
-        onPress={() => navigation.navigate('TapNumberGame')} 
-      />
-      <Button
-        title="Ir a Juego 2"
-        onPress={() => navigation.navigate('SequenceGame')} 
-      />
-      <Button
-        title="Intentar ir a Details sin parámetro"
-      />
     </View>
   );
 }
