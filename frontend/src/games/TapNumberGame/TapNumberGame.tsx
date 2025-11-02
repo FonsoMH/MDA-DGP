@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F7F8FA',
         alignItems: 'center',
         padding: 20,
+        margin: 20
     },
 
     imageWrapper: {

@@ -12,7 +12,7 @@ import FeedbackScreen from '../../components/FeedBack/Feedback';
 import { generateRandomOptions } from '../utils/gameUtils';
 import { useGameManager } from '../utils/gameManager';
 import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
-import DraggableItem from './DraggableOption';
+import DraggableItem from './DraggableItem';
 
 
 //TODO esto deberia depender de login pero no esta hecho aun
@@ -110,7 +110,7 @@ function SequenceGame() {
                 {visualIcon}
             </View>
             <View
-                style={[styles.gridContainer, { height: 320 }]}
+                style={[styles.gridContainer, { height: '40%' }]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -138,7 +138,7 @@ function SequenceGame() {
                 </View>
             </View>
             <View
-                style={[styles.gridContainer, { height: 300 }]}
+                style={[styles.gridContainer, { height: '35%' }]}
                 ref={bottomZoneRef}
                 onLayout={() => {
                     bottomZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
+        margin: 20
     },
 
     header: {
