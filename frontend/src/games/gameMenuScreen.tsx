@@ -38,7 +38,7 @@ const GAMES: Game[] = [
     },
     {
         id: 'Game4',
-        title: 'Deja el mismo número',
+        title: 'Deja el mismo númeroooooo',
         image: require('../../assets/icons/games_icons/icon_game4.png'),
     },
 ];
@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     
     gridContainer: {
         width: '95%',
+        height: '70%',
         flexDirection: 'row', 
         flexWrap: 'wrap', 
         justifyContent: 'space-between', 
