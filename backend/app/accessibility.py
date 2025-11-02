@@ -107,4 +107,14 @@ def update_accessibility(student_id):
     db.commit()
     cur.close()
 
-    return jsonify({"message": "Configuración actualizada correctamente"}), 200
+
+    cur = get_db_cursor()
+    cur.execute("SELECT * FROM accessibility_settings WHERE student_id = %s", (student_id,))
+    updated_settings = cur.fetchone()
+    cur.close()
+
+
+    return jsonify({
+        "message": "Configuración actualizada correctamente",
+        "updated_settings": updated_settings
+    }), 200
