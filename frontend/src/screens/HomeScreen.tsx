@@ -11,6 +11,10 @@ export default function HomeScreen({ navigation }: HomeProps) {
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>¡Bienvenido!</Text>
       <Button
+        title="Crear Estudiante"
+        onPress={() => navigation.navigate('StudentCreate')}
+      />
+      <Button
         title="Ir a Detalles del Producto (ID 42)"
         onPress={() => navigation.navigate('Details', { itemId: 42 })} 
       />

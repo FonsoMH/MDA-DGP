@@ -2,6 +2,7 @@ export type RootStackParamList = {
   Home: undefined; 
 
   Details: { itemId: number };
+  StudentCreate: undefined;
   
   // Resto de rutas
 };
