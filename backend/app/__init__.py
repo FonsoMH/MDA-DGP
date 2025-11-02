@@ -36,8 +36,14 @@ def create_app():
     from .create_teacher import teacher_bp
     app.register_blueprint(teacher_bp)
 
-    from .update_user import user_bp
-    app.register_blueprint(user_bp)
+    from .update_user_admin import update_admin_bp
+    app.register_blueprint(update_admin_bp)
+
+    from .update_user_teacher import update_teacher_bp
+    app.register_blueprint(update_teacher_bp)
+
+    from .update_user_student import update_student_bp
+    app.register_blueprint(update_student_bp)
 
 
     @app.route("/hello")
