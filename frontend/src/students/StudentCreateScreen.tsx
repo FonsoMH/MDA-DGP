@@ -6,6 +6,7 @@ import {
   Text,
   TextInput,
   Pressable,
+  Image,
   StyleSheet,
 } from 'react-native';
 import axios from 'axios';
@@ -108,7 +109,11 @@ export default function StudentCreateScreen({ navigation }: Props) {
                   accessibilityRole="button"
                   accessibilityLabel={p.label || p.key}
                 >
-                  <Text style={styles.picText}>{p.emoji || '🔶'}</Text>
+                  {p.image ? (
+                    <Image source={p.image} style={styles.picImage} />
+                  ) : (
+                    <Text style={styles.picText}>{p.emoji || '🔶'}</Text>
+                  )}
                 </Pressable>
               );
             })}
@@ -126,7 +131,11 @@ export default function StudentCreateScreen({ navigation }: Props) {
                   accessibilityRole="button"
                   accessibilityLabel={p.label || p.key}
                 >
-                  <Text style={styles.picText}>{p.emoji || '🔶'}</Text>
+                  {p.image ? (
+                    <Image source={p.image} style={styles.picImage} />
+                  ) : (
+                    <Text style={styles.picText}>{p.emoji || '🔶'}</Text>
+                  )}
                 </Pressable>
               );
             })}
@@ -134,11 +143,18 @@ export default function StudentCreateScreen({ navigation }: Props) {
 
           <Text style={[styles.help, { marginTop: 8 }]}>La contraseña final y el avatar se muestran aquí:</Text>
           <View style={styles.passwordRow}>
-            {Array.from({ length: maxPasswordLength }).map((_, idx) => (
-              <View key={idx} style={styles.previewSlot}>
-                <Text style={styles.previewText}>{passwordIcons[idx]?.emoji || '❓'}</Text>
-              </View>
-            ))}
+            {Array.from({ length: maxPasswordLength }).map((_, idx) => {
+              const pic = passwordIcons[idx];
+              return (
+                <View key={idx} style={styles.previewSlot}>
+                  {pic?.image ? (
+                    <Image source={pic.image} style={styles.previewImage} />
+                  ) : (
+                    <Text style={styles.previewText}>{pic?.emoji || '❓'}</Text>
+                  )}
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -212,6 +228,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   picText: { fontSize: 22 },
+  picImage: { width: 26, height: 26, resizeMode: 'contain' },
   passwordRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
   previewSlot: {
     width: 36,
@@ -224,6 +241,7 @@ const styles = StyleSheet.create({
     borderColor: '#E6E8EB',
   },
   previewText: { fontSize: 20 },
+  previewImage: { width: 24, height: 24, resizeMode: 'contain' },
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
