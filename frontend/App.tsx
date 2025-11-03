@@ -8,8 +8,6 @@ import { UserProvider } from './src/contexts/UserContext';
 export default function App() {
   return (
 
-//https://www.youtube.com/watch?v=Ky43ve3b9Ss
-
     <UserProvider>
       <NavigationContainer>
         <AppNavigator />
