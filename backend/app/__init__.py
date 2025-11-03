@@ -26,6 +26,10 @@ def create_app():
     with app.app_context():
         init_db()
 
+    from .login import teacher_login_bp, student_login_bp
+    app.register_blueprint(teacher_login_bp)
+    app.register_blueprint(student_login_bp)
+
     @app.route("/hello")
     def hello():
         cur = get_db_cursor()

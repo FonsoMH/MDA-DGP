@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 
 export const UserContext = createContext();
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
 
 
 export function UserProvider({ children }) {
