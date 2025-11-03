@@ -4,10 +4,12 @@ import Constants from 'expo-constants';
 
 const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
 
+const LOCAL_GIF_PRUEBA = '../../../assets/positive_feedback.gif';
+
 //TODO definir
 const DEFAULT_INFO: FeedbackData = {
-    url: '../../../assets/favicon.png',
-    texto: "Sigue asi makina"
+    url: LOCAL_GIF_PRUEBA,
+    texto: "¡Bien Jugado!"
 }
 
 export const FeedBackApi = async () => {
