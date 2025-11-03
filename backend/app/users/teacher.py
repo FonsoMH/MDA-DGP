@@ -6,7 +6,7 @@ from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check
 
 teacher_bp = Blueprint('teacher', __name__)
 
-@teacher_bp.route('/api/teacher', methods=['POST'])
+@teacher_bp.route('/api/teachers', methods=['POST'])
 def create_teacher():
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -77,7 +77,7 @@ def create_teacher():
         cur.close()
 
 
-@teacher_bp.route('/api/teacher/<int:user_id>', methods=['PUT'])
+@teacher_bp.route('/api/teachers/<int:user_id>', methods=['PUT'])
 def update_teacher(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -129,7 +129,7 @@ def update_teacher(user_id):
         cur.close()
 
 
-@teacher_bp.route('/api/teacher/<int:user_id>', methods=['DELETE'])
+@teacher_bp.route('/api/teachers/<int:user_id>', methods=['DELETE'])
 def delete_teacher(user_id):
     cur = get_db_cursor()
     try:

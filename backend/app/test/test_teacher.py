@@ -4,42 +4,6 @@ from app import create_app
 from app.db import get_db_cursor
 from werkzeug.security import check_password_hash
 
-# # ---------------- Fixtures ----------------
-# @pytest.fixture
-# def client():
-#     app = create_app()
-#     app.config["TESTING"] = True
-#     with app.test_client() as client:
-#         yield client
-
-
-# @pytest.fixture
-# def temp_teacher(client):
-#     """Crea un profesor temporal con email único y limpia después"""
-#     unique_email = f"temp_teacher_{int(time.time()*1000)}@app.com"
-#     payload = {
-#         "name": "Temp Teacher",
-#         "email": unique_email,
-#         "password": "hash123",
-#         "assigned_students_ids": []
-#     }
-
-#     response = client.post("/api/teacher", json=payload)
-#     assert response.status_code == 201, f"Error creando profesor: {response.get_json()}"
-#     teacher_id = response.get_json()["id"]
-#     print(f"✅ Profesor temporal creado: {teacher_id} ({unique_email})")
-
-#     yield teacher_id, unique_email
-
-#     # Cleanup con contexto de aplicación activo
-#     app = create_app()
-#     with app.app_context():
-#         cur = get_db_cursor()
-#         cur.execute("DELETE FROM users WHERE user_id = %s; COMMIT;", (teacher_id,))
-#         cur.close()
-#         print(f"Profesor temporal eliminado: {teacher_id}")
-
-
 # ---------------- Tests ----------------
 def test_create_teacher(client):
     """Verifica que un profesor se puede crear correctamente"""
@@ -50,7 +14,7 @@ def test_create_teacher(client):
         "password": "pytest_hash",
         "assigned_students_ids": []
     }
-    response = client.post("/api/teacher", json=payload)
+    response = client.post("/api/teachers", json=payload)
     assert response.status_code == 201
     teacher_id = response.get_json()["id"]
     print(f"✅ Profesor creado: {teacher_id}")
@@ -117,7 +81,7 @@ def test_create_teacher_email_exists(client, temp_teacher):
         "assigned_students_ids": []
     }
 
-    response = client.post("/api/teacher", json=payload)
+    response = client.post("/api/teachers", json=payload)
     assert response.status_code == 400
     json_data = response.get_json()
     assert "Email already in use." in json_data.get("error", "")
@@ -131,7 +95,7 @@ def test_update_teacher_basic_fields(client, temp_teacher):
         "email": "updated_teacher@app.com",
         "password": "new_password_123"
     }
-    response = client.put(f"/api/teacher/{user_id}", json=update_payload)
+    response = client.put(f"/api/teachers/{user_id}", json=update_payload)
     assert response.status_code == 200
     assert response.get_json()["message"] == "Teacher updated successfully."
 
@@ -149,7 +113,7 @@ def test_update_teacher_assign_students(client, temp_teacher):
     user_id, _ = temp_teacher
     payload = {"assigned_students_ids": [3, 4]}
 
-    response = client.put(f"/api/teacher/{user_id}", json=payload)
+    response = client.put(f"/api/teachers/{user_id}", json=payload)
     assert response.status_code == 200
 
     cur = get_db_cursor()
@@ -182,7 +146,7 @@ def test_update_teacher_email_duplicate(client, temp_teacher):
 
     # Intentar actualizar el temp_teacher con ese email duplicado
     payload = {"email": duplicate_email}
-    response = client.put(f"/api/teacher/{user_id}", json=payload)
+    response = client.put(f"/api/teachers/{user_id}", json=payload)
     assert response.status_code == 400
     assert "Email already in use" in response.get_json()["error"]
     print("✅ Test de email duplicado exitoso")

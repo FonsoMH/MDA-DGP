@@ -8,7 +8,7 @@ def test_update_student_basic_fields(client, temp_student):
         "assigned_teacher_id": None
     }
 
-    response = client.put(f"/api/user/update_student/{user_id}", json=update_payload)
+    response = client.put(f"/api/students/{user_id}", json=update_payload)
     assert response.status_code == 200
     assert response.get_json()["message"] == "Student updated successfully."
 
@@ -35,7 +35,7 @@ def test_update_student_email_duplicate(client, temp_student):
     cur.close()
 
     payload = {"email": "duplicate@app.com"}
-    response = client.put(f"/api/user/update_student/{user_id}", json=payload)
+    response = client.put(f"/api/students/{user_id}", json=payload)
     assert response.status_code == 400
     assert "Email already in use" in response.get_json()["error"]
 

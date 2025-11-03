@@ -39,7 +39,7 @@ def temp_teacher(client):
         "password": "hash_temp",
         "assigned_students_ids": []
     }
-    response = client.post("/api/teacher", json=payload)
+    response = client.post("/api/teachers", json=payload)
     assert response.status_code == 201
     user_id = response.get_json()["id"]
     print(f"✅ Profesor temporal creado: {user_id} ({unique_email})")
