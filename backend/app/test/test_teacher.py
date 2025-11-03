@@ -4,40 +4,40 @@ from app import create_app
 from app.db import get_db_cursor
 from werkzeug.security import check_password_hash
 
-# ---------------- Fixtures ----------------
-@pytest.fixture
-def client():
-    app = create_app()
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
+# # ---------------- Fixtures ----------------
+# @pytest.fixture
+# def client():
+#     app = create_app()
+#     app.config["TESTING"] = True
+#     with app.test_client() as client:
+#         yield client
 
 
-@pytest.fixture
-def temp_teacher(client):
-    """Crea un profesor temporal con email único y limpia después"""
-    unique_email = f"temp_teacher_{int(time.time()*1000)}@app.com"
-    payload = {
-        "name": "Temp Teacher",
-        "email": unique_email,
-        "password": "hash123",
-        "assigned_students_ids": []
-    }
+# @pytest.fixture
+# def temp_teacher(client):
+#     """Crea un profesor temporal con email único y limpia después"""
+#     unique_email = f"temp_teacher_{int(time.time()*1000)}@app.com"
+#     payload = {
+#         "name": "Temp Teacher",
+#         "email": unique_email,
+#         "password": "hash123",
+#         "assigned_students_ids": []
+#     }
 
-    response = client.post("/api/teacher", json=payload)
-    assert response.status_code == 201, f"Error creando profesor: {response.get_json()}"
-    teacher_id = response.get_json()["id"]
-    print(f"✅ Profesor temporal creado: {teacher_id} ({unique_email})")
+#     response = client.post("/api/teacher", json=payload)
+#     assert response.status_code == 201, f"Error creando profesor: {response.get_json()}"
+#     teacher_id = response.get_json()["id"]
+#     print(f"✅ Profesor temporal creado: {teacher_id} ({unique_email})")
 
-    yield teacher_id, unique_email
+#     yield teacher_id, unique_email
 
-    # Cleanup con contexto de aplicación activo
-    app = create_app()
-    with app.app_context():
-        cur = get_db_cursor()
-        cur.execute("DELETE FROM users WHERE user_id = %s; COMMIT;", (teacher_id,))
-        cur.close()
-        print(f"Profesor temporal eliminado: {teacher_id}")
+#     # Cleanup con contexto de aplicación activo
+#     app = create_app()
+#     with app.app_context():
+#         cur = get_db_cursor()
+#         cur.execute("DELETE FROM users WHERE user_id = %s; COMMIT;", (teacher_id,))
+#         cur.close()
+#         print(f"Profesor temporal eliminado: {teacher_id}")
 
 
 # ---------------- Tests ----------------
