@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
 
-import Sound from 'react-native-sound';
-
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
 import BackButton from '../../components/common/BackButton/BackButton';
 import { useGameConfig } from '../hooks/useGameConfig';
 import FeedbackScreen from '../../components/FeedBack/Feedback';
+import { playTTS } from '../../components/ttsListener';
 
 
 const getRandomNumber = (max: number): number => {
@@ -31,31 +30,12 @@ const generateUniqueOptions = (target: number, max: number, count: number): numb
   return Array.from(uniqueOptions).sort(() => Math.random() - 0.5);
 };
 
-export const playNumberSound = (numero: number) => {
-  const soundName = `n_${numero}`; 
-
-  const audioLocation = Sound.MAIN_BUNDLE; 
-
-  const soundObject = new Sound(soundName, audioLocation, (error) => {
-    if (error) {
-      console.log('Error al cargar el archivo de sonido: ', error);
-      return;
-    }
-    
-    soundObject.play((success) => {
-      if (!success) {
-        console.log(`Fallo en la reproducción del audio de ${numero}`);
-      }
-      soundObject.release();
-    });
-  });
-};
 
 //TODO esto deberia depender de login pero no esta hecho aun
 const STUDENT_ID = 3; 
 const GAME_ID = 1; 
 
-const REPEATS = 2;
+const REPEATS = 5;
 
 
 function TapNumberGame() {
@@ -87,7 +67,7 @@ function TapNumberGame() {
         setTargetNumber(newTarget);
         setOptions(newOptions);
         
-        playNumberSound(newTarget);
+        playTTS(newTarget.toString());
         return null;
         
     }, [maxRange, optionsCount]);
@@ -122,7 +102,7 @@ function TapNumberGame() {
         
         <View style={styles.screenContainer}>
             <BackButton width={215} height={76}></BackButton>
-            <TouchableOpacity onPress={() => playNumberSound(targetNumber)}  style={styles.imageWrapper}>
+            <TouchableOpacity onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
                 <Image
                 source={require('../../../assets/icons/listen.png')}
                 style={styles.clickableImage}

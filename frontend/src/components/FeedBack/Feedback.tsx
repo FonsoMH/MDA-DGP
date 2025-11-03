@@ -1,11 +1,11 @@
-import { View, Text, Button, ImageBackground, StyleSheet, Modal, TouchableOpacity, ActivityIndicator, Image } from "react-native";
+import { View, Text, ImageBackground, StyleSheet, Modal, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 import { FeedBackHook } from "./FeedBackHook";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 
 
 interface FeedBackProps {
-    onNotify: (data: string) => void;
+    onNotify: () => void;
     visible: boolean
 }
 
@@ -18,10 +18,8 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
     const canGoBack = navigation.canGoBack(); 
 
     const handlePress = () => {
-        const dataParaElPadre = '¡Hola Papá, todo bien!';
-        
         if (onNotify) { 
-            onNotify(dataParaElPadre);
+            onNotify();
         }
     };
 
@@ -62,7 +60,7 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
                                 onPress={() => navigation.goBack()}
                             >
                                 <Image
-                                    source={require("../../../assets/casa.png")} // ruta de tu imagen
+                                    source={require("../../../assets/casa.png")}
                                     style={styles.buttonIcon}
                                     resizeMode="contain"
                                 />
@@ -78,7 +76,7 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
                                 onPress={handlePress}
                             >
                                 <Image
-                                    source={require("../../../assets/de_nuevo.png")} // ruta de tu imagen
+                                    source={require("../../../assets/de_nuevo.png")}
                                     style={styles.buttonIcon}
                                     resizeMode="contain"
                                 />
@@ -109,13 +107,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         width: "100%",
-        backgroundColor: "rgba(0,0,0,0.5)", // fondo semitransparente
+        backgroundColor: "rgba(0,0,0,0.5)",
     },
     card: {
         backgroundColor: "white",
         borderRadius: 20,
         padding: 30,
-        width: "85%", // más grande que antes
+        width: "85%",
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
@@ -139,7 +137,7 @@ const styles = StyleSheet.create({
 
     button: {
         flex: 1,
-        alignItems: "center", // centra contenido horizontalmente
+        alignItems: "center",
         justifyContent: "center",
         paddingVertical: 18,
         marginHorizontal: 8,
@@ -156,11 +154,11 @@ const styles = StyleSheet.create({
         height: 200,
     },
     homeButton: {
-        backgroundColor: "#1E3A8A", // azul oscuro para contraste
+        backgroundColor: "#1E3A8A",
     },
 
     playAgainButton: {
-        backgroundColor: "#059669", // verde brillante
+        backgroundColor: "#059669",
     },
 
     buttonText: {
