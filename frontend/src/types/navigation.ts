@@ -1,5 +1,12 @@
 export type RootStackParamList = {
   Home: undefined; 
+  GameMenu: undefined;
+
+  TapNumberGame: undefined;
+
+  SequenceGame: undefined;
+
+  Games: NavigatorScreenParams<GameStackParamList>; 
 
   Details: { itemId: number };
 
@@ -14,8 +21,8 @@ export type RootStackParamList = {
   // Resto de rutas
 };
 
-// 2. Definir el tipo para el objeto 'navigation'
-// Esto crea el tipo que se usará para navegar DESDE cualquier pantalla.
+import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { GameStackParamList } from '../navigation/GameNavigator';
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

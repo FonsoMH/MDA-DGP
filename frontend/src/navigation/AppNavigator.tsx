@@ -3,7 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '../types/navigation'; 
 import HomeScreen from '../screens/HomeScreen';
-import DetailsScreen from '../screens/DetailsScreen';
+import GameMenuScreen from '../games/gameMenuScreen';
+import GameNavigator from './GameNavigator';
 import LoginScreen from '../screens/LoginScreen';
 import StudentLoginScreen from '../screens/StudentLoginScreen';
 import StudentPasswordScreen from '../screens/StudentPasswordScreen';
@@ -15,25 +16,20 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator 
       initialRouteName="Login"
+      screenOptions={{
+            headerShown: false
+        }}
     >
       <Stack.Screen 
         name="Home" 
-        component={HomeScreen} 
-        options={{ 
-            title: 'Listado Principal',
-            headerShown: false
-        }} 
-
+        component={HomeScreen}
       />
+
       <Stack.Screen 
-        name="Details" 
-        component={DetailsScreen} 
-        options={{ 
-            title: 'Detalles del Ítem',
-            headerShown: false
-        }} 
-
+        name="GameMenu" 
+        component={GameMenuScreen}
       />
+      
       <Stack.Screen
         name="Login"
         component={LoginScreen}

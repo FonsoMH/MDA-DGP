@@ -25,6 +25,13 @@ def create_app():
     init_app(app)
     with app.app_context():
         init_db()
+    
+    from . import feedback
+    app.register_blueprint(feedback.bp)
+
+
+    from . import games
+    app.register_blueprint(games.bp)
 
     from .login import teacher_login_bp, student_login_bp
     app.register_blueprint(teacher_login_bp)
