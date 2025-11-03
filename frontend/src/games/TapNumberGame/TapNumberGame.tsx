@@ -8,11 +8,11 @@ import { playTTS } from '../../components/ttsListener';
 import { generateOptionsWithTarget, getRandomNumber } from '../utils/gameUtils';
 import { useGameManager } from '../utils/gameManager';
 import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
+import { useUser } from '../../hooks/useUser';
+import { useAccessibilitySettings } from '../../hooks/useAccesibilitySettings';
 
 
-//TODO esto deberia depender de login pero no esta hecho aun
 //TODO calcular puntuacion
-const STUDENT_ID = 3; 
 const GAME_ID = 1; 
 
 
@@ -21,6 +21,8 @@ function TapNumberGame() {
 
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
+    const { user } = useUser();
+    const [accesibilitySettings] = useAccessibilitySettings();
 
     const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
         const newTarget = getRandomNumber(maxRange);
@@ -32,7 +34,7 @@ function TapNumberGame() {
         playTTS(newTarget.toString());
     }, []);
 
-    const manager = useGameManager(STUDENT_ID, GAME_ID, initializeGame);
+    const manager = useGameManager(user.id, GAME_ID, initializeGame);
 
     const handlePlayAgain = () => {
         manager.resetGame();

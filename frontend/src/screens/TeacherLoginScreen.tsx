@@ -77,7 +77,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                 console.log('Login failed');
             }
         } catch (error) {
-            
+            console.error('Error during login:', error);
         }   
     }
 

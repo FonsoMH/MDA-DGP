@@ -75,7 +75,7 @@ type StudentPasswordProps = NativeStackScreenProps<RootStackParamList, 'StudentP
 
 export default function StudentPasswordScreen({ route, navigation }: StudentPasswordProps){
 
-    const { userId , name } = route.params;
+    const { userId , email , name } = route.params;
 
     const { user , student_login } = useUser();
 
@@ -109,9 +109,11 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
 
     const handleLogIn = async () => {
         try{
+            
             const success = await student_login(userId, password);
             if (success) {
                 console.log('Login successful');
+                navigation.navigate('GameMenu');
             } else {
                 console.log('Login failed');
             }
@@ -119,6 +121,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
         catch(error){
             console.log('Login failed:', error);
         }
+
     }
 
     return (

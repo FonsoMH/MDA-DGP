@@ -37,6 +37,9 @@ def create_app():
     app.register_blueprint(teacher_login_bp)
     app.register_blueprint(student_login_bp)
 
+    from .users.student import get_students
+    app.register_blueprint(get_students)
+
     @app.route("/hello")
     def hello():
         cur = get_db_cursor()

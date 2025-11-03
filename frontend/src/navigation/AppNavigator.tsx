@@ -20,6 +20,7 @@ export default function AppNavigator() {
             headerShown: false
         }}
     >
+      
       <Stack.Screen 
         name="Home" 
         component={HomeScreen}
@@ -28,6 +29,11 @@ export default function AppNavigator() {
       <Stack.Screen 
         name="GameMenu" 
         component={GameMenuScreen}
+      />
+
+      <Stack.Screen 
+        name="Games" 
+        component={GameNavigator}
       />
       
       <Stack.Screen

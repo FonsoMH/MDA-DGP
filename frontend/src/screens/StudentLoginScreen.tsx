@@ -4,6 +4,11 @@ import { StudentLogin } from '../types/login';
 import StudentLoginCard from '../components/StudentLoginCard';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import Constants from 'expo-constants';
+import { useCallback } from 'react';
+
+// const BASE_URL = Constants.expoConfig?.extra?.apiUrl;
+const BASE_URL = "http://localhost:5000";
 
 const styles = StyleSheet.create({
     container: {
@@ -25,17 +30,32 @@ type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
 
 export default function StudentLoginScreen({ navigation }: StudentLoginProps){
 
-    const [users, setUsers] = React.useState<StudentLogin[]>([
-        { name: 'Juan', id: 1 },
-        { name: 'María', id: 2 },
-        { name: 'Pedro', id: 3 },
-        { name: 'Ana', id: 4 },
-        { name: 'Luis', id: 5 },
-        { name: 'Sofía', id: 6 },
-        { name: 'Carlos', id: 7 },
-        { name: 'Lucía', id: 8 },
-        { name: 'Jorge', id: 9 },
-    ]);
+    const [users, setUsers] = React.useState<StudentLogin[]>([]);
+
+    const fetchUsers = React.useCallback(async () => {
+        
+        try {
+            const response = await fetch(`${BASE_URL}/api/students`);
+            const data = await response.json();
+            setUsers(data);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    } , []);
+
+    // const fetchUsers = async () => {
+    //     try {
+    //         const response = await fetch(`${BASE_URL}/api/students`);
+    //         const data = await response.json();
+    //         setUsers(data.students);
+    //     } catch (error) {
+    //         console.error('Error fetching users:', error);
+    //     }
+    // };
+
+    React.useEffect(() => {
+        fetchUsers();
+    }, []);
 
     const handleSubmit = (userId: number, name: string) => {
         navigation.navigate('StudentPassword', { userId , name});

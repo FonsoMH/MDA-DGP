@@ -14,6 +14,7 @@ const queryClient = new QueryClient({
 });
 import LoginScreen from './src/screens/LoginScreen';
 import { UserProvider } from './src/contexts/UserContext';
+import { AccessibilitySettingsProvider } from './src/contexts/AccesibilitySettingsContext';
 
 
 export default function App() {
@@ -21,9 +22,11 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView>
         <UserProvider>
-          <NavigationContainer>
-            <AppNavigator />
-          </NavigationContainer>
+          <AccessibilitySettingsProvider>
+            <NavigationContainer>
+              <AppNavigator />
+            </NavigationContainer>
+          </AccessibilitySettingsProvider>
         </UserProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>

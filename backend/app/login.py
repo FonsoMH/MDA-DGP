@@ -2,6 +2,7 @@ from .db import get_db_cursor
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
 
+# TODO arreglar rutas
 teacher_login_bp = Blueprint('teacher_login', __name__)
 student_login_bp = Blueprint('student_login', __name__)
 

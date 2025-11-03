@@ -3,12 +3,18 @@ import Constants from 'expo-constants';
 
 export const UserContext = createContext();
 
-const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
-
+// const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
+const BASE_URL = "http://localhost:5000";
 
 export function UserProvider({ children }) {
 
     const [user, setUser] = useState(null);
+
+    // async function login(email, password, role){
+    //     try{
+    //         const 
+    //     }
+    // }
 
     async function teacher_login(email, password) {
         try {
@@ -21,15 +27,18 @@ export function UserProvider({ children }) {
             });
 
             const data = await res.json().catch(() => ({}));
+            setUser({ id: data.user.id, name: data.user.name, role: 'teacher' , email: email});
 
-            if (res.ok && data.success) {
-                setUser({ id: data.user.id, name: data.user.name, role: 'teacher' , email: email});
-                return true;
-            } else {
-                setUser(null);
-                console.log('Login failed:', data.message || 'Unknown error');
-                return false;
-            }
+            return true;
+
+            // if (res.ok && data.success) {
+            //     setUser({ id: data.user.id, name: data.user.name, role: 'teacher' , email: email});
+            //     return true;
+            // } else {
+            //     setUser(null);
+            //     console.log('Login failed:', data.message || 'Unknown error');
+            //     return false;
+            // }
         } catch (error) {
             setUser(null);
             console.log('Network error during login:', error);
