@@ -36,7 +36,7 @@ def create_app():
     from .users.teacher import teacher_bp
     app.register_blueprint(teacher_bp)
 
-    from .users.student import students_bp
+    from .users.students import students_bp
     app.register_blueprint(students_bp)
 
     from .users.admin import admin_bp
