@@ -4,11 +4,11 @@ from psycopg2 import sql
 from werkzeug.security import generate_password_hash
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
 
-student_bp = Blueprint('student', __name__)
+students_bp = Blueprint('students', __name__)
 
 #TODO : Poner aquí el create_student cuando se haga merge de la gestion de students
 
-@student_bp.route('/api/students/<int:user_id>', methods=['PUT'])
+@students_bp.route('/api/students/<int:user_id>', methods=['PUT'])
 def update_student(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -53,7 +53,7 @@ def update_student(user_id):
         cur.close()
 #TODO : queda hacer la logica para cambiar la contraseña
 
-@student_bp.route('/api/students/<int:user_id>', methods=['DELETE'])
+@students_bp.route('/api/students/<int:user_id>', methods=['DELETE'])
 def delete_student(user_id):
     cur = get_db_cursor()
     try:
