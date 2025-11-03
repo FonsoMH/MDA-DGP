@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { View ,Text , Button , StyleSheet, Pressable , Image , TextInput} from 'react-native';
+import { useUser } from '../hooks/useUser';
 
 
 const styles = StyleSheet.create({
@@ -41,7 +42,6 @@ const styles = StyleSheet.create({
     },
     loginButton: {
         backgroundColor: '#000',
-        color: '#fff',
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
@@ -66,6 +66,14 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
         setPassword(text);
     };
 
+    const { user , login } = useUser();
+
+    const handleLogIn = () => {
+        // login(email, password);
+        login(email, password);
+    }
+
+ 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -84,11 +92,11 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                         <TextInput placeholder="" secureTextEntry style={styles.input} onChangeText={handlePasswordChange} />
                     </View>
                 </View>
-                <Pressable style={styles.loginButton} onPress={() => { /* Lógica de autenticación */ }}>
-                    Iniciar Sesión
+                <Pressable style={styles.loginButton} onPress={handleLogIn}>
+                    <Text style={{ color: '#fff' }}>Iniciar Sesión</Text>
                 </Pressable>
                 <Pressable onPress={() => { /* Lógica para recuperar contraseña */ }}>
-                    ¿Olvidaste tu contraseña?
+                    <Text>¿Olvidaste tu contraseña?</Text>
                 </Pressable>
             </View>
 
