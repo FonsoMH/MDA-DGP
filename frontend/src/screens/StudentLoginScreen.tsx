@@ -37,18 +37,17 @@ export default function StudentLoginScreen({ navigation }: StudentLoginProps){
         { name: 'Jorge', id: 9 },
     ]);
 
-    const handleSubmit = () => {
-        navigation.navigate('StudentPassword');
+    const handleSubmit = (userId: number, name: string) => {
+        navigation.navigate('StudentPassword', { userId , name});
     }
     
     return (
         <View style={styles.container}>
             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>¡Elige tu perfil!</Text>
             <View style={styles.cards}>
-
                 {
                     users.map((user) => (
-                        <StudentLoginCard key={user.id} id={user.id} user={user.name} onPress={handleSubmit} />
+                        <StudentLoginCard key={user.id} id={user.id} user={user.name} onPress={() => handleSubmit(user.id, user.name)} />
                     ))
                 }
             </View>

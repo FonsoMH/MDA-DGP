@@ -11,7 +11,7 @@ import musicIcon from '../../assets/PasswordIcons/music.png';
 import unknownIcon from '../../assets/PasswordIcons/unknown.png';
 
 const iconList = {
-  star: { name: 'Star', icon: starIcon },
+  star: { name: 'Star', icon: starIcon , slug : 'sT4r_'},
   apple: { name: 'Apple', icon: appleIcon },
   car: { name: 'Car', icon: carIcon },
   dog: { name: 'Dog', icon: dogIcon },

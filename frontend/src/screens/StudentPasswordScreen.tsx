@@ -1,12 +1,15 @@
 import * as React from 'react'
 import { View ,Text , Button , StyleSheet, Pressable , Image} from 'react-native';
 import PasswordItem from '../components/PasswordItem';
+import type { RootStackParamList } from '../types/navigation';
+import { useUser } from '../hooks/useUser';
 
 import iconList from '../types/passwordIconList';
 import {iconsMap} from '../types/passwordIconList';
 import trashCanIcon from '../../assets/trash_can.png';
 import TextImageButton from '../components/TextImageButton';
 import paperPlaneIcon from '../../assets/paper_plane.png';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const styles = StyleSheet.create({
 
@@ -68,14 +71,19 @@ const styles = StyleSheet.create({
 
 });
 
-export default function StudentPasswordScreen({}){
+type StudentPasswordProps = NativeStackScreenProps<RootStackParamList, 'StudentPassword'>;
+
+export default function StudentPasswordScreen({ route, navigation }: StudentPasswordProps){
+
+    const { userId , name } = route.params;
+
+    const { user , student_login } = useUser();
 
     const [password, setPassword] = React.useState<{ name: string, icon: any }[]>([
         { name: iconList.unknown.name, icon: iconList.unknown.icon },
         { name: iconList.unknown.name, icon: iconList.unknown.icon },
         { name: iconList.unknown.name, icon: iconList.unknown.icon },
         { name: iconList.unknown.name, icon: iconList.unknown.icon },
-
     ]);
 
     const onPressPasswordItem = (item : { name: string, icon: any }) => {
@@ -99,10 +107,24 @@ export default function StudentPasswordScreen({}){
         setPassword(newPassword);
     }
 
+    const handleLogIn = async () => {
+        try{
+            const success = await student_login(userId, password);
+            if (success) {
+                console.log('Login successful');
+            } else {
+                console.log('Login failed');
+            }
+        }
+        catch(error){
+            console.log('Login failed:', error);
+        }
+    }
+
     return (
         <View style={{ marginLeft: '10%', marginRight: '10%' }}>
             <View style={styles.header}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>¡Selecciona tu contraseña!</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>¡Selecciona tu contraseña {name}!</Text>
                 <Text style={{ fontSize: 16, color: '#666' }}>Elige 4 pictogramas en orden</Text>
             </View>
             <View style={styles.passwordBox}>
@@ -121,8 +143,9 @@ export default function StudentPasswordScreen({}){
 
                 <View style={styles.passwordOptions}>
                     <TextImageButton icon={trashCanIcon} onPress={removePassword} text="Eliminar" />
-                    <TextImageButton icon={paperPlaneIcon} onPress={() => {}} text="Enviar" />
+                    <TextImageButton icon={paperPlaneIcon} onPress={handleLogIn} text="Enviar" />
                 </View>
+
             </View>
             <View style={styles.passwordElements}>
                 {

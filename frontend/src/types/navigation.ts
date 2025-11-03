@@ -7,7 +7,7 @@ export type RootStackParamList = {
 
   StudentLogin: undefined;
 
-  StudentPassword: undefined;
+  StudentPassword: { userId: number , name: string };
 
   TeacherLogin: undefined;
   

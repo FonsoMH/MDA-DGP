@@ -66,11 +66,19 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
         setPassword(text);
     };
 
-    const { user , login } = useUser();
+    const { user , teacher_login } = useUser();
 
-    const handleLogIn = () => {
-        // login(email, password);
-        login(email, password);
+    const handleLogIn = async () => {
+        try {
+            const success = await teacher_login(email, password);
+            if (success) {
+                console.log('Login successful');
+            } else {
+                console.log('Login failed');
+            }
+        } catch (error) {
+            
+        }   
     }
 
  
