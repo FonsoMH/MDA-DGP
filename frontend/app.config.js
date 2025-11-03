@@ -6,7 +6,7 @@ export default ({ config }) => {
     "name": "frontend",
     "slug": "frontend",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -34,6 +34,7 @@ export default ({ config }) => {
 
     extra: {
       REACT_APP_API_BASE_URL: process.env.REACT_APP_API_BASE_URL,
+      API_TIMEOUT: process.env.API_TIMEOUT,
     }
   };
 };
