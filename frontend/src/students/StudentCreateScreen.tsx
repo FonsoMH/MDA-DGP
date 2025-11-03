@@ -19,7 +19,7 @@ import { PICTOGRAMS, type Pictogram } from '../pictograms/catalog';
 // Route: 'StudentCreate'
 type Props = NativeStackScreenProps<RootStackParamList, 'StudentCreate'>;
 
-// CAMBIO: Definimos un punto de corte para "pantalla grande"
+//Definimos un punto de corte para "pantalla grande"
 const LARGE_SCREEN_BREAKPOINT = 768; // Ancho de un iPad en vertical
 
 type Tutor = { id: number; name: string; email: string };
@@ -37,12 +37,12 @@ export default function StudentCreateScreen({ navigation }: Props) {
   const [tutorsLoading, setTutorsLoading] = React.useState<boolean>(false);
   const [selectedTutorId, setSelectedTutorId] = React.useState<number | null>(null);
 
-  // CAMBIO: Obtenemos el ancho de la pantalla
+  // Obtenemos el ancho de la pantalla
   const { width } = useWindowDimensions();
-  // CAMBIO: Calculamos si la pantalla es grande
+  // Calculamos si la pantalla es grande
   const isLargeScreen = width > LARGE_SCREEN_BREAKPOINT;
 
-  // CAMBIO: Hacemos que los tamaños de los elementos dependan del tamaño de pantalla
+  // Hacemos que los tamaños de los elementos dependan del tamaño de pantalla
   const titleSize = isLargeScreen ? 24 : 20;
   const picButtonSize = isLargeScreen ? 52 : 42;
   const picImageSize = isLargeScreen ? 32 : 26;
@@ -121,12 +121,12 @@ export default function StudentCreateScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* CAMBIO: Usamos el tamaño de fuente dinámico */}
+        {/* Usamos el tamaño de fuente dinámico */}
         <Text style={[styles.title, { fontSize: titleSize }]}>Crear Nuevo Estudiante</Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información Básica</Text>
-          {/* ... (inputs sin cambios) ... */}
+          { }
           <Text style={styles.label}>Nombre Completo</Text>
           <TextInput
             value={name}
@@ -158,7 +158,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
                 <Pressable
                   key={`pass-${p.key}`}
                   onPress={() => togglePasswordIcon(p)}
-                  // CAMBIO: Aplicamos tamaño dinámico al botón
+                  // Aplicamos tamaño dinámico al botón
                   style={[
                     styles.picButton,
                     active && styles.picButtonActive,
@@ -168,7 +168,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
                   accessibilityLabel={p.label || p.key}
                 >
                   {p.image ? (
-                    // CAMBIO: Aplicamos tamaño dinámico a la imagen
+                    // Aplicamos tamaño dinámico a la imagen
                     <Image
                       source={p.image}
                       style={[styles.picImage, { width: picImageSize, height: picImageSize }]}
@@ -182,7 +182,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
           </View>
 
           { /* Avatar preview */}
-          <Text style={[styles.help, { marginTop: 8 }]}>Avatar generado automáticamente (color aleatorio + iniciales)</Text>
+          <Text style={[styles.help, { marginTop: 8 }]}>Avatar generado automáticamente</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 }}>
             <View style={[styles.avatarCircle, { backgroundColor: avatarColor }]}>
               <Text style={[styles.avatarText, { color: getReadableTextColor(avatarColor) }]}>
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     borderColor: '#4f46e5',
     backgroundColor: '#EEF2FF',
   },
-  picText: { fontSize: 22 }, // Se puede hacer dinámico también si se desea
+  picText: { fontSize: 22 }, // <<-- tambien se puede hacer dinamico ojo
   picImage: {
     // width y height se aplican dinámicamente
     resizeMode: 'contain',
