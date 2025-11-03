@@ -91,7 +91,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
                 { translateX: translateX.value },
                 { translateY: translateY.value },
             ],
-            zIndex: (translateX.value !== 0 || translateY.value !== 0) ? 99 : 1,
+            // zIndex: (translateX.value !== 0 || translateY.value !== 0) ? 9999 : 1,
         };
     });
 
@@ -101,9 +101,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
         <GestureDetector gesture={combinedGesture}>
             <Animated.View ref={itemRef as any} onLayout={measureItem} 
             style={[style, animatedStyle]}
-            
             >
-
                 {children}
             </Animated.View>
         </GestureDetector>

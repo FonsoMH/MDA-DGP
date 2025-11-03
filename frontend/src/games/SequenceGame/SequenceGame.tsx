@@ -85,7 +85,7 @@ function SequenceGame() {
     }
 
     const title = manager.config?.upward 
-        ? "Mueve del pequeño al grande" 
+        ? "Mueve del pequeño al grandeeeee" 
         : "Mueve del grande al pequeño";
 
     const visualIcon = manager.config?.upward  ? (
@@ -118,7 +118,6 @@ function SequenceGame() {
                     });
                 }}
             >
-                <View style={styles.optionsGrid}>
                     {options.map((num, index) => (
                         <DraggableItem
                             key={`option-${num}-${index}`}
@@ -135,7 +134,6 @@ function SequenceGame() {
                             />
                         </DraggableItem>
                     ))}
-                </View>
             </View>
             <View
                 style={[styles.gridContainer, { height: '35%' }]}
@@ -146,7 +144,6 @@ function SequenceGame() {
                     });
                 }}
             >
-                <View style={styles.optionsGrid}>
                     {selectedNumbers.map((num, index) => (
                         <DraggableItem
                             key={`selected-${num}-${index}`}
@@ -161,13 +158,9 @@ function SequenceGame() {
                                     numberProp={num} 
                                     size={100}
                                 />
-                                <View style={styles.removeIconContainer}>
-                                    <Text style={styles.removeIcon}>✖</Text>
-                                </View>
                             </>
                         </DraggableItem>
                     ))}
-                </View>
             </View>
        
             <FeedbackScreen visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
@@ -215,43 +208,20 @@ const styles = StyleSheet.create({
         borderWidth: 2,           
         borderColor: '#000000',   
         borderRadius: 15,
-        backgroundColor: '#FFFFFF', 
-    },
-
-    optionsGrid: {
+        backgroundColor: '#FFFFFF',
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        width: '90%',
-        padding: 10,
-        marginTop: 5,
     },
+
     optionWrapper: {
         margin: 5, 
+        zIndex: 2,
     },
 
     disabled: {
         backgroundColor: 'grey',
         opacity: 0.3
-    },
-
-    removeIconContainer: {
-        position: 'absolute',
-        top: -5,
-        right: -5,
-        backgroundColor: 'red',
-        borderRadius: 15,
-        width: 30,
-        height: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1,
-        elevation: 2,
-    },
-    removeIcon: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
     },
 
     iconContainer: {
