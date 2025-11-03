@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
 from psycopg2 import sql
 from ..db import get_db_cursor
-from .user_common import get_user_by_id, email_in_use, commit_or_rollback
+from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
+from werkzeug.security import generate_password_hash
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -12,7 +13,11 @@ def update_admin(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip().lower()
-    password_hash = (data.get('password_hash') or '').strip()
+    password = (data.get('password') or '').strip()
+    password_hash = None
+
+    if password:
+        password_hash = generate_password_hash(password)
 
     cur = get_db_cursor()
     try:
@@ -22,19 +27,10 @@ def update_admin(user_id):
 
         fields, values = [], []
 
-        if name:
-            fields.append("name = %s")
-            values.append(name)
+        fields, values = check_basic_values(cur, name, email, password_hash, user_id)
 
-        if email:
-            if email_in_use(cur, email, exclude_user_id=user_id):
-                return jsonify({'error': 'Email already in use.'}), 400
-            fields.append("email = %s")
-            values.append(email)
-
-        if password_hash:
-            fields.append("password_hash = %s")
-            values.append(password_hash)
+        if isinstance(fields, dict) and 'error' in fields:
+            return jsonify(fields), values  # values contains the status code in this case
 
         if fields:
             query = f"UPDATE users SET {', '.join(fields)} WHERE user_id = %s"

@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from ..db import get_db_cursor
 from psycopg2 import sql
 from werkzeug.security import generate_password_hash
-from .user_common import get_user_by_id, email_in_use, commit_or_rollback
+from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
 
 teacher_bp = Blueprint('teacher', __name__)
 
@@ -12,12 +12,22 @@ def create_teacher():
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip().lower()
     password = (data.get('password') or '').strip()
+    password_hash = None
     assigned_students_ids = data.get('assigned_students_ids') or []
 
     if not name or not email:
         return jsonify({'error': 'Name and email are required.'}), 400
 
-    password_hash = generate_password_hash(password) if password else ''
+    if password:
+        password_hash = generate_password_hash(password)
+    else:
+        return jsonify({'error': 'Password is required.'}), 400
+    
+    temp_cur = get_db_cursor()
+    if email_in_use(temp_cur, email):
+        temp_cur.close()
+        return jsonify({'error': 'Email already in use.'}), 400
+    temp_cur.close()
 
     cur = get_db_cursor()
     try:
@@ -27,11 +37,6 @@ def create_teacher():
         if not role_row:
             return jsonify({'error': 'teacher role not found in the database.'}), 500
         role_id = role_row['role_id']
-
-        # Verificar si el correo ya existe
-        cur.execute("SELECT user_id FROM users WHERE email = %s", (email,))
-        if cur.fetchone():
-            return jsonify({'error': 'Email already exists.'}), 400
 
         # Insertar nuevo profesor
         insert_query = """
@@ -77,10 +82,19 @@ def update_teacher(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip().lower()
-    password_hash = (data.get('password_hash') or '').strip()
+    password = (data.get('password') or '').strip()
+    password_hash = None
     assigned_students_ids = data.get('assigned_students_ids') or []
+    
+    if password:
+        password_hash = generate_password_hash(password)
 
     cur = get_db_cursor()
+
+    if email_in_use(cur, email):
+        cur.close()
+        return jsonify({'error': 'Email already in use.'}), 400
+    
     try:
         user = get_user_by_id(cur, user_id)
         if not user:
@@ -88,19 +102,10 @@ def update_teacher(user_id):
 
         fields, values = [], []
 
-        if name:
-            fields.append("name = %s")
-            values.append(name)
+        fields, values = check_basic_values(cur, name, email, password_hash, user_id)
 
-        if email:
-            if email_in_use(cur, email, exclude_user_id=user_id):
-                return jsonify({'error': 'Email already in use.'}), 400
-            fields.append("email = %s")
-            values.append(email)
-
-        if password_hash:
-            fields.append("password_hash = %s")
-            values.append(password_hash)
+        if isinstance(fields, dict) and 'error' in fields:
+            return jsonify(fields), values  # values contains the status code in this case
 
         if fields:
             query = f"UPDATE users SET {', '.join(fields)} WHERE user_id = %s"
