@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation'; 
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
+import StudentCreateScreen from '../students/StudentCreateScreen';
 import GameMenuScreen from '../games/gameMenuScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -39,6 +40,14 @@ export default function AppNavigator() {
             headerShown: false
         }} 
 
+      />
+      <Stack.Screen
+        name="StudentCreate"
+        component={StudentCreateScreen}
+        options={{
+          title: 'Crear Estudiante',
+          headerShown: false,
+        }}
       />
       {/** Pantalla alternativa eliminado: GameSelected */}
     </Stack.Navigator>

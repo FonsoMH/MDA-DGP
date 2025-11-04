@@ -5,6 +5,7 @@ export type RootStackParamList = {
   Play:{gameId: string};
 
   Details: { itemId: number };
+  StudentCreate: undefined;
   
   // Resto de rutas
 };
