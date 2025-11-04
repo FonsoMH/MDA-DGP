@@ -3,99 +3,50 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-na
 
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
 import BackButton from '../../components/common/BackButton/BackButton';
-import { useGameConfig } from '../hooks/useGameConfig';
 import FeedbackScreen from '../../components/FeedBack/Feedback';
 import { playTTS } from '../../components/ttsListener';
-
-
-const getRandomNumber = (max: number): number => {
-    return Math.floor(Math.random() * (max + 1));
-};
-
-//TODO esto a lo mejor se puede mover a otro archivo
-const generateUniqueOptions = (target: number, max: number, count: number): number[] => {
-  const uniqueOptions = new Set<number>();
-  uniqueOptions.add(target);
-
-  while (uniqueOptions.size < count) {
-    let randomOption = getRandomNumber(max);
-    
-    if (randomOption === target) {
-      randomOption = (randomOption + 1) % (max + 1); 
-    }
-    
-    uniqueOptions.add(randomOption);
-  }
-
-  return Array.from(uniqueOptions).sort(() => Math.random() - 0.5);
-};
+import { generateOptionsWithTarget, getRandomNumber } from '../utils/gameUtils';
+import { useGameManager } from '../utils/gameManager';
+import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
 
 
 //TODO esto deberia depender de login pero no esta hecho aun
+//TODO calcular puntuacion
 const STUDENT_ID = 3; 
 const GAME_ID = 1; 
 
-const REPEATS = 5;
 
 
 function TapNumberGame() {
 
-    const { config, isLoading } = useGameConfig(STUDENT_ID, GAME_ID);
-
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
-    const [isGameInitialized, setIsGameInitialized] = useState<boolean>(false); 
 
-    const [games, setGames] = useState(1);
-    const [modalVisible, setModalVisible] = useState(false);
-    
-    const handlePlayAgain = () => {
-        setGames(1);
-        setModalVisible(false);
-        initializeGame();
-    };
-
-    //TODO calcular el score
-
-    const maxRange: number = config?.ranges ?? 10;
-    const optionsCount = (config?.numElements ?? 9) as number;
-
-   const initializeGame = useCallback(() => {    
+    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
         const newTarget = getRandomNumber(maxRange);
-        const newOptions = generateUniqueOptions(newTarget, maxRange, optionsCount);
+        const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
         
         setTargetNumber(newTarget);
         setOptions(newOptions);
         
         playTTS(newTarget.toString());
-        return null;
-        
-    }, [maxRange, optionsCount]);
+    }, []);
+
+    const manager = useGameManager(STUDENT_ID, GAME_ID, initializeGame);
+
+    const handlePlayAgain = () => {
+        manager.resetGame();
+    };
 
     const handleSelection = (selectedNumber: number) => {
-        // TODO Lógica de acierto/error (Pendiente de implementar completamente)
-        
-        // setScore(score + 1); 
-        if(selectedNumber == targetNumber){
-            if (games == REPEATS) {
-                setModalVisible(true);
-                console.log("¡Máximo de juegos alcanzado!");
-            }
-            else{
-                initializeGame(); 
-                setGames(prevGames => prevGames + 1 );
-                console.log("aumentamos");
-                
-            }
+        if (selectedNumber === targetNumber) {
+            manager.advanceGame(); 
         }
     };
 
-    useEffect(() => {
-        if (!isLoading && config && !isGameInitialized) {
-            initializeGame();
-            setIsGameInitialized(true); 
-        }
-    }, [isLoading, config, initializeGame, isGameInitialized]);
+    if (manager.isLoading) {
+        return <LoadingSpinner />; 
+    }
 
 
     return (
@@ -129,7 +80,7 @@ function TapNumberGame() {
                 ))}
             </View>
 
-            <FeedbackScreen visible={modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
+            <FeedbackScreen visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
 
     );
@@ -141,6 +92,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F7F8FA',
         alignItems: 'center',
         padding: 20,
+        margin: 20
     },
 
     imageWrapper: {

@@ -1,6 +1,5 @@
 import axios from "axios";
 import { GameConfigFrontend, GameConfigApiData } from "../../types/games";
-import Constants from 'expo-constants'; 
 
 //const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 const BASE_URL =  'http://localhost:5000' ;

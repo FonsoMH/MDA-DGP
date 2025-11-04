@@ -1,18 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 interface ChildProps {
   numberProp: number;
   size?: number; 
+  style?: StyleProp<ViewStyle>;
 }
 
-function NumberDisplay({ numberProp, size = 100 }: ChildProps) {
-    const dynamicFontSize = size * 0.4;
+function NumberDisplay({ numberProp, size = 100, style }: ChildProps) {
+    const dynamicFontSize = size * 0.3;
 
     return (
-        <View style={[styles.container, { width: size, height: size }]}>
-        <Text style={[styles.numberText, { fontSize: dynamicFontSize }]}>{numberProp}</Text>
+        <View style={[styles.container, { width: size, height: size }, style]}>        
+        <Text style={[styles.numberText, { fontSize: dynamicFontSize }]}>
+            {numberProp}
+        </Text>
         </View>
     );
 }
