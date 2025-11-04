@@ -24,22 +24,22 @@ const GAMES: Game[] = [
 	{
 		id: 'toca-numero',
 		title: 'Toca el número que suena',
-		image: require('../../assets/pictogramaJuego1.png'),
+		image: require('../../assets/GamesIcons/pictogramaJuego1.png'),
 	},
 	{
 		id: 'ordena-secuencia',
 		title: 'Ordena la secuencia',
-		image: require('../../assets/pictogramaJuego2.png'),
+		image: require('../../assets/GamesIcons/pictogramaJuego2.png'),
 	},
 	{
 		id: 'reparte-igual',
 		title: 'Reparte el mismo número',
-		image: require('../../assets/pictogramaJuego3.png'),
+		image: require('../../assets/GamesIcons/pictogramaJuego3.png'),
 	},
 	{
 		id: 'deja-igual',
 		title: 'Deja el mismo número',
-		image: require('../../assets/pictogramaJuego4.png'),
+		image: require('../../assets/GamesIcons/pictogramaJuego4.png'),
 	},
 ];
 

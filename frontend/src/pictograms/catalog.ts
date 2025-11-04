@@ -14,16 +14,14 @@ export type Pictogram = {
 };
 
 export const PICTOGRAMS: Pictogram[] = [
-    { key: 'apple', label: 'Manzana', image: require('../../assets/Passwordicons/manzana.png')},
-    { key: 'dice', label: 'Dado', image: require('../../assets/Passwordicons/dado.png')},
-    { key: 'lion', label: 'Leon', image: require('../../assets/Passwordicons/león.png')},
-    { key: 'rocket', label: 'Cohete', image: require('../../assets/Passwordicons/cohete.png')},
-    { key: 'flower', label: 'Flor', image: require('../../assets/Passwordicons/flor.png')},
-    { key: 'train', label: 'Tren', image: require('../../assets/Passwordicons/tren.png')},
-    { key: 'monopatin', label: 'Monopatín', image: require('../../assets/Passwordicons/monopatín.png')},
-    { key: 'bear', label: 'OsoDePeluche', image: require('../../assets/Passwordicons/oso.png')},
-    { key: 'roller-skate', label: 'Patines', image: require('../../assets/Passwordicons/patines.png')},
-    { key: 'ball', label: 'Pelota', image: require('../../assets/Passwordicons/pelota.png')},
-    { key: 'gift', label: 'Regalo', image: require('../../assets/Passwordicons/regalo.png')},
-    { key: 'star', label: 'Estrella', image: require('../../assets/Passwordicons/estrella.png')},
-];
+    { key: 'apple', label: 'Manzana', image: require('../../assets/Passwordicons/apple.png')},
+    { key: 'book', label: 'Libro', image: require('../../assets/Passwordicons/book.png')},
+    { key: 'car', label: 'Coche', image: require('../../assets/Passwordicons/car.png')},
+    { key: 'dog', label: 'Perro', image: require('../../assets/Passwordicons/dog.png')},
+    { key: 'house', label: 'Casa', image: require('../../assets/Passwordicons/house.png')},
+    { key: 'music', label: 'Música', image: require('../../assets/Passwordicons/music.png')},
+    { key: 'paint', label: 'Pintura', image: require('../../assets/Passwordicons/paint.png')},
+    { key: 'ball', label: 'Pelota', image: require('../../assets/Passwordicons/ball.png')},
+    { key: 'star', label: 'Estrella', image: require('../../assets/Passwordicons/star.png')},
+    { key: 'tree', label: 'Árbol', image: require('../../assets/Passwordicons/tree.png')},
+  ];
