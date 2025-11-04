@@ -5,6 +5,7 @@ import { RootStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/HomeScreen';
 import GameMenuScreen from '../games/gameMenuScreen';
 import GameNavigator from './GameNavigator';
+import UserList from '../userlist/UserList';
 import LoginScreen from '../auth/screens/LoginScreen';
 import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
 import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
@@ -28,7 +29,7 @@ export default function AppNavigator() {
       />
 
       <Stack.Screen 
-        name="GameMenu" 
+         name="GameMenu" 
         component={GameMenuScreen}
       />
 
@@ -69,6 +70,17 @@ export default function AppNavigator() {
           headerShown: false
         }}
       />
+
+      <Stack.Screen 
+        name="UserList" 
+        component={UserList} 
+        options={{ 
+          title: 'Lista de Usuarios',
+          headerShown: false
+        }} 
+      />
+
+      
     </Stack.Navigator>
   );
 }

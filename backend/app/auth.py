@@ -14,12 +14,25 @@ def get_user_by_email(cursor, email):
     
     return cursor.fetchone()
 
+def get_role_by_id(cursor, id_rol):
+    
+    query = "SELECT role_name FROM roles WHERE role_id = %s;"
+    
+
+    cursor.execute(query, (id_rol,))
+    
+    return cursor.fetchone()
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('username')
     submitted_password = data.get('password')
     
+    eje = generate_password_hash(submitted_password)
+    print("holaaa")
+    print(eje)
+
     if not email or not submitted_password:
         return jsonify({
             'success': False, 
@@ -29,6 +42,9 @@ def login():
     try:
         cursor = get_db_cursor()
         user_record = get_user_by_email(cursor, email)
+        role_id = user_record.get('role_id')
+        role_record = get_role_by_id(cursor, role_id)
+        role_name = role_record.get('role_name')
         cursor.close()
     except Exception as e:
         print(f"Database error during login: {e}")
@@ -54,14 +70,13 @@ def login():
     try:
         if check_password_hash(stored_hash, submitted_password):
             
-            role_id = user_record.get('role_id')
-            is_teacher = role_id == 2
+            
             
             response_user = {
                 'id': user_record['user_id'], 
                 'name': user_record['name'], 
                 'email': user_record['email'],
-                'role': 'teacher' if is_teacher else 'student'
+                'role': role_name
             }
 
             return jsonify({

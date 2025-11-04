@@ -48,13 +48,8 @@ def create_app():
     from .users.admin import admin_bp
     app.register_blueprint(admin_bp)
 
-    @app.route("/hello")
-    def hello():
-        cur = get_db_cursor()
-        cur.execute("SELECT user_id, name FROM users")
-        rows = cur.fetchall()
-        cur.close()
-        return jsonify(rows)
+    from . import general_users
+    app.register_blueprint(general_users.bp)
     
 
     return app

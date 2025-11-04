@@ -4,6 +4,8 @@ export type RootStackParamList = {
 
   TapNumberGame: undefined;
 
+  UserList: undefined;
+
   SequenceGame: undefined;
 
   Games: NavigatorScreenParams<GameStackParamList>; 
