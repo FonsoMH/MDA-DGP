@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
 import BackButton from '../../components/common/BackButton/BackButton';
@@ -74,10 +74,9 @@ function TapNumberGame() {
 
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
-    // const { user } = useUser();
-    const user = {id: 1, name: 'Test User'}; // Mocked user for testing
 
-    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {
+    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
+        
         const newTarget = getRandomNumber(maxRange);
         const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
         
@@ -87,7 +86,7 @@ function TapNumberGame() {
         playTTS(newTarget.toString());
     }, []);
 
-    const manager = useGameManager(user.id, GAME_ID, initializeGame);
+    const manager = useGameManager(GAME_ID, initializeGame);
 
     const handlePlayAgain = () => {
         manager.resetGame();

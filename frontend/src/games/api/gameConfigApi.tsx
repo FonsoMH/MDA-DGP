@@ -1,9 +1,8 @@
 import axios from "axios";
 import { GameConfigFrontend, GameConfigApiData } from "../../types/games";
-import Constants from 'expo-constants'; 
 
-const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
-const API_TIMEOUT = Constants.expoConfig?.extra?.API_TIMEOUT;
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_TIMEOUT = process.env.API_TIMEOUT;
 
 export const DEFAULT_CONFIG = {
     ranges: 10,
@@ -28,7 +27,7 @@ export async function fetchGameConfiguration( studentId: number, gameId: number 
     const endpoint = `${BASE_URL}/games/students/${studentId}/config/${gameId}`;
 
     try {
-
+        
         const response = await axios.get<GameConfigApiData>(endpoint, { 
             timeout: +API_TIMEOUT 
         });

@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 export default ({ config }) => {
   return {
     ...config,
@@ -31,10 +29,5 @@ export default ({ config }) => {
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
-    extra: {
-      REACT_APP_API_BASE_URL: process.env.REACT_APP_API_BASE_URL,
-      API_TIMEOUT: process.env.API_TIMEOUT,
-    }
   };
 };

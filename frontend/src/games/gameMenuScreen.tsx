@@ -10,7 +10,7 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation'; 
 import { GameStackParamList } from '../navigation/GameNavigator';
-import BackButton from '../components/common/BackButton/BackButton'; // Lo usas, así que está bien
+import BackButton from '../components/common/BackButton/BackButton';
 import { useAccessibilitySettings } from '../accessibilitySettings/hooks/useAccessibilitySettings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;

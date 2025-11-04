@@ -1,7 +1,9 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as React from 'react';
-import { View ,Text , Button , StyleSheet, Pressable , Image , TextInput} from 'react-native';
-import { useUser } from '../hooks/useUser';
+import { View ,Text , StyleSheet, Pressable , TextInput} from 'react-native';
+import { useUser } from '../../hooks/useUser';
+import BackButton from '../../components/common/BackButton/BackButton';
+
 
 
 const styles = StyleSheet.create({
@@ -66,16 +68,17 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
         setPassword(text);
     };
 
-    const { user , teacher_login } = useUser();
+    const { login } = useUser();
 
     const handleLogIn = async () => {
         try {
-            const success = await teacher_login(email, password);
-            if (success) {
-                console.log('Login successful');
-            } else {
-                console.log('Login failed');
-            }
+            await login(
+                {username: email, 
+                    password: password}
+            );
+            console.log("login exitoso");
+            //TODO navegar a dahsboard
+            //TODo error handling
         } catch (error) {
             console.error('Error during login:', error);
         }   
@@ -84,6 +87,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
  
     return (
         <View style={styles.container}>
+            
             <View style={styles.header}>
                 <Text style={{ fontWeight: 'bold', fontSize: 24 }}>Acceso Docente</Text>
                 <Text style={{ marginBottom: 20 , color: '#999'}}>Ingresa tus credenciales</Text>
@@ -108,6 +112,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                 </Pressable>
             </View>
 
+            <BackButton width={215} height={76} alignSelf='center' />
         </View>
         
     )
