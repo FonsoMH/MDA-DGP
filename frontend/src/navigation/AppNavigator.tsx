@@ -5,7 +5,7 @@ import { RootStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import TapNumberGame from '../games/TapNumberGame/TapNumberGame';
-import UserListScreen from '../screens/UserListScreen';
+import UserList from '../userlist/UserList';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -43,7 +43,7 @@ export default function AppNavigator() {
       />
       <Stack.Screen 
         name="UserList" 
-        component={UserListScreen} 
+        component={UserList} 
         options={{ 
           title: 'Lista de Usuarios',
           headerShown: false
