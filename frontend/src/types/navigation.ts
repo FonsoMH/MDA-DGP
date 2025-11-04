@@ -7,7 +7,8 @@ export type RootStackParamList = {
   Details: { itemId: number };
   StudentCreate: undefined;
   
-  // Resto de rutas
+  // Nueva ruta para configuración de juegos por estudiante
+  StudentGameConfig: { studentId: number };
 };
 
 // 2. Definir el tipo para el objeto 'navigation'

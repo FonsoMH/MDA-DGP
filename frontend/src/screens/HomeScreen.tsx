@@ -25,6 +25,11 @@ export default function HomeScreen({ navigation }: HomeProps) {
       <Button
         title="Intentar ir a Details sin parámetro"
       />
+      <View style={{ height: 12 }} />
+      <Button
+        title="Configurar juegos (Eva Student)"
+        onPress={() => navigation.navigate('StudentGameConfig', { studentId: 3 })}
+      />
     </View>
   );
 }
