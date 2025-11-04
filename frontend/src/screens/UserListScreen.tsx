@@ -90,7 +90,9 @@ export default function UserListScreen() {
       {loading ? (
         <ActivityIndicator size="large" color="#333" style={{ marginTop: 20 }} />
       ) : (
-        filteredUsers.map(u => <UserCard key={u.user_id} user={u} />)
+        filteredUsers.map(u => (
+          <UserCard key={u.user_id} user={u} onUserDeleted={fetchUsers} />
+        ))
       )}
     </ScrollView>
   );

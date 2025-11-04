@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager, Alert } from 'react-native';
+import axios from 'axios';
 
 export type UserRole = "admin" | "teacher" | "student";
 
@@ -12,8 +13,11 @@ export interface User {
   assignedStudents?: string[];
 }
 
+const BASE_URL = 'http://localhost:5000';
+
 interface UserCardProps {
   user: User;
+  onUserDeleted?: () => void;
 }
 
 const roleColors = {
@@ -22,7 +26,7 @@ const roleColors = {
   student: { bg: '#DCFCE7', text: '#016630' },
 };
 
-export default function UserCard({ user }: UserCardProps) {
+export default function UserCard({ user, onUserDeleted }: UserCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const roleColor = roleColors[user.role];
@@ -31,6 +35,58 @@ export default function UserCard({ user }: UserCardProps) {
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded(!expanded);
+  };
+
+  const handleDelete = () => {
+
+    const askConfirm = (): Promise<boolean> => {
+      if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+        // Web fallback
+        return Promise.resolve(window.confirm('¿Seguro que desea eliminar este usuario?'));
+      }
+
+      return new Promise((resolve) => {
+        Alert.alert(
+          'Confirmar eliminación',
+          '¿Seguro que desea eliminar este usuario?',
+          [
+            { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },
+            { text: 'Sí, seguro', style: 'destructive', onPress: () => resolve(true) },
+          ],
+        );
+      });
+    };
+
+    (async () => {
+      try {
+        console.log('UserCard: delete clicked for user', user.user_id);
+        const confirmed = await askConfirm();
+        if (!confirmed) {
+          console.log('UserCard: delete cancelled');
+          return;
+        }
+
+        if (!user.user_id) {
+          console.error('UserCard: missing user_id, cannot delete');
+          Alert.alert('Error', 'ID de usuario no disponible.');
+          return;
+        }
+
+        const resp = await axios.delete(`${BASE_URL}/users/${user.user_id}`);
+        console.log('UserCard: delete response', resp?.status, resp?.data);
+        Alert.alert('Éxito', 'El usuario ha sido eliminado correctamente');
+        if (onUserDeleted) onUserDeleted();
+      } catch (error: any) {
+        console.error('UserCard: delete error', error);
+        // If backend returned a helpful message, show it
+        const serverMessage = error?.response?.data?.error || error?.response?.data?.message;
+        if (serverMessage) {
+          Alert.alert('Error', String(serverMessage));
+        } else {
+          Alert.alert('Error', 'No se pudo eliminar el usuario.');
+        }
+      }
+    })();
   };
 
   return (
@@ -86,7 +142,7 @@ export default function UserCard({ user }: UserCardProps) {
           <TouchableOpacity style={styles.editButton}>
             <Text style={styles.editText}>Editar</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
             <Text style={styles.deleteText}>Eliminar</Text>
           </TouchableOpacity>
         </View>

@@ -68,14 +68,52 @@ def get_users():
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     cur = get_db_cursor()
-    cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
+
+    # Fetch the user and its role
+    cur.execute("""
+        SELECT u.user_id, r.role_name
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE u.user_id = %s
+    """, (user_id,))
 
     user = cur.fetchone()
 
     if not user:
         cur.close()
         return jsonify({'error': 'User not found.'}), 404
-    
+
+    # Prevent deleting the last admin: ensure there's at least one admin left
+    if user.get('role_name') == 'admin':
+        cur.execute("""
+            SELECT COUNT(*) as cnt
+            FROM users u
+            JOIN roles r ON u.role_id = r.role_id
+            WHERE r.role_name = 'admin'
+        """)
+        count_row = cur.fetchone()
+        # count may be returned under different key names depending on cursor; try common ones
+        admin_count = None
+        if count_row is None:
+            admin_count = 0
+        elif 'cnt' in count_row:
+            admin_count = count_row['cnt']
+        elif 'count' in count_row:
+            admin_count = count_row['count']
+        else:
+            # take first value
+            admin_count = list(count_row.values())[0]
+
+        try:
+            admin_count = int(admin_count)
+        except Exception:
+            admin_count = 0
+
+        if admin_count <= 1:
+            cur.close()
+            return jsonify({'error': 'No se puede eliminar al último administrador del sistema. Debe haber al menos un administrador.'}), 400
+
+    # Proceed to delete
     cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
     cur.connection.commit()
     cur.close()
