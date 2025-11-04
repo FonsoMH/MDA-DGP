@@ -13,6 +13,8 @@ export default function HomeScreen({ navigation }: HomeProps) {
       <Button
         title="Crear Estudiante"
         onPress={() => navigation.navigate('StudentCreate')}
+        title="Ver juegos disponibles"
+        onPress={() => navigation.navigate('GameMenu')}
       />
       <Button
         title="Ir a Detalles del Producto (ID 42)"
