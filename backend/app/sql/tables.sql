@@ -30,8 +30,10 @@ CREATE TABLE IF NOT EXISTS games (
 -- Accessibility Settings (1-to-1 with Student)
 CREATE TABLE IF NOT EXISTS accessibility_settings (
     student_id INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    background_color VARCHAR(7) DEFAULT '#D9D9D9',
+    background_color VARCHAR(7) DEFAULT '#F7F8FA',
     foreground_color VARCHAR(7) DEFAULT '#000000',
+    number_color VARCHAR(7) DEFAULT '#000000', 
+    box_color VARCHAR(7) DEFAULT '#D9D9D9', 
     icon_position VARCHAR(10) DEFAULT 'izquierda' CHECK (icon_position IN ('izquierda', 'derecha')),
     high_contrast_mode BOOLEAN DEFAULT false,
     show_numbers_mode BOOLEAN DEFAULT true, 
@@ -91,12 +93,12 @@ VALUES ('Anne Admin', 'admin@app.com', 'fake_hash_123', (SELECT role_id FROM rol
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO users (name, email, password_hash, role_id) 
-VALUES ('Professor Paul', 'paul@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'teacher'))
+VALUES ('Professor Paul', 'paul@app.com', 'scrypt:32768:8:1$5IjCMocVblg07UqT$9ff5d3058a93e927c45f62a5658eaa251d14dde68a58ec84b0d2e928a060ed41d493f5e3d41c8122a8d773fcafe6e91b5c3a45301f57f6fce1bcdff417978ebe', (SELECT role_id FROM roles WHERE role_name = 'teacher'))
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id) 
 VALUES 
-('Eva Student', 'eva@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com')),
+('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$cqwOvGPYlW6TdyuQ$b1717df1f28a0d52b08fb2a1ee5599ddadd3e1a9c98be3d02accd368b1975ae1994c247a81da01ad4d89d606c6479c4f79032876a70d57af3fd8da343aab8e6a', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com')),
 ('Leo Reader', 'leo@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'))
 ON CONFLICT (email) DO NOTHING;
 

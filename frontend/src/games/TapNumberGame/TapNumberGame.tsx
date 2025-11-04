@@ -1,107 +1,112 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
 import BackButton from '../../components/common/BackButton/BackButton';
-import { useGameConfig } from '../hooks/useGameConfig';
 import FeedbackScreen from '../../components/FeedBack/Feedback';
 import { playTTS } from '../../components/ttsListener';
+import { generateOptionsWithTarget, getRandomNumber } from '../utils/gameUtils';
+import { useGameManager } from '../utils/gameManager';
+import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
+import { useUser } from '../../hooks/useUser';
+import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useAccessibilitySettings';
 
 
-const getRandomNumber = (max: number): number => {
-    return Math.floor(Math.random() * (max + 1));
-};
 
-//TODO esto a lo mejor se puede mover a otro archivo
-const generateUniqueOptions = (target: number, max: number, count: number): number[] => {
-  const uniqueOptions = new Set<number>();
-  uniqueOptions.add(target);
-
-  while (uniqueOptions.size < count) {
-    let randomOption = getRandomNumber(max);
-    
-    if (randomOption === target) {
-      randomOption = (randomOption + 1) % (max + 1); 
-    }
-    
-    uniqueOptions.add(randomOption);
-  }
-
-  return Array.from(uniqueOptions).sort(() => Math.random() - 0.5);
-};
-
-
-//TODO esto deberia depender de login pero no esta hecho aun
-const STUDENT_ID = 3; 
+//TODO calcular puntuacion
 const GAME_ID = 1; 
 
-const REPEATS = 5;
 
 
 function TapNumberGame() {
 
-    const { config, isLoading } = useGameConfig(STUDENT_ID, GAME_ID);
+    const accessibilitySettings = useAccessibilitySettings();
+    
+    const styles = StyleSheet.create({
+        screenContainer: {
+            flex: 1,
+            backgroundColor: accessibilitySettings.backgroundColor,
+            alignItems: 'center',
+            paddingVertical: 30,
+            paddingHorizontal: 20
+        },
+    
+        imageWrapper: {
+            padding: 10,
+            borderRadius: 10,
+        },
+    
+        clickableImage: {
+            width: 155,
+            height: 155,
+            resizeMode: 'contain',
+        },
+    
+        header: {
+            width: '100%',
+            padding: 20,
+            alignItems: 'center',
+        },
+        title: {
+            fontSize: accessibilitySettings.fontSize + 10,
+            fontWeight: '900',
+            color: '#101828',
+            marginBottom: 10,
+        },
+        messageText: {
+            fontSize: accessibilitySettings.fontSize,
+            color: '#333',
+            fontWeight: '500',
+        },
+        optionsGrid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            
+            width: '90%',
+            padding: 10,
+            marginTop: 20,
+        },
+        optionWrapper: {
+            margin: 5, 
+        },
+    });
 
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
-    const [isGameInitialized, setIsGameInitialized] = useState<boolean>(false); 
 
-    const [games, setGames] = useState(1);
-    const [modalVisible, setModalVisible] = useState(false);
-    
-    const handlePlayAgain = () => {
-        setGames(1);
-        setModalVisible(false);
-        initializeGame();
-    };
-
-    //TODO calcular el score
-
-    const maxRange: number = config?.ranges ?? 10;
-    const optionsCount = (config?.numElements ?? 9) as number;
-
-   const initializeGame = useCallback(() => {    
+    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
+        
         const newTarget = getRandomNumber(maxRange);
-        const newOptions = generateUniqueOptions(newTarget, maxRange, optionsCount);
+        const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
         
         setTargetNumber(newTarget);
         setOptions(newOptions);
         
         playTTS(newTarget.toString());
-        return null;
-        
-    }, [maxRange, optionsCount]);
+    }, []);
+
+    const manager = useGameManager(GAME_ID, initializeGame);
+
+    const handlePlayAgain = () => {
+        manager.resetGame();
+    };
 
     const handleSelection = (selectedNumber: number) => {
-        // TODO Lógica de acierto/error (Pendiente de implementar completamente)
-        
-        // setScore(score + 1); 
-        if(selectedNumber == targetNumber){
-            if (games == REPEATS) {
-                setModalVisible(true);
-                console.log("¡Máximo de juegos alcanzado!");
-            }
-            else{
-                initializeGame(); 
-                setGames(prevGames => prevGames + 1 );
-                console.log("aumentamos");
-                
-            }
+        if (selectedNumber === targetNumber) {
+            manager.advanceGame(); 
         }
     };
 
-    useEffect(() => {
-        if (!isLoading && config && !isGameInitialized) {
-            initializeGame();
-            setIsGameInitialized(true); 
-        }
-    }, [isLoading, config, initializeGame, isGameInitialized]);
+    if (manager.isLoading) {
+        return <LoadingSpinner />; 
+    }
 
 
     return (
         
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76}></BackButton>
+            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
             <TouchableOpacity onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
                 <Image
                 source={require('../../../assets/icons/listen.png')}
@@ -129,59 +134,10 @@ function TapNumberGame() {
                 ))}
             </View>
 
-            <FeedbackScreen visible={modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
+            <FeedbackScreen visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
 
     );
 }
-
-const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        alignItems: 'center',
-        padding: 20,
-    },
-
-    imageWrapper: {
-        padding: 10,
-        borderRadius: 10,
-    },
-
-    clickableImage: {
-        width: 155,
-        height: 155,
-        resizeMode: 'contain',
-    },
-
-    header: {
-        width: '100%',
-        padding: 20,
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: '900',
-        color: '#101828',
-        marginBottom: 10,
-    },
-    messageText: {
-        fontSize: 18,
-        color: '#333',
-        fontWeight: '500',
-    },
-    optionsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        
-        width: '90%',
-        padding: 10,
-        marginTop: 20,
-    },
-    optionWrapper: {
-        margin: 5, 
-    },
-});
 
 export default TapNumberGame;
