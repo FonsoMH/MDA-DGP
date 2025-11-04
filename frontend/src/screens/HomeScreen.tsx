@@ -35,6 +35,10 @@ export default function HomeScreen({ navigation }: HomeProps) {
         title="Ver Usuarios de Prueba"
         onPress={() => navigation.navigate('TestUsers')} 
       />
+      <Button
+        title="Ir a la Lista de Usuarios"
+        onPress={() => navigation.navigate('UserList')} 
+      />
     </View>
   );
 }

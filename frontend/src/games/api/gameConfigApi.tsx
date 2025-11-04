@@ -1,10 +1,13 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { GameConfigFrontend, GameConfigApiData } from "../../types/games";
 import Constants from 'expo-constants'; 
 
-const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
+//const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const BASE_URL =  'http://localhost:5000' ;
+//const API_TIMEOUT = Constants.expoConfig?.extra?.API_TIMEOUT;
+const API_TIMEOUT = 3000;
 
-const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG = {
     ranges: 10,
     numElements: 5,
     numContainers: 2,
@@ -25,10 +28,12 @@ export async function fetchGameConfiguration( studentId: number, gameId: number 
     }
 
     const endpoint = `${BASE_URL}/games/students/${studentId}/config/${gameId}`;
-    console.log(`Fetching config from: ${endpoint}`);
 
     try {
-        const response = await axios.get<GameConfigApiData>(endpoint);
+
+        const response = await axios.get<GameConfigApiData>(endpoint, { 
+            timeout: +API_TIMEOUT 
+        });
         const configData = response.data;
         
         const mappedConfig: GameConfigFrontend = {
@@ -42,17 +47,6 @@ export async function fetchGameConfiguration( studentId: number, gameId: number 
         return mappedConfig;
 
     } catch (error) {
-
-        const axiosError = error as AxiosError;
-
-        if (axiosError.response) {
-            console.error(`API returned status ${axiosError.response.status}. Using default config.`);
-        } else if (axiosError.request) {
-            console.error("Error connecting to backend API: No response received.");
-        } else {
-            console.error("Error setting up request:", axiosError.message);
-        }
-        
 
         return DEFAULT_CONFIG;
     }
