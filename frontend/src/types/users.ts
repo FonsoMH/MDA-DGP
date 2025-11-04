@@ -3,11 +3,15 @@ export interface UserApiData {
   name: string;
   email: string;
   role: string;
+  assignedStudents?: string[];
+  studentsCount?: number;
 }
 
 export interface UserFrontend {
-  userId: number;      
+  userId: number;
   name: string;
   email: string;
   role: string;
+  assignedStudents?: string[];     
+  studentsCount?: number;          
 }

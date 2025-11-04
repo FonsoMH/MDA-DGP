@@ -71,6 +71,8 @@ export default function UserListScreen() {
               name: u.name,
               email: u.email,
               role: u.role,
+              studentsCount: u.studentsCount ?? 0,
+              assignedStudents: u.assignedStudents ?? [],
             } as User}
           />
         ))

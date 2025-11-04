@@ -26,6 +26,8 @@ export async function fetchUsers(): Promise<UserFrontend[]> {
       name: u.name,
       email: u.email,
       role: u.role,
+      assignedStudents: u.assignedStudents ?? [],
+      studentsCount: u.studentsCount ?? 0,
     }));
 
     return mappedUsers;
