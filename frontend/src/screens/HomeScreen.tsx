@@ -11,8 +11,12 @@ export default function HomeScreen({ navigation }: HomeProps) {
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>¡Bienvenido!</Text>
       <Button
+        title="Crear Estudiante"
+        onPress={() => navigation.navigate('StudentCreate')}
+      />
+      <Button
         title="Ver juegos disponibles"
-        onPress={() => navigation.navigate('GameMenu')}
+        onPress={() => navigation.navigate('GameMenu')} 
       />
       <Button
         title="Ir a Pantalla de Login"
@@ -21,6 +25,11 @@ export default function HomeScreen({ navigation }: HomeProps) {
       <Button
         title="Crear Tutor"
         onPress={() => navigation.navigate('TeacherCreate')}
+      />
+      <View style={{ height: 12 }} />
+      <Button
+        title="Configurar juegos (Eva Student)"
+        onPress={() => navigation.navigate('StudentGameConfig', { studentId: 3 })}
       />
     </View>
   );

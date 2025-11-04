@@ -50,12 +50,15 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
 
         try {
             const passwordSequence = password.map(item => item.code).join();
-            await login(
+            const user = await login(
                 {username: userParam.email, 
                     password: passwordSequence}
             );
 
-            navigation.navigate('GameMenu');
+            if(user){
+                navigation.navigate('GameMenu');
+            }
+
             
             return true; 
             

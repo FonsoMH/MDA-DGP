@@ -56,7 +56,7 @@ def create_teacher():
             """, (new_teacher_id, tuple(assigned_students_ids)))
             print(f"Assigned students {assigned_students_ids} to teacher {new_teacher_id}")
 
-        # Confirmar la transacción
+        # Confirmar la transacciÃ³n
         cur.connection.commit()
 
         return jsonify({
@@ -195,3 +195,50 @@ def get_assigned_students_by_teacher(user_id):
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()
+
+
+@teacher_bp.route('/api/teachers', methods=['GET'])
+def get_teachers():
+    """
+    Endpoint que devuelve todos los usuarios con role_id = 2 (estudiantes).
+    Ruta: GET /users/students
+    """
+
+    try:
+        cur = get_db_cursor()
+
+        cur = get_db_cursor()
+
+        cur.execute("SELECT role_id FROM roles WHERE role_name = 'teacher';")
+        role_record = cur.fetchone()
+
+        if not role_record:
+            cur.close()
+            return jsonify({"error": "Error de configuración: Rol 'teacher' no encontrado"}), 500
+
+        STUDENT_ROLE_ID = role_record['role_id']
+
+
+        query = """
+        SELECT 
+            user_id AS id, 
+            name, 
+            email,
+            role_id as role
+        FROM users 
+        WHERE role_id = %s;
+        """
+        cur.execute(query, (STUDENT_ROLE_ID,)) 
+
+
+        student_records = cur.fetchall()
+
+
+        cur.close()
+
+        return jsonify(student_records), 200
+
+    except Exception as e:
+        print(f"Error al listar estudiantes: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
+

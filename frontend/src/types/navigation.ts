@@ -20,7 +20,8 @@ export type RootStackParamList = {
   TeacherCreate: undefined;
   StudentCreate: undefined;
   
-  // Resto de rutas
+  // Nueva ruta para configuración de juegos por estudiante
+  StudentGameConfig: { studentId: number };
 };
 
 import { NavigatorScreenParams } from '@react-navigation/native';
