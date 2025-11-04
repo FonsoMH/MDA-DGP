@@ -9,6 +9,7 @@ export type RootStackParamList = {
   // Resto de rutas
   CreateStudent: undefined;
   TestUsers: undefined;
+  UserList: undefined;
 };
 
 // 2. Definir el tipo para el objeto 'navigation'

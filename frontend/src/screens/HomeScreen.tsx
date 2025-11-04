@@ -24,6 +24,10 @@ export default function HomeScreen({ navigation }: HomeProps) {
         title="Intentar ir a Details sin parámetro"
       />
       <Button
+        title="Ir a la lista de usuarios"
+        onPress={() => navigation.navigate('UserList')}
+      />
+      <Button
         title="Crear Nuevo Estudiante"
         onPress={() => navigation.navigate('CreateStudent')} 
       />
