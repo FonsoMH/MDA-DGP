@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
 import BackButton from '../../components/common/BackButton/BackButton';
@@ -8,8 +8,6 @@ import { playTTS } from '../../components/ttsListener';
 import { generateOptionsWithTarget, getRandomNumber } from '../utils/gameUtils';
 import { useGameManager } from '../utils/gameManager';
 import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
-import { useUser } from '../../hooks/useUser';
-import { useAccessibilitySettings } from '../../hooks/useAccesibilitySettings';
 
 
 //TODO calcular puntuacion
@@ -21,10 +19,12 @@ function TapNumberGame() {
 
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
-    const { user } = useUser();
-    const [accesibilitySettings] = useAccessibilitySettings();
 
     const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
+        
+        console.log(maxRange);
+        
+        
         const newTarget = getRandomNumber(maxRange);
         const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
         
@@ -34,7 +34,7 @@ function TapNumberGame() {
         playTTS(newTarget.toString());
     }, []);
 
-    const manager = useGameManager(user.id, GAME_ID, initializeGame);
+    const manager = useGameManager(GAME_ID, initializeGame);
 
     const handlePlayAgain = () => {
         manager.resetGame();

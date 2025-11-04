@@ -1,9 +1,8 @@
 import axios from "axios"
 import { FeedbackData } from "../../types/feedback";
-import Constants from 'expo-constants'; 
 
-const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
-const API_TIMEOUT = Constants.expoConfig?.extra?.API_TIMEOUT;
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_TIMEOUT = process.env.API_TIMEOUT;
 
 //TODO definir
 const DEFAULT_INFO: FeedbackData = {

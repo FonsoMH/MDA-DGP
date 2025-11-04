@@ -5,10 +5,11 @@ import { RootStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/HomeScreen';
 import GameMenuScreen from '../games/gameMenuScreen';
 import GameNavigator from './GameNavigator';
-import LoginScreen from '../screens/LoginScreen';
-import StudentLoginScreen from '../screens/StudentLoginScreen';
-import StudentPasswordScreen from '../screens/StudentPasswordScreen';
-import TeacherLoginScreen from '../screens/TeacherLoginScreen';
+import LoginScreen from '../auth/screens/LoginScreen';
+import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
+import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
+import TeacherLoginScreen from '../auth/screens/TeacherLoginScreen';
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
