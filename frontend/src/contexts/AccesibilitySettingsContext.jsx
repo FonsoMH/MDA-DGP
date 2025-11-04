@@ -12,7 +12,6 @@ export function AccessibilitySettingsProvider({ children }) {
 
     }
 
-
     return (
         <AccessibilitySettingsContext.Provider
             value={{
