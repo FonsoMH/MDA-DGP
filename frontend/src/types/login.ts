@@ -2,6 +2,7 @@ export interface StudentLogin {
   name: string;
   email: string
   id: number;
+  role: string
 };
 
 export type StudentLoginCardProps = {

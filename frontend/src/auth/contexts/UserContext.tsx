@@ -2,6 +2,7 @@ import { createContext , ReactNode, useCallback, useState} from "react";
 import Constants from 'expo-constants';
 import { AuthResponse, LoginCredentials, StudentLogin } from "../../types/login";
 import { performLogin } from "../api/loginApi";
+import { useAccessibilitySettings } from "../../accessibilitySettings/hooks/useAccessibilitySettings";
 
 interface UserContextType {
     user: StudentLogin | null,
@@ -23,10 +24,17 @@ export function UserProvider({ children }: UserProviderProps) {
 
     const [user, setUser] = useState<StudentLogin | null>(null);
 
+    const { getSettings } = useAccessibilitySettings();
+    
     const login = useCallback(async (credentials: LoginCredentials) => {
         try {
             const result: AuthResponse = await performLogin(credentials);
             setUser(result.user);
+
+            if(result.user.role == 'student' && getSettings){
+                await getSettings(result.user.id);
+            }
+            
             
             return true; 
             
@@ -37,40 +45,9 @@ export function UserProvider({ children }: UserProviderProps) {
         }
     }, []);
 
-    // async function teacher_login(email, password) {
-    //     try {
-    //         const passwordHash = password;
-
-    //         const res = await fetch(`${BASE_URL}/api/login/teacher`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify({ email, password: passwordHash })
-    //         });
-
-    //         const data = await res.json().catch(() => ({}));
-    //         setUser({ id: data.user.id, name: data.user.name, role: 'teacher' , email: email});
-
-    //         return true;
-
-    //         // if (res.ok && data.success) {
-    //         //     setUser({ id: data.user.id, name: data.user.name, role: 'teacher' , email: email});
-    //         //     return true;
-    //         // } else {
-    //         //     setUser(null);
-    //         //     console.log('Login failed:', data.message || 'Unknown error');
-    //         //     return false;
-    //         // }
-    //     } catch (error) {
-    //         setUser(null);
-    //         console.log('Network error during login:', error);
-    //         return false;
-    //     }
-    // }
-
     
-
     async function logout() {
-        
+        setUser(null);
     }
 
     return (

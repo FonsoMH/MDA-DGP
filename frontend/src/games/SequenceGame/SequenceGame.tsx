@@ -13,6 +13,7 @@ import { generateRandomOptions } from '../utils/gameUtils';
 import { useGameManager } from '../utils/gameManager';
 import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
 import DraggableItem from './DraggableItem';
+import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useAccessibilitySettings';
 
 
 const GAME_ID = 2; 
@@ -22,6 +23,84 @@ const GAME_ID = 2;
 type Layout = { x: number; y: number; width: number; height: number; };
 
 function SequenceGame() {
+    
+    const accessibilitySettings = useAccessibilitySettings();
+
+    const styles = StyleSheet.create({
+        screenContainer: {
+            flex: 1,
+            backgroundColor: accessibilitySettings.backgroundColor,
+            alignItems: 'center',
+            paddingHorizontal: 20,
+            paddingVertical: 30,
+        },
+
+        header: {
+            width: '100%',
+            paddingVertical: 5,
+            alignItems: 'center',
+            flexDirection: 'row',
+            gap: 20,
+            justifyContent: 'center',
+        },
+        title: {
+            fontSize: accessibilitySettings.fontSize + 10,
+            fontWeight: '900',
+            color: '#101828',
+            marginBottom: 10,
+            textAlign: 'center',
+        },
+        messageText: {
+            fontSize: accessibilitySettings.fontSize,
+            color: '#333',
+            fontWeight: '500',
+        },
+
+        gridContainer: {
+            width: '95%',
+            padding: 10,
+            marginTop: 10,
+            alignItems: 'center',
+            borderWidth: 2,           
+            borderColor: '#000000',   
+            borderRadius: 15,
+            backgroundColor: '#FFFFFF',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+        },
+
+        optionWrapper: {
+            margin: 5, 
+            zIndex: 2,
+        },
+
+        disabled: {
+            backgroundColor: 'grey',
+            opacity: 0.3
+        },
+
+        iconContainer: {
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            height: 40,
+        },
+        bar: {
+            width: 15,
+            backgroundColor: '#101828',
+            marginHorizontal: 3,
+            borderRadius: 4,
+        },
+        barSmall: {
+            height: '40%',
+        },
+        barMedium: {
+            height: '70%',
+        },
+        barLarge: {
+            height: '100%',
+        },
+    });
 
     const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
     const [options, setOptions] = useState<number[]>([]);
@@ -83,7 +162,7 @@ function SequenceGame() {
     }
 
     const title = manager.config?.upward 
-        ? "Mueve del pequeño al grandeeeee" 
+        ? "Mueve del pequeño al grande" 
         : "Mueve del grande al pequeño";
 
     const visualIcon = manager.config?.upward  ? (
@@ -102,7 +181,7 @@ function SequenceGame() {
 
     return (
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76}></BackButton>
+            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'} />
             <View style={styles.header}>
                 <Text style={styles.title}>{title}</Text>
                 {visualIcon}
@@ -166,82 +245,5 @@ function SequenceGame() {
     );
 }
 
-
-const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        margin: 20
-    },
-
-    header: {
-        width: '100%',
-        paddingVertical: 5,
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: 20,
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: '900',
-        color: '#101828',
-        marginBottom: 10,
-        textAlign: 'center',
-    },
-    messageText: {
-        fontSize: 18,
-        color: '#333',
-        fontWeight: '500',
-    },
-
-    gridContainer: {
-        width: '95%',
-        padding: 10,
-        marginTop: 10,
-        alignItems: 'center',
-        borderWidth: 2,           
-        borderColor: '#000000',   
-        borderRadius: 15,
-        backgroundColor: '#FFFFFF',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-    },
-
-    optionWrapper: {
-        margin: 5, 
-        zIndex: 2,
-    },
-
-    disabled: {
-        backgroundColor: 'grey',
-        opacity: 0.3
-    },
-
-    iconContainer: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        height: 40,
-    },
-    bar: {
-        width: 15,
-        backgroundColor: '#101828',
-        marginHorizontal: 3,
-        borderRadius: 4,
-    },
-    barSmall: {
-        height: '40%',
-    },
-    barMedium: {
-        height: '70%',
-    },
-    barLarge: {
-        height: '100%',
-    },
-});
 
 export default SequenceGame;

@@ -43,6 +43,9 @@ def create_app():
     from .users import student
     app.register_blueprint(student.bp)
 
+    from .accessibilitySettings import accessibility_settings_bp
+    app.register_blueprint(accessibility_settings_bp)
+
     @app.route("/hello")
     def hello():
         cur = get_db_cursor()

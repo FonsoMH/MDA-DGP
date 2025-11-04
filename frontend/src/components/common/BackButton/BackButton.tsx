@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, Image, FlexAlignType, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation, useRoute } from '@react-navigation/native';
+import { useUser } from '../../../hooks/useUser';
 
 interface BackProps {
     width: number
@@ -12,14 +13,21 @@ const BASE_ICON_SIZE = 28;
 const BASE_FONT_SIZE = 18;
 const BASE_BUTTON_HEIGHT = 48;
 
+//TODO nombre de la main de profe
+const HOME_SCREENS = ['GameMenu', 'TeacherHome'];
+
 function BackButton({ width, height, alignSelf = 'flex-start' }: BackProps){
   const navigation = useNavigation();
+
+  const route = useRoute();
 
   const canGoBack = navigation.canGoBack(); 
 
   if (!canGoBack) {
     return null; 
   }
+
+  const { logout } = useUser();
 
   const scaleFactor = height / BASE_BUTTON_HEIGHT;
 
@@ -28,9 +36,29 @@ function BackButton({ width, height, alignSelf = 'flex-start' }: BackProps){
   const newPaddingVertical = 12 * scaleFactor;
   const newPaddingHorizontal = 25 * scaleFactor;
 
+  const isHomeScreen = HOME_SCREENS.includes(route.name);
+
+  const handlePress = () => {
+    if (isHomeScreen) {
+        logout();
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              { name: 'Login' },
+            ],
+          })
+        );
+        return;
+    }
+
+    navigation.goBack();
+    
+  };
+
   return (
     <TouchableOpacity 
-      onPress={() => navigation.goBack()}
+      onPress={handlePress}
       style={[
         styles.button,
         { 

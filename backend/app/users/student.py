@@ -30,7 +30,8 @@ def get_students():
         SELECT 
             user_id AS id, 
             name, 
-            email
+            email,
+            role_id as role
         FROM users 
         WHERE role_id = %s;
         """

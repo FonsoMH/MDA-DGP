@@ -10,7 +10,8 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation'; 
 import { GameStackParamList } from '../navigation/GameNavigator';
-import BackButton from '../components/common/BackButton/BackButton'; // Lo usas, así que está bien
+import BackButton from '../components/common/BackButton/BackButton';
+import { useAccessibilitySettings } from '../accessibilitySettings/hooks/useAccessibilitySettings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;
 
@@ -44,10 +45,60 @@ const GAMES: Game[] = [
 ];
 
 export default function GameMenuScreen({ navigation }: Props) {
+    
+    const accessibilitySettings = useAccessibilitySettings();   
+    
+    const styles = StyleSheet.create({
+        safe: {
+            flex: 1,
+            backgroundColor: accessibilitySettings.backgroundColor,
+            alignItems: 'center',
+            paddingHorizontal: 20,
+            paddingVertical: 30,
+        },
+        
+        gridContainer: {
+            width: '95%',
+            height: '70%',
+            flexDirection: 'row', 
+            flexWrap: 'wrap', 
+            justifyContent: 'space-between', 
+            padding: 10,
+            marginTop: 10,
+        },
+        
+        card: {
+            width: '48%', 
+            height: '50%',
+            backgroundColor: '#FFFFFF',
+            borderRadius: 16,
+            padding: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#000',
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            shadowOffset: { width: 0, height: 6 },
+            elevation: 3,
+            marginBottom: 20,
+        },
+        cardImage: {
+            width: '80%',
+            flex: 1,
+            resizeMode: 'contain',
+        },
+        cardTitle: {
+            marginTop: 12,
+            fontSize: accessibilitySettings.fontSize,
+            fontWeight: '600',
+            color: '#111',
+            textAlign: 'center',
+        },
+    });
 
     return (
         <View style={styles.safe}>
-			<BackButton width={215} height={76} />
+			<BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}/>
                 <View style={styles.gridContainer}>
                     {GAMES.map((item) => (
                         <Pressable
@@ -68,52 +119,3 @@ export default function GameMenuScreen({ navigation }: Props) {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    safe: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-		margin:20
-    },
-    
-    gridContainer: {
-        width: '95%',
-        height: '70%',
-        flexDirection: 'row', 
-        flexWrap: 'wrap', 
-        justifyContent: 'space-between', 
-		padding: 10,
-        marginTop: 10,
-    },
-    
-    card: {
-        width: '48%', 
-		height: '50%',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 3,
-        marginBottom: 20,
-    },
-    cardImage: {
-        width: '80%',
-        flex: 1,
-        resizeMode: 'contain',
-    },
-    cardTitle: {
-        marginTop: 12,
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111',
-        textAlign: 'center',
-    },
-});
