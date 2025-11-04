@@ -63,9 +63,9 @@ export default function UserListScreen() {
       {isLoading ? (
         <ActivityIndicator size="large" color="#333" style={{ marginTop: 20 }} />
       ) : (
-        filteredUsers.map(u => (
+        filteredUsers.map((u, index) => (
           <UserCard
-            key={u.userId}
+            key={u.userId || index}
             user={{
               user_id: u.userId,
               name: u.name,
