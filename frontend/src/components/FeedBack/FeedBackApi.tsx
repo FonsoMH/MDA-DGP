@@ -4,10 +4,12 @@ import { FeedbackData } from "../../types/feedback";
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
+const LOCAL_GIF_PRUEBA = '../../../assets/positive_feedback.gif';
+
 //TODO definir
 const DEFAULT_INFO: FeedbackData = {
-    url: '../../../assets/favicon.png',
-    texto: "Sigue asi makina"
+    url: LOCAL_GIF_PRUEBA,
+    texto: "¡Bien Jugado!"
 }
 
 /**

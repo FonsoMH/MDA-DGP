@@ -21,6 +21,8 @@ venv/
 
 # Docker
 *.env.backup
+.env.development
+.env.production
 pgdata/
 
 # IDEs

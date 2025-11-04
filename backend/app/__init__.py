@@ -7,6 +7,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
 
+
 load_dotenv()  # carga las variables del .env
 
 def create_app():
@@ -29,22 +30,23 @@ def create_app():
     from . import feedback
     app.register_blueprint(feedback.bp)
 
-
     from . import games
     app.register_blueprint(games.bp)
 
     from . import auth
     app.register_blueprint(auth.auth_bp)
 
-    from .login import teacher_login_bp, student_login_bp
-    app.register_blueprint(teacher_login_bp)
-    app.register_blueprint(student_login_bp)
-
-    from .users import student
-    app.register_blueprint(student.bp)
-
     from .accessibilitySettings import accessibility_settings_bp
     app.register_blueprint(accessibility_settings_bp)
+
+    from .users.teacher import teacher_bp
+    app.register_blueprint(teacher_bp)
+
+    from .users.students import students_bp
+    app.register_blueprint(students_bp)
+
+    from .users.admin import admin_bp
+    app.register_blueprint(admin_bp)
 
     @app.route("/hello")
     def hello():
@@ -53,5 +55,6 @@ def create_app():
         rows = cur.fetchall()
         cur.close()
         return jsonify(rows)
+    
 
     return app

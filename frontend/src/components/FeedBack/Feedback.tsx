@@ -28,7 +28,7 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
     }
 
     return (
-        <Modal
+    <Modal
         animationType="fade"
         transparent={true}
         visible={visible}
@@ -40,16 +40,19 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
             </View>
 
         ) : (
-            <ImageBackground
-                source={{ uri: feedback?.url }}
-                style={styles.fullScreen}
-                resizeMode="cover"
-            >
+            <View style={styles.fullScreen}>
                 <View style={styles.contentContainer}>
                     <View style={styles.card}>
                         <Text style={styles.messageText}>
                             {feedback?.texto || "¡Bien Jugado!"} 
                         </Text>
+
+                        {/* GIF local debajo del texto */}
+                        <Image
+                            source={require("../../../assets/positive_feedback.gif")}
+                            style={styles.gifStyle}
+                            resizeMode="contain"
+                        />
 
                         <View style={styles.buttonWrapper}>
                             <TouchableOpacity
@@ -65,7 +68,6 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
                                     resizeMode="contain"
                                 />
                                 <Text style={styles.buttonText}> Inicio</Text>
-                                
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -85,9 +87,10 @@ export default function FeedbackScreen({ onNotify, visible}: FeedBackProps) {
                         </View>
                     </View>
                 </View>
-            </ImageBackground> 
+            </View>
         )}
     </Modal>
+
     
       
     );
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         width: "100%",
-        marginTop: 20,
+        marginTop: 10,
     },
 
     button: {
@@ -186,5 +189,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         color: '#FFFFFF',
+    },
+    gifStyle: {
+        width: 700,
+        height: 350,
     },
 });
