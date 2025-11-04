@@ -49,15 +49,15 @@ def create_teacher():
 
         # Actualizar alumnos asignados (si hay)
         if assigned_students_ids:
-            update_query = sql.SQL("""
+            cur.execute("""
                 UPDATE users
                 SET assigned_teacher_id = %s
-                WHERE user_id = ANY(%s);
-            """)
-            cur.execute(update_query, (new_teacher_id, assigned_students_ids))
+                WHERE user_id IN %s;
+            """, (new_teacher_id, tuple(assigned_students_ids)))
+            print(f"Assigned students {assigned_students_ids} to teacher {new_teacher_id}")
 
         # Confirmar la transacción
-        cur.execute("COMMIT;")
+        cur.connection.commit()
 
         return jsonify({
             'id': new_teacher_id,
@@ -68,7 +68,7 @@ def create_teacher():
 
     except Exception as e:
         try:
-            cur.execute("ROLLBACK;")
+            cur.connection.rollback()
         except:
             pass
         current_app.logger.error(f"Error creating teacher: {e}")
