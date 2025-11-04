@@ -16,7 +16,9 @@ export type RootStackParamList = {
 
   TeacherLogin: undefined;
 
+  AdminCreate: undefined;
   TeacherCreate: undefined;
+  StudentCreate: undefined;
   
   // Resto de rutas
 };

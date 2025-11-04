@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   View,
   Text,
@@ -39,7 +38,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
   const loadStudents = async (p: number) => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BASE_URL}/students/no-teacher`, {
+      const res = await axios.get(`${BASE_URL}/api/students/no_teacher`, {
         params: { page: p, page_size: pageSize },
         timeout: +API_TIMEOUT
       });
@@ -88,7 +87,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Crear Nuevo Tutor</Text>
 
@@ -180,7 +179,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

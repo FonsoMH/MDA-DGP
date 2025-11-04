@@ -6,7 +6,7 @@ from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check
 
 students_bp = Blueprint('students', __name__)
 
-@students_bp.route('/api/students/no-teacher', methods=['GET'])
+@students_bp.route('/api/students/no_teacher', methods=['GET'])
 def get_students_without_teacher():
     cur = None
     try:
