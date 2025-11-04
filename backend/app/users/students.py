@@ -6,8 +6,8 @@ from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check
 
 students_bp = Blueprint('students', __name__)
 
-@students_bp.route('/api/students', methods=['GET'])
-def get_students():
+@students_bp.route('/api/students/no-teacher', methods=['GET'])
+def get_students_without_teacher():
     cur = None
     try:
         page = int(request.args.get('page', 1))
