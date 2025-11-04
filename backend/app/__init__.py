@@ -25,6 +25,26 @@ def create_app():
     init_app(app)
     with app.app_context():
         init_db()
+    
+    from . import feedback
+    app.register_blueprint(feedback.bp)
+
+
+    from . import games
+    app.register_blueprint(games.bp)
+
+    from . import auth
+    app.register_blueprint(auth.auth_bp)
+
+    from .login import teacher_login_bp, student_login_bp
+    app.register_blueprint(teacher_login_bp)
+    app.register_blueprint(student_login_bp)
+
+    from .users import student
+    app.register_blueprint(student.bp)
+
+    from .accessibilitySettings import accessibility_settings_bp
+    app.register_blueprint(accessibility_settings_bp)
 
     @app.route("/hello")
     def hello():
