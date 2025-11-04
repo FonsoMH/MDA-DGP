@@ -4,51 +4,67 @@ import { View ,Text , StyleSheet, Pressable , TextInput} from 'react-native';
 import { useUser } from '../../hooks/useUser';
 import BackButton from '../../components/common/BackButton/BackButton';
 
-
+const MAX_WIDTH = 450;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#000',
+        borderColor: '#ccc',
         borderRadius: 10,
-        marginLeft: '30%',
-        marginRight: '30%',
-        marginTop: '10%',
-        marginBottom: '10%',
+       
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        width: '90%',
+        maxWidth: MAX_WIDTH,
+        
+        paddingVertical: 40,
+        marginTop: '5%',
+        marginBottom: '5%',
         backgroundColor: '#fff',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     header:{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: 30,
     },
 
     inputContainer: {
-        width: '80%',
+        width: '100%',
         marginBottom: 20,
         alignItems: 'center',
-        gap: 10,
+        paddingHorizontal: 20,
+        gap: 15,
+    },
+
+    inputWrapper: {
+        width: '100%',
     },
 
     input: {
         backgroundColor: '#f3f3f5',
         borderRadius: 10,
-        padding: 20,
-        marginVertical: 5,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        marginTop: 5,
         width: '100%',
-        height: 50,
+        height: 45,
     },
     loginButton: {
-        backgroundColor: '#000',
+        backgroundColor: '#007AFF',
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
-        marginBottom: 10,
-        width: '80%',
+        marginTop: 10,
+        marginBottom: 15,
+        width: '90%',
     },
     
 });
@@ -72,13 +88,18 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
 
     const handleLogIn = async () => {
         try {
-            await login(
+            const user = await login(
                 {username: email, 
                     password: password}
             );
-            console.log("login exitoso");
-            //TODO navegar a dahsboard
-            //TODo error handling
+
+            if(user?.role == 'admin'){
+                navigation.navigate('UserList');
+            }
+
+
+           
+           
         } catch (error) {
             console.error('Error during login:', error);
         }   
@@ -107,12 +128,12 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                 <Pressable style={styles.loginButton} onPress={handleLogIn}>
                     <Text style={{ color: '#fff' }}>Iniciar Sesión</Text>
                 </Pressable>
-                <Pressable onPress={() => { /* Lógica para recuperar contraseña */ }}>
+                <Pressable style={{marginBottom:20}} onPress={() => { /* Lógica para recuperar contraseña */ }}>
                     <Text>¿Olvidaste tu contraseña?</Text>
                 </Pressable>
             </View>
 
-            <BackButton width={215} height={76} alignSelf='center' />
+            <BackButton width={130} height={50} alignSelf='center' />
         </View>
         
     )

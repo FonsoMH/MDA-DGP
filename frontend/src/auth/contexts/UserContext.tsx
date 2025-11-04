@@ -6,8 +6,8 @@ import { useAccessibilitySettings } from "../../accessibilitySettings/hooks/useA
 
 interface UserContextType {
     user: StudentLogin | null,
-    login: (user: LoginCredentials) => Promise<boolean>,
-    logout:  (() => {}),
+    login: (user: LoginCredentials) => Promise<StudentLogin | null>,
+    logout: () => void,
 }
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -24,36 +24,37 @@ export function UserProvider({ children }: UserProviderProps) {
 
     const [user, setUser] = useState<StudentLogin | null>(null);
 
-    const { getSettings } = useAccessibilitySettings();
+    const { getSettings } = useAccessibilitySettings(); 
     
-    const login = useCallback(async (credentials: LoginCredentials) => {
+    const login = useCallback(async (credentials: LoginCredentials): Promise<StudentLogin | null> => {
         try {
             const result: AuthResponse = await performLogin(credentials);
-            setUser(result.user);
+            const loggedInUser = result.user;
 
-            if(result.user.role == 'student' && getSettings){
-                await getSettings(result.user.id);
+            setUser(loggedInUser);
+
+            if(loggedInUser.role === 'student' && getSettings){
+                await getSettings(loggedInUser.id);
             }
             
-            
-            return true; 
+
+            return loggedInUser; 
             
         } catch (err: any) {
             console.error("Login hook error:", err.message);
             setUser(null);
-            return false;
+            return null;
         }
-    }, []);
+    }, [getSettings]);
 
     
-    async function logout() {
+    const logout = useCallback(async () => {
         setUser(null);
-    }
+    }, []); 
 
     return (
         <UserContext.Provider value={{ user, login, logout }}>
             {children}
         </UserContext.Provider>
     );
-
 }
