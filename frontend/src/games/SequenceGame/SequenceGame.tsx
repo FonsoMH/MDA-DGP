@@ -32,8 +32,7 @@ function SequenceGame() {
             backgroundColor: accessibilitySettings.backgroundColor,
             alignItems: 'center',
             paddingHorizontal: 20,
-            paddingVertical: 10,
-            margin: 20
+            paddingVertical: 30,
         },
 
         header: {

@@ -27,8 +27,8 @@ function TapNumberGame() {
             flex: 1,
             backgroundColor: accessibilitySettings.backgroundColor,
             alignItems: 'center',
-            padding: 20,
-            margin: 20
+            paddingVertical: 30,
+            paddingHorizontal: 20
         },
     
         imageWrapper: {
@@ -106,7 +106,7 @@ function TapNumberGame() {
     return (
         
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76}></BackButton>
+            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
             <TouchableOpacity onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
                 <Image
                 source={require('../../../assets/icons/listen.png')}

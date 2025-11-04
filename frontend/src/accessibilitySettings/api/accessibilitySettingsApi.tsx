@@ -1,9 +1,8 @@
 import axios from "axios";
 import { AccessibilitySettingsApiData, AccessibilitySettingsFrontend } from "../../types/accessibility";
-import Constants from 'expo-constants'; 
 
-const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
-const API_TIMEOUT = Constants.expoConfig?.extra?.API_TIMEOUT;
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_TIMEOUT = process.env.API_TIMEOUT;
 
 export const DEFAULT_CONFIG = {
     backgroundColor: "#F7F8FA",
@@ -39,8 +38,6 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
             showNumbers: configData.show_numbers,
             fontSize: configData.font_size,
         };
-
-        console.log(mappedConfig);
         
         
         return mappedConfig;

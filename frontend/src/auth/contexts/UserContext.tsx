@@ -31,11 +31,8 @@ export function UserProvider({ children }: UserProviderProps) {
             const result: AuthResponse = await performLogin(credentials);
             setUser(result.user);
 
-            console.log(result.user);
-
             if(result.user.role == 'student' && getSettings){
                 await getSettings(result.user.id);
-                console.log(`Cargando ajustes de accesibilidad para el estudiante ID: ${result.user.id}`);
             }
             
             
@@ -49,9 +46,8 @@ export function UserProvider({ children }: UserProviderProps) {
     }, []);
 
     
-    //TODO logout
     async function logout() {
-        
+        setUser(null);
     }
 
     return (

@@ -54,8 +54,7 @@ export default function GameMenuScreen({ navigation }: Props) {
             backgroundColor: accessibilitySettings.backgroundColor,
             alignItems: 'center',
             paddingHorizontal: 20,
-            paddingVertical: 10,
-            margin:20
+            paddingVertical: 30,
         },
         
         gridContainer: {
@@ -99,7 +98,7 @@ export default function GameMenuScreen({ navigation }: Props) {
 
     return (
         <View style={styles.safe}>
-			<BackButton width={215} height={76} />
+			<BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}/>
                 <View style={styles.gridContainer}>
                     {GAMES.map((item) => (
                         <Pressable
