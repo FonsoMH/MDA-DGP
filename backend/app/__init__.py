@@ -33,6 +33,12 @@ def create_app():
     from . import games
     app.register_blueprint(games.bp)
 
+    from . import auth
+    app.register_blueprint(auth.auth_bp)
+
+    from .accessibilitySettings import accessibility_settings_bp
+    app.register_blueprint(accessibility_settings_bp)
+
     from .users.teacher import teacher_bp
     app.register_blueprint(teacher_bp)
 
