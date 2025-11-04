@@ -19,11 +19,12 @@ export default function HomeScreen({ navigation }: HomeProps) {
         onPress={() => navigation.navigate('GameMenu')} 
       />
       <Button
-        title="Ir a Detalles del Producto (ID 42)"
-        onPress={() => navigation.navigate('Details', { itemId: 42 })} 
+        title="Ir a Pantalla de Login"
+        onPress={() => navigation.navigate('Login')} 
       />
       <Button
-        title="Intentar ir a Details sin parámetro"
+        title="Crear Tutor"
+        onPress={() => navigation.navigate('TeacherCreate')}
       />
       <View style={{ height: 12 }} />
       <Button

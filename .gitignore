@@ -15,10 +15,14 @@ __pycache__/
 venv/
 .env
 .env.local
+.env.development
+.env.production
 *.log
 
 # Docker
 *.env.backup
+.env.development
+.env.production
 pgdata/
 
 # IDEs

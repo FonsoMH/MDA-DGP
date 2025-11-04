@@ -5,9 +5,7 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
-from .students import bp as students_bp
-from .general_users import users_bp
-from .game_config import config_bp
+
 
 load_dotenv()  # carga las variables del .env
 
@@ -27,22 +25,30 @@ def create_app():
     init_app(app)
     with app.app_context():
         init_db()
+    
+    from . import feedback
+    app.register_blueprint(feedback.bp)
 
-    # Registrar blueprints
-    app.register_blueprint(students_bp)
-    app.register_blueprint(users_bp)
-    # Register blueprints
-    app.register_blueprint(config_bp)
+    from . import games
+    app.register_blueprint(games.bp)
+
+    from . import auth
+    app.register_blueprint(auth.auth_bp)
+
+    from .accessibilitySettings import accessibility_settings_bp
+    app.register_blueprint(accessibility_settings_bp)
 
     from .users.teacher import teacher_bp
     app.register_blueprint(teacher_bp)
 
-    @app.route("/hello")
-    def hello():
-        cur = get_db_cursor()
-        cur.execute("SELECT user_id, name FROM users")
-        rows = cur.fetchall()
-        cur.close()
-        return jsonify(rows)
+    from .users.students import students_bp
+    app.register_blueprint(students_bp)
+
+    from .users.admin import admin_bp
+    app.register_blueprint(admin_bp)
+
+    from . import general_users
+    app.register_blueprint(general_users.bp)
+    
 
     return app
