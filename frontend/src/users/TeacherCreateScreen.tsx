@@ -15,7 +15,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
 import Constants from 'expo-constants'; 
 
-const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_TIMEOUT = process.env.API_TIMEOUT;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TeacherCreate'>;
 
@@ -42,6 +43,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
       setLoading(true);
       const res = await axios.get(`${BASE_URL}/api/students`, {
         params: { page: p, page_size: pageSize },
+        timeout: +API_TIMEOUT
       });
 
       const data = res.data || [];
