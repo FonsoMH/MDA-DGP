@@ -18,6 +18,10 @@ export default function HomeScreen({ navigation }: HomeProps) {
         title="Ir a Pantalla de Login"
         onPress={() => navigation.navigate('Login')} 
       />
+      <Button
+        title="Crear Tutor"
+        onPress={() => navigation.navigate('TeacherCreate')}
+      />
     </View>
   );
 }

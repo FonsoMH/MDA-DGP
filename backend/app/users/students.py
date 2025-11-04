@@ -6,6 +6,70 @@ from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check
 
 students_bp = Blueprint('students', __name__)
 
+@students_bp.route('/api/students/no_teacher', methods=['GET'])
+def get_students_without_teacher():
+    cur = None
+    try:
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 10))
+        # if page < 1:
+        #     page = 1
+        # if page_size < 1:
+        #     page_size = 10
+        # offset = (page - 1) * page_size
+        offset = (page - 1) * page_size
+
+        cur = get_db_cursor()
+
+        cur.execute("SELECT role_id FROM roles WHERE role_name = %s", ('student',))
+        role_row = cur.fetchone()
+
+        student_role_id = role_row['role_id']
+
+        cur.execute("SELECT COUNT(*) AS count FROM users WHERE role_id = %s AND assigned_teacher_id IS NULL", (student_role_id,))
+        total_row = cur.fetchone()
+        total_count = total_row['count'] if total_row else 0
+
+        
+        cur.execute("""
+            SELECT user_id, name, email
+            FROM users
+            WHERE role_id = %s AND assigned_teacher_id IS NULL
+            ORDER BY name ASC
+            LIMIT %s OFFSET %s
+        """, (student_role_id, page_size, offset))
+
+        rows = cur.fetchall()
+
+        
+        students = [
+            {
+                'id': row['user_id'],
+                'name': row['name'],
+                'email': row['email']
+            }
+            for row in rows
+        ]
+
+        total_pages = (total_count + page_size - 1) // page_size if total_count else 0
+
+        return jsonify({
+            'items': students,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'current_page': page
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except Exception:
+                pass
+
+
 #TODO : Poner aquí el create_student cuando se haga merge de la gestion de students
 
 @students_bp.route('/api/students/<int:user_id>', methods=['PUT'])
@@ -118,3 +182,40 @@ def get_students():
     except Exception as e:
         print(f"Error al listar estudiantes: {e}")
         return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
+
+
+
+@students_bp.route('/api/students/<int:user_id>/teacher', methods=['GET'])
+def get_teacher_by_student(user_id):
+    cur = get_db_cursor()
+    try:
+        cur.execute("SELECT user_id, name, email, assigned_teacher_id FROM users WHERE user_id = %s", (user_id,))
+        student = cur.fetchone()
+        if not student:
+            return jsonify({'error': 'Student not found.'}), 404
+
+        assigned_teacher_id = student['assigned_teacher_id']
+        if not assigned_teacher_id:
+            return jsonify({'error': 'Student is not assigned to any teacher.'}), 404
+
+        cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (assigned_teacher_id,))
+        teacher = cur.fetchone()
+        if not teacher:
+            return jsonify({'error': 'Teacher not found.'}), 404
+
+        return jsonify({
+            'student': {
+                'id': user_id
+            },
+            'teacher': {
+                'id': teacher['user_id'],
+                'name': teacher['name'],
+                'email': teacher['email']
+            }
+        }), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching teacher for student {user_id}: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()

@@ -10,6 +10,7 @@ import LoginScreen from '../auth/screens/LoginScreen';
 import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
 import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
 import TeacherLoginScreen from '../auth/screens/TeacherLoginScreen';
+import TeacherCreateScreen from '../users/TeacherCreateScreen';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -78,6 +79,15 @@ export default function AppNavigator() {
           title: 'Lista de Usuarios',
           headerShown: false
         }} 
+      />
+
+      <Stack.Screen
+        name="TeacherCreate"
+        component={TeacherCreateScreen}
+        options={{
+          title: 'Crear Tutor',
+          headerShown: false
+        }}
       />
 
       

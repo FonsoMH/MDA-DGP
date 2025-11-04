@@ -49,15 +49,15 @@ def create_teacher():
 
         # Actualizar alumnos asignados (si hay)
         if assigned_students_ids:
-            update_query = sql.SQL("""
+            cur.execute("""
                 UPDATE users
                 SET assigned_teacher_id = %s
-                WHERE user_id = ANY(%s);
-            """)
-            cur.execute(update_query, (new_teacher_id, assigned_students_ids))
+                WHERE user_id IN %s;
+            """, (new_teacher_id, tuple(assigned_students_ids)))
+            print(f"Assigned students {assigned_students_ids} to teacher {new_teacher_id}")
 
         # Confirmar la transacción
-        cur.execute("COMMIT;")
+        cur.connection.commit()
 
         return jsonify({
             'id': new_teacher_id,
@@ -68,7 +68,7 @@ def create_teacher():
 
     except Exception as e:
         try:
-            cur.execute("ROLLBACK;")
+            cur.connection.rollback()
         except:
             pass
         current_app.logger.error(f"Error creating teacher: {e}")
@@ -153,6 +153,45 @@ def delete_teacher(user_id):
     except Exception as e:
         commit_or_rollback(cur, False)
         current_app.logger.error(f"Error deleting teacher {user_id}: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()
+
+
+@teacher_bp.route('/api/teachers/<int:user_id>/students', methods=['GET'])
+def get_assigned_students_by_teacher(user_id):
+    cur = get_db_cursor()
+    try:
+        cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (user_id,))
+        teacher = cur.fetchone()
+        if not teacher:
+            return jsonify({'error': 'Teacher not found.'}), 404
+
+        cur.execute("""
+            SELECT user_id, name, email
+            FROM users
+            WHERE assigned_teacher_id = %s
+            ORDER BY name ASC
+        """, (user_id,))
+        students = cur.fetchall()
+
+        students_list = [{
+            'id': s['user_id'],
+            'name': s['name'],
+            'email': s['email']
+        } for s in students]
+
+        return jsonify({
+            'teacher': {
+                'id': teacher['user_id'],
+                'name': teacher['name'],
+                'email': teacher['email']
+            },
+            'students': students_list
+        }), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching students for teacher {user_id}: {e}")
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()

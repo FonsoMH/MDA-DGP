@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, ActivityIndicator, Alert } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
 
 import BackButton from '../components/common/BackButton/BackButton';
 import StateCard from '../components/users/StateCard';
@@ -9,10 +9,17 @@ import UserCard, { User } from '../components/users/UserCard';
 import { useUsers } from './hook/useUserList';  
 import { UserFrontend } from '../types/users';
 
-export default function UserListScreen() {
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
+
+type UserListProps = NativeStackScreenProps<RootStackParamList, 'UserList'>;
+
+export default function UserListScreen({ navigation }: UserListProps) { 
   const { users, isLoading } = useUsers();
   const [filteredUsers, setFilteredUsers] = useState<UserFrontend[]>([]);
   const [filter, setFilter] = useState<FilterOption>('todos');
+
+  const [showMenu, setShowMenu] = useState(false);
 
   const roleMap: Record<FilterOption, string | null> = {
     todos: null,
@@ -34,7 +41,7 @@ export default function UserListScreen() {
     users.filter(u => u.role === role).length;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <View style={styles.container} >
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
@@ -77,7 +84,29 @@ export default function UserListScreen() {
           />
         ))
       )}
-    </ScrollView>
+
+      {showMenu && (
+          <View style={styles.menuContainer}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('AdminCreate'); }}>
+              <Text style={styles.menuText}>Crear Administrador</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('TeacherCreate'); }}>
+              <Text style={styles.menuText}>Crear Tutor</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('StudentCreate'); }}>
+              <Text style={styles.menuText}>Crear Estudiante</Text>
+          </TouchableOpacity>
+      </View>
+      )}
+
+      <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setShowMenu(!showMenu)}
+      >
+          <Text style={styles.fabText}>{showMenu ? '✕' : '+'}</Text>
+      </TouchableOpacity>
+    </View>
+    
   );
 }
 
@@ -97,5 +126,46 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     textAlign: 'center',
+  },
+
+  fab: {
+      position: 'absolute',
+      width: 60,
+      height: 60,
+      alignItems: 'center',
+      justifyContent: 'center',
+      right: 30,
+      bottom: 50,
+      backgroundColor: '#007AFF',
+      borderRadius: 30,
+      elevation: 8,
+      shadowColor: '#000',
+      shadowOpacity: 0.3,
+      shadowOffset: { width: 0, height: 4 },
+  },
+  fabText: {
+      fontSize: 30,
+      color: 'white',
+      lineHeight: 30,
+  },
+
+  menuContainer: {
+      position: 'absolute',
+      right: 30,
+      bottom: 100,
+      backgroundColor: 'white',
+      borderRadius: 8,
+      padding: 10,
+      elevation: 8,
+      shadowColor: '#000',
+      shadowOpacity: 0.2,
+  },
+  menuItem: {
+      paddingVertical: 8,
+      paddingHorizontal: 15,
+  },
+  menuText: {
+      fontSize: 16,
+      color: '#333',
   },
 });

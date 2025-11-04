@@ -2,11 +2,7 @@ export type RootStackParamList = {
   Home: undefined; 
   GameMenu: undefined;
 
-  TapNumberGame: undefined;
-
   UserList: undefined;
-
-  SequenceGame: undefined;
 
   Games: NavigatorScreenParams<GameStackParamList>; 
 
@@ -19,6 +15,10 @@ export type RootStackParamList = {
   StudentPassword: { userParam: StudentLogin };
 
   TeacherLogin: undefined;
+
+  AdminCreate: undefined;
+  TeacherCreate: undefined;
+  StudentCreate: undefined;
   
   // Resto de rutas
 };
