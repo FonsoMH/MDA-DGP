@@ -65,7 +65,7 @@ export default function UserListScreen() {
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
-        <BackButton width={100} height={40} />
+        <BackButton width={215} height={76} />
       </View>
 
       {/* Stats */}
