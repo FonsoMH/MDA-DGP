@@ -6,6 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import StudentCreateScreen from '../students/StudentCreateScreen';
 import GameMenuScreen from '../games/gameMenuScreen';
+import StudentGameConfigScreen from '../screens/StudentGameConfigScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -48,6 +49,14 @@ export default function AppNavigator() {
           title: 'Crear Estudiante',
           headerShown: false,
         }}
+      />
+      <Stack.Screen 
+        name="StudentGameConfig" 
+        component={StudentGameConfigScreen} 
+        options={{ 
+          title: 'Configurar juegos',
+          headerShown: true 
+        }} 
       />
       {/** Pantalla alternativa eliminado: GameSelected */}
     </Stack.Navigator>
