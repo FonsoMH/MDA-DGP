@@ -1,5 +1,4 @@
 import { createContext , useState} from "react";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 export const AccessibilitySettingsContext = createContext();
 
@@ -12,7 +11,6 @@ export function AccessibilitySettingsProvider({ children }) {
     
 
     }
-
 
     return (
         <AccessibilitySettingsContext.Provider
