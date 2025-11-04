@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { fetchUsers } from "../api/userApi";
 import { UserFrontend } from "../../types/users";
+import { useFocusEffect } from "@react-navigation/native";
 
 /**
  * Custom Hook para cargar y manejar la lista de usuarios.
@@ -10,16 +11,34 @@ export function useUsers() {
   const [users, setUsers] = useState<UserFrontend[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      setIsLoading(true);
-      const data = await fetchUsers();
-      setUsers(data);
-      setIsLoading(false);
-    };
+  // useEffect(() => {
+  //   const loadUsers = async () => {
+  //     setIsLoading(true);
+  //     const data = await fetchUsers();
+  //     setUsers(data);
+  //     setIsLoading(false);
+  //   };
 
-    loadUsers();
+  //   loadUsers();
+  // }, []);
+
+  const loadUsersData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+        const data = await fetchUsers();
+        setUsers(data);
+    } catch (error) {
+        console.error("Error al cargar usuarios:", error);
+    } finally {
+        setIsLoading(false);
+    }
   }, []);
 
-  return { users, isLoading };
+  useFocusEffect(
+      useCallback(() => {
+          loadUsersData();
+      }, [loadUsersData])
+  );
+
+  return { users, isLoading , refetch: loadUsersData};
 }

@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
+import PasswordInput from '../components/common/PasswordInput/PasswordInput';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
@@ -74,7 +75,6 @@ export default function TeacherCreateScreen({ navigation }: Props) {
         password: password.trim(),
         assigned_students_ids: selectedIds,
       };
-      console.log(selectedIds);
       await axios.post(`${BASE_URL}/api/teachers`, payload);
       alert('Tutor creado correctamente');
       navigation.goBack();
@@ -111,12 +111,10 @@ export default function TeacherCreateScreen({ navigation }: Props) {
           />
 
           <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            value={password}
-            onChangeText={setPassword}
-            placeholder="••••••"
+          <PasswordInput
             style={styles.input}
-            secureTextEntry
+            onChangeText={setPassword}
+            value={password}
           />
         </View>
 
