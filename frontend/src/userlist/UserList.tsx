@@ -38,7 +38,7 @@ export default function UserListScreen() {
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
-        <BackButton width={215} height={76} />
+        <BackButton width={130} height={50} />
       </View>
 
       {/* Stats */}
@@ -82,7 +82,7 @@ export default function UserListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA', padding: 16 },
+  container: { flex: 1, backgroundColor: '#F7F8FA', padding: 30 },
   headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   headerTitle: { fontSize: 24, fontWeight: '700', color: '#101828' },
   statsRow: { flexDirection: 'row', marginBottom: 16, flexWrap: 'wrap' },

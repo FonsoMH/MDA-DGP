@@ -1,11 +1,8 @@
 import axios from "axios";
 import { UserFrontend, UserApiData } from "../../types/users";
 
-//const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL || 'http://localhost:5000';
-//const API_TIMEOUT = Constants.expoConfig?.extra?.API_TIMEOUT;
-
-const BASE_URL = "http://localhost:5000";
-const API_TIMEOUT = 3000;
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_TIMEOUT = process.env.API_TIMEOUT;
 
 
 /**
