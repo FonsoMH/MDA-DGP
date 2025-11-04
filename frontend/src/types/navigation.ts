@@ -5,6 +5,8 @@ export type RootStackParamList = {
 
   TapNumberGame: undefined;
 
+  TeacherCreate: undefined;
+
   
   // Resto de rutas
 };
