@@ -4,6 +4,8 @@ import { View, Text, Button } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
 
+console.log("API base url:", process.env.REACT_APP_API_BASE_URL);
+
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: HomeProps) { 
@@ -16,6 +18,14 @@ export default function HomeScreen({ navigation }: HomeProps) {
       />
       <Button
         title="Intentar ir a Details sin parámetro"
+      />
+      <Button
+        title="Crear Nuevo Estudiante"
+        onPress={() => navigation.navigate('CreateStudent')} 
+      />
+      <Button
+        title="Ver Usuarios de Prueba"
+        onPress={() => navigation.navigate('TestUsers')} 
       />
     </View>
   );

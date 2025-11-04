@@ -4,6 +4,8 @@ export type RootStackParamList = {
   Details: { itemId: number };
   
   // Resto de rutas
+  CreateStudent: undefined;
+  TestUsers: undefined;
 };
 
 // 2. Definir el tipo para el objeto 'navigation'
