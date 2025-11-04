@@ -30,12 +30,16 @@ def create_app():
     from . import feedback
     app.register_blueprint(feedback.bp)
 
+    from . import users
+    app.register_blueprint(users.bp)
 
     from . import games
     app.register_blueprint(games.bp)
 
     from . import accessibility
     app.register_blueprint(accessibility.bp)
+    
+
 
     # Registrar blueprints
 
