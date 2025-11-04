@@ -17,6 +17,10 @@ export default function HomeScreen({ navigation }: HomeProps) {
         onPress={() => navigation.navigate('Details', { itemId: 42 })} 
       />
       <Button
+        title="Ir a Juego 1"
+        onPress={() => navigation.navigate('TapNumberGame')} 
+      />
+      <Button
         title="Intentar ir a Details sin parámetro"
       />
       <Button

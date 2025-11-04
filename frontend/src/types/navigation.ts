@@ -2,6 +2,9 @@ export type RootStackParamList = {
   Home: undefined; 
 
   Details: { itemId: number };
+
+  TapNumberGame: undefined;
+
   
   // Resto de rutas
   CreateStudent: undefined;
