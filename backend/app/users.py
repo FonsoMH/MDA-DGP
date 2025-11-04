@@ -39,18 +39,30 @@ def get_users():
         """)
 
     rows = cur.fetchall()
-    cur.close()
 
-    users = [
-        {
+    users = []
+    for row in rows:
+        user_dict = {
             'id': row['user_id'],
             'name': row['name'],
             'email': row['email'],
             'role': row['role_name']
         }
-        for row in rows
-    ]
 
+        # If user is a teacher, fetch assigned students
+        if row['role_name'] == 'teacher':
+            cur.execute("""
+                SELECT name FROM users
+                WHERE assigned_teacher_id = %s
+                ORDER BY name
+            """, (row['user_id'],))
+            students = cur.fetchall()
+            user_dict['assignedStudents'] = [s['name'] for s in students]
+            user_dict['studentsCount'] = len(students)
+
+        users.append(user_dict)
+    
+    cur.close()
     return jsonify(users)
 
 @bp.route('/users/<int:user_id>', methods=['DELETE'])
