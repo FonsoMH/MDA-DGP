@@ -21,6 +21,10 @@ export default function HomeScreen({ navigation }: HomeProps) {
       <Button
         title="Intentar ir a Details sin parámetro"
       />
+      <Button
+        title="Crear Tutor"
+        onPress={() => navigation.navigate('TeacherCreate')}
+      />
     </View>
   );
 }
