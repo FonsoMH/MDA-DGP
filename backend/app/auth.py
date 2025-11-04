@@ -19,11 +19,6 @@ def login():
     data = request.get_json()
     email = data.get('username')
     submitted_password = data.get('password')
-
-    eje = generate_password_hash(submitted_password)
-
-    print("holaaaa")
-    print(eje)
     
     if not email or not submitted_password:
         return jsonify({
