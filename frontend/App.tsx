@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 });
 import LoginScreen from './src/screens/LoginScreen';
 import { UserProvider } from './src/contexts/UserContext';
-import { AccessibilitySettingsProvider } from './src/contexts/AccesibilitySettingsContext';
+import { AccessibilitySettingsProvider } from './src/accessibilitySettings/contexts/AccessibilitySettingsContext';
 
 
 export default function App() {

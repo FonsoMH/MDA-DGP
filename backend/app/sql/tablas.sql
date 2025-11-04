@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS games (
 -- Accessibility Settings (1-to-1 with Student)
 CREATE TABLE IF NOT EXISTS accessibility_settings (
     student_id INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    background_color VARCHAR(7) DEFAULT '#D9D9D9',
+    background_color VARCHAR(7) DEFAULT '#F7F8FA',
     foreground_color VARCHAR(7) DEFAULT '#000000',
     icon_position VARCHAR(10) DEFAULT 'izquierda' CHECK (icon_position IN ('izquierda', 'derecha')),
     high_contrast_mode BOOLEAN DEFAULT false,
