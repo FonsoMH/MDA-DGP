@@ -13,7 +13,7 @@ import {
 import axios from 'axios';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
-import { API_BASE_URL } from '../config';
+
 import { PICTOGRAMS, type Pictogram } from '../pictograms/catalog';
 
 // Route: 'StudentCreate'
@@ -23,6 +23,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'StudentCreate'>;
 const LARGE_SCREEN_BREAKPOINT = 768; // Ancho de un iPad en vertical
 
 type Tutor = { id: number; name: string; email: string };
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 export default function StudentCreateScreen({ navigation }: Props) {
   const [name, setName] = React.useState('');
@@ -63,7 +65,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
     const loadTutors = async () => {
       try {
         setTutorsLoading(true);
-        const res = await axios.get(`${API_BASE_URL}/users`, { params: { role: 'teacher' } });
+        const res = await axios.get(`${BASE_URL}/api/teachers`);
         // Backend devuelve [{ id, name, email, role }]
         const items: Tutor[] = (res.data || []).map((u: any) => ({ id: u.id, name: u.name, email: u.email }));
         setTutors(items);
@@ -107,7 +109,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
         assigned_teacher_id: selectedTutorId,
         avatar: { initials: avatarInitials, color: avatarColor },
       };
-      await axios.post(`${API_BASE_URL}/api/students`, payload);
+      await axios.post(`${BASE_URL}/api/students`, payload);
       alert('Estudiante creado');
       navigation.goBack();
     } catch (e: any) {

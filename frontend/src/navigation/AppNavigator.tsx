@@ -6,7 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import StudentCreateScreen from '../students/StudentCreateScreen';
 import GameMenuScreen from '../games/gameMenuScreen';
-import StudentGameConfigScreen from '../screens/StudentGameConfigScreen';
+import StudentGameConfigScreen from '../students/StudentGameConfigScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 

@@ -5,12 +5,9 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
-<<<<<<< HEAD
 from .students import bp as students_bp
-from .users import users_bp
-=======
+from .general_users import users_bp
 from .game_config import config_bp
->>>>>>> 04b0d2b (Configuracion funcionando)
 
 load_dotenv()  # carga las variables del .env
 
@@ -31,14 +28,14 @@ def create_app():
     with app.app_context():
         init_db()
 
-<<<<<<< HEAD
     # Registrar blueprints
     app.register_blueprint(students_bp)
     app.register_blueprint(users_bp)
-=======
     # Register blueprints
     app.register_blueprint(config_bp)
->>>>>>> 04b0d2b (Configuracion funcionando)
+
+    from .users.teacher import teacher_bp
+    app.register_blueprint(teacher_bp)
 
     @app.route("/hello")
     def hello():
