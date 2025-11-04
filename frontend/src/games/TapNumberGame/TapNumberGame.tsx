@@ -22,9 +22,6 @@ function TapNumberGame() {
 
     const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
         
-        console.log(maxRange);
-        
-        
         const newTarget = getRandomNumber(maxRange);
         const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
         

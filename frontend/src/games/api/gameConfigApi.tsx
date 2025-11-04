@@ -27,8 +27,6 @@ export async function fetchGameConfiguration( studentId: number, gameId: number 
     const endpoint = `${BASE_URL}/games/students/${studentId}/config/${gameId}`;
 
     try {
-
-        console.log(`fetching from ${endpoint}`);
         
         const response = await axios.get<GameConfigApiData>(endpoint, { 
             timeout: +API_TIMEOUT 

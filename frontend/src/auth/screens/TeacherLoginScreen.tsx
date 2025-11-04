@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { View ,Text , StyleSheet, Pressable , TextInput} from 'react-native';
 import { useUser } from '../../hooks/useUser';
+import BackButton from '../../components/common/BackButton/BackButton';
 
 
 
@@ -86,6 +87,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
  
     return (
         <View style={styles.container}>
+            
             <View style={styles.header}>
                 <Text style={{ fontWeight: 'bold', fontSize: 24 }}>Acceso Docente</Text>
                 <Text style={{ marginBottom: 20 , color: '#999'}}>Ingresa tus credenciales</Text>
@@ -110,6 +112,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                 </Pressable>
             </View>
 
+            <BackButton width={215} height={76} alignSelf='center' />
         </View>
         
     )
