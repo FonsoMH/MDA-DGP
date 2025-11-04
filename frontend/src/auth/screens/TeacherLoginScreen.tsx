@@ -3,6 +3,8 @@ import * as React from 'react';
 import { View ,Text , StyleSheet, Pressable , TextInput} from 'react-native';
 import { useUser } from '../../hooks/useUser';
 import BackButton from '../../components/common/BackButton/BackButton';
+import { useState } from 'react';
+import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
 const MAX_WIDTH = 450;
 
@@ -122,7 +124,11 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                     </View>
                     <View style={{ width: '100%'}} >
                         <Text>Contraseña</Text>
-                        <TextInput placeholder="" secureTextEntry style={styles.input} onChangeText={handlePasswordChange} />
+                        <PasswordInput
+                            style={styles.input}
+                            onChangeText={handlePasswordChange}
+                            value={password}
+                        />
                     </View>
                 </View>
                 <Pressable style={styles.loginButton} onPress={handleLogIn}>
