@@ -72,3 +72,39 @@ def delete_student(user_id):
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()
+
+
+@students_bp.route('/api/students/<int:user_id>/teacher', methods=['GET'])
+def get_teacher_by_student(user_id):
+    cur = get_db_cursor()
+    try:
+        cur.execute("SELECT user_id, name, email, assigned_teacher_id FROM users WHERE user_id = %s", (user_id,))
+        student = cur.fetchone()
+        if not student:
+            return jsonify({'error': 'Student not found.'}), 404
+
+        assigned_teacher_id = student['assigned_teacher_id']
+        if not assigned_teacher_id:
+            return jsonify({'error': 'Student is not assigned to any teacher.'}), 404
+
+        cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (assigned_teacher_id,))
+        teacher = cur.fetchone()
+        if not teacher:
+            return jsonify({'error': 'Teacher not found.'}), 404
+
+        return jsonify({
+            'student': {
+                'id': user_id
+            },
+            'teacher': {
+                'id': teacher['user_id'],
+                'name': teacher['name'],
+                'email': teacher['email']
+            }
+        }), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching teacher for student {user_id}: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()
