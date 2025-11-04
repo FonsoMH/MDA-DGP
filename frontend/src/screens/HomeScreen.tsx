@@ -15,11 +15,9 @@ export default function HomeScreen({ navigation }: HomeProps) {
         onPress={() => navigation.navigate('GameMenu')}
       />
       <Button
-        title="Ir a la Lista de Usuarios"
-        onPress={() => navigation.navigate('UserList')} 
+        title="Ir a Pantalla de Login"
+        onPress={() => navigation.navigate('Login')} 
       />
-
-      
     </View>
   );
 }

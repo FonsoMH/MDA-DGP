@@ -6,17 +6,23 @@ import HomeScreen from '../screens/HomeScreen';
 import GameMenuScreen from '../games/gameMenuScreen';
 import GameNavigator from './GameNavigator';
 import UserList from '../userlist/UserList';
+import LoginScreen from '../auth/screens/LoginScreen';
+import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
+import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
+import TeacherLoginScreen from '../auth/screens/TeacherLoginScreen';
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
     <Stack.Navigator 
-      initialRouteName="Home"
+      initialRouteName="Login"
       screenOptions={{
             headerShown: false
         }}
     >
+      
       <Stack.Screen 
         name="Home" 
         component={HomeScreen}
@@ -27,7 +33,43 @@ export default function AppNavigator() {
         component={GameMenuScreen}
       />
 
-      <Stack.Screen name="Games" component={GameNavigator} />
+      <Stack.Screen 
+        name="Games" 
+        component={GameNavigator}
+      />
+      
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{
+          title: 'Iniciar Sesión',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="StudentLogin"
+        component={StudentLoginScreen} 
+        options={{
+          title: 'Iniciar Sesión Estudiante',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="StudentPassword"
+        component={StudentPasswordScreen} 
+        options={{
+          title: 'Pantalla de Contraseña Estudiante',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="TeacherLogin"
+        component={TeacherLoginScreen} 
+        options={{
+          title: 'Iniciar Sesión Profesor',
+          headerShown: false
+        }}
+      />
 
       <Stack.Screen 
         name="UserList" 

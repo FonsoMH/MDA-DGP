@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameConfig } from '../hooks/useGameConfig';
 import { DEFAULT_REPEATS } from './gameUtils';
+import { useUser } from '../../hooks/useUser';
 
 /**
  * @file Manages the core game loop and state for a game session.
@@ -29,12 +30,13 @@ import { DEFAULT_REPEATS } from './gameUtils';
  * - `updateScore`: A function to add or subtract points from the score.
  */
 export const useGameManager = (
-    studentId: number, 
     gameId: number, 
     onGameInit: (maxRange: number, optionsCount: number) => void
 ) => {
 
-    const { data: config, isLoading } = useGameConfig(studentId, gameId);
+    const {user} = useUser();
+
+    const { data: config, isLoading } = useGameConfig(user?.id ?? 0, gameId);
     
     const [games, setGames] = useState(1);
     const [modalVisible, setModalVisible] = useState(false);

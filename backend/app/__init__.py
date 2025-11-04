@@ -30,25 +30,23 @@ def create_app():
     from . import feedback
     app.register_blueprint(feedback.bp)
 
-    from . import users
-    app.register_blueprint(users.bp)
-
     from . import games
     app.register_blueprint(games.bp)
 
-    from . import accessibility
-    app.register_blueprint(accessibility.bp)
+    from . import auth
+    app.register_blueprint(auth.auth_bp)
+
+    from .accessibilitySettings import accessibility_settings_bp
+    app.register_blueprint(accessibility_settings_bp)
+
+    from .users.teacher import teacher_bp
+    app.register_blueprint(teacher_bp)
+
+    from .users.students import students_bp
+    app.register_blueprint(students_bp)
+
+    from .users.admin import admin_bp
+    app.register_blueprint(admin_bp)
     
-
-
-    # Registrar blueprints
-
-    @app.route("/hello")
-    def hello():
-        cur = get_db_cursor()
-        cur.execute("SELECT user_id, name FROM users")
-        rows = cur.fetchall()
-        cur.close()
-        return jsonify(rows)
 
     return app

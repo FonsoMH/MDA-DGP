@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
 import BackButton from '../../components/common/BackButton/BackButton';
@@ -8,21 +8,75 @@ import { playTTS } from '../../components/ttsListener';
 import { generateOptionsWithTarget, getRandomNumber } from '../utils/gameUtils';
 import { useGameManager } from '../utils/gameManager';
 import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
+import { useUser } from '../../hooks/useUser';
+import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useAccessibilitySettings';
 
 
-//TODO esto deberia depender de login pero no esta hecho aun
+
 //TODO calcular puntuacion
-const STUDENT_ID = 3; 
 const GAME_ID = 1; 
 
 
 
 function TapNumberGame() {
 
+    const accessibilitySettings = useAccessibilitySettings();
+    
+    const styles = StyleSheet.create({
+        screenContainer: {
+            flex: 1,
+            backgroundColor: accessibilitySettings.backgroundColor,
+            alignItems: 'center',
+            paddingVertical: 30,
+            paddingHorizontal: 20
+        },
+    
+        imageWrapper: {
+            padding: 10,
+            borderRadius: 10,
+        },
+    
+        clickableImage: {
+            width: 155,
+            height: 155,
+            resizeMode: 'contain',
+        },
+    
+        header: {
+            width: '100%',
+            padding: 20,
+            alignItems: 'center',
+        },
+        title: {
+            fontSize: accessibilitySettings.fontSize + 10,
+            fontWeight: '900',
+            color: '#101828',
+            marginBottom: 10,
+        },
+        messageText: {
+            fontSize: accessibilitySettings.fontSize,
+            color: '#333',
+            fontWeight: '500',
+        },
+        optionsGrid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            
+            width: '90%',
+            padding: 10,
+            marginTop: 20,
+        },
+        optionWrapper: {
+            margin: 5, 
+        },
+    });
+
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
 
     const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
+        
         const newTarget = getRandomNumber(maxRange);
         const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
         
@@ -32,7 +86,7 @@ function TapNumberGame() {
         playTTS(newTarget.toString());
     }, []);
 
-    const manager = useGameManager(STUDENT_ID, GAME_ID, initializeGame);
+    const manager = useGameManager(GAME_ID, initializeGame);
 
     const handlePlayAgain = () => {
         manager.resetGame();
@@ -52,7 +106,7 @@ function TapNumberGame() {
     return (
         
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76}></BackButton>
+            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
             <TouchableOpacity onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
                 <Image
                 source={require('../../../assets/icons/listen.png')}
@@ -85,55 +139,5 @@ function TapNumberGame() {
 
     );
 }
-
-const styles = StyleSheet.create({
-    screenContainer: {
-        flex: 1,
-        backgroundColor: '#F7F8FA',
-        alignItems: 'center',
-        padding: 20,
-        margin: 20
-    },
-
-    imageWrapper: {
-        padding: 10,
-        borderRadius: 10,
-    },
-
-    clickableImage: {
-        width: 155,
-        height: 155,
-        resizeMode: 'contain',
-    },
-
-    header: {
-        width: '100%',
-        padding: 20,
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: '900',
-        color: '#101828',
-        marginBottom: 10,
-    },
-    messageText: {
-        fontSize: 18,
-        color: '#333',
-        fontWeight: '500',
-    },
-    optionsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        
-        width: '90%',
-        padding: 10,
-        marginTop: 20,
-    },
-    optionWrapper: {
-        margin: 5, 
-    },
-});
 
 export default TapNumberGame;

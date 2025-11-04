@@ -13,17 +13,23 @@ const queryClient = new QueryClient({
     },
 });
 
+import { AccessibilitySettingsProvider } from './src/accessibilitySettings/contexts/AccessibilitySettingsContext';
+import { UserProvider } from './src/auth/contexts/UserContext';
+
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
+        <AccessibilitySettingsProvider>
+        <UserProvider>
+            <NavigationContainer>
+              <AppNavigator />
+            </NavigationContainer>
+        </UserProvider>
+        </AccessibilitySettingsProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
-
-    
+  
   );
 }
