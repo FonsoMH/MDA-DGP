@@ -10,21 +10,30 @@ import paintIcon from '../../assets/PasswordIcons/paint.png';
 import musicIcon from '../../assets/PasswordIcons/music.png';
 import unknownIcon from '../../assets/PasswordIcons/unknown.png';
 
-const iconList = {
-  star: { name: 'Star', icon: starIcon , slug : 'sT4r_'},
-  apple: { name: 'Apple', icon: appleIcon },
-  car: { name: 'Car', icon: carIcon },
-  dog: { name: 'Dog', icon: dogIcon },
-  house: { name: 'House', icon: houseIcon },
-  book: { name: 'Book', icon: bookIcon },
-  ball: { name: 'Ball', icon: ballIcon },
-  tree: { name: 'Tree', icon: treeIcon },
-  paint: { name: 'Paint', icon: paintIcon },
-  music: { name: 'Music', icon: musicIcon },
-  unknown: { name: 'Unknown', icon: unknownIcon },
-};
+export type Icon = {
+  name: string,
+  icon: any,
+  code?: string
+}
 
-const iconsMap = Object.values(iconList).map(item => { return { name: item.name, icon: item.icon }; });
+export const unknowICon: Icon = { name: 'Unknown', icon: unknownIcon };
 
+const iconList: Icon[] = [
+  { name: 'Estrella', icon: starIcon, code: 'ST4R' },
+  { name: 'Manzana', icon: appleIcon, code: 'APL3' },
+  { name: 'Coche', icon: carIcon, code: 'C4R$' },
+  { name: 'Perro', icon: dogIcon, code: 'D0GZ' },
+  { name: 'Casa', icon: houseIcon, code: 'H0US' },
+  { name: 'Libro', icon: bookIcon, code: 'B00K' },
+  { name: 'Pelota', icon: ballIcon, code: 'B4L!' },
+  { name: 'Árbol', icon: treeIcon, code: 'TR33' },
+  { name: 'Pintura', icon: paintIcon, code: 'PNT1' },
+  { name: 'Música', icon: musicIcon, code: 'MUSC' },
+];
+
+const iconsMap = Object.values(iconList)
+    .map(item => { 
+        return { name: item.name, icon: item.icon, code: item.code }; 
+    });
 export default iconList;
 export { iconsMap };

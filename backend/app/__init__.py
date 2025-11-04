@@ -33,12 +33,15 @@ def create_app():
     from . import games
     app.register_blueprint(games.bp)
 
+    from . import auth
+    app.register_blueprint(auth.auth_bp)
+
     from .login import teacher_login_bp, student_login_bp
     app.register_blueprint(teacher_login_bp)
     app.register_blueprint(student_login_bp)
 
-    from .users.student import get_students
-    app.register_blueprint(get_students)
+    from .users import student
+    app.register_blueprint(student.bp)
 
     @app.route("/hello")
     def hello():

@@ -14,7 +14,7 @@ export type RootStackParamList = {
 
   StudentLogin: undefined;
 
-  StudentPassword: { userId: number , email: string , name: string };
+  StudentPassword: { userParam: StudentLogin };
 
   TeacherLogin: undefined;
   
@@ -24,5 +24,6 @@ export type RootStackParamList = {
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { GameStackParamList } from '../navigation/GameNavigator';
+import { StudentLogin } from './login';
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

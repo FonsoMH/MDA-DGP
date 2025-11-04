@@ -1,6 +1,5 @@
 import { useContext } from "react";
-import { UserContext } from "../contexts/UserContext";
-import { StudentLogin } from '../types/login'; 
+import { UserContext } from "../auth/contexts/UserContext";
 
 export function useUser(){
     const context = useContext(UserContext);

@@ -15,8 +15,6 @@ import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinne
 import DraggableItem from './DraggableItem';
 
 
-//TODO esto deberia depender de login pero no esta hecho aun
-const STUDENT_ID = 3; 
 const GAME_ID = 2; 
 
 //TODO calcular puntuacion
@@ -35,7 +33,7 @@ function SequenceGame() {
         setSelectedNumbers([]);
     }, []);
 
-    const manager = useGameManager(STUDENT_ID, GAME_ID, initializeGame);
+    const manager = useGameManager(GAME_ID, initializeGame);
 
     const topZoneRef = useAnimatedRef<View>();
     const topZoneLayout = useSharedValue<Layout | null>(null);
