@@ -70,7 +70,7 @@ def get_students_without_teacher():
                 pass
 
 
-@bp.route('/api/students', methods=['POST'])
+@students_bp.route('/api/students', methods=['POST'])
 def create_student():
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
