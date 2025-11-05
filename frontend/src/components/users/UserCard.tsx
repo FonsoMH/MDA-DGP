@@ -18,6 +18,7 @@ const BASE_URL = 'http://localhost:5000';
 interface UserCardProps {
   user: User;
   onUserDeleted?: () => void;
+  onEdit?: (user: User) => void;
 }
 
 const roleColors = {
@@ -26,7 +27,7 @@ const roleColors = {
   student: { bg: '#DCFCE7', text: '#016630' },
 };
 
-export default function UserCard({ user, onUserDeleted }: UserCardProps) {
+export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const roleColor = roleColors[user.role];
@@ -139,9 +140,9 @@ export default function UserCard({ user, onUserDeleted }: UserCardProps) {
 
         {/* Buttons */}
         <View style={[styles.cell, { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
-          <TouchableOpacity style={styles.editButton}>
-            <Text style={styles.editText}>Editar</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.editButton} onPress={() => onEdit && onEdit(user)}>
+              <Text style={styles.editText}>Editar</Text>
+            </TouchableOpacity>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
             <Text style={styles.deleteText}>Eliminar</Text>
           </TouchableOpacity>

@@ -7,6 +7,7 @@ import BackButton from '../components/common/BackButton/BackButton';
 import StateCard from '../components/users/StateCard';
 import FilterButtons, { FilterOption } from '../components/users/FilterButtons';
 import UserCard, { User } from '../components/users/UserCard';
+import EditUserForm from '../components/users/EditUserForm';
 
 
 //const BASE_URL = Constants.expoConfig?.extra?.REACT_APP_API_BASE_URL;
@@ -20,6 +21,7 @@ export default function UserListScreen() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterOption>('todos');
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -87,11 +89,20 @@ export default function UserListScreen() {
         <Text style={[styles.listHeaderText, { flex: 1 }]}></Text>
       </View>
 
+      {editingUser && (
+        <EditUserForm
+          user={editingUser}
+          teachers={allUsers.filter(u => u.role === 'teacher').map(t => ({ user_id: t.user_id, name: t.name }))}
+          onClose={() => setEditingUser(null)}
+          onSaved={() => fetchUsers()}
+        />
+      )}
+
       {loading ? (
         <ActivityIndicator size="large" color="#333" style={{ marginTop: 20 }} />
       ) : (
         filteredUsers.map(u => (
-          <UserCard key={u.user_id} user={u} onUserDeleted={fetchUsers} />
+          <UserCard key={u.user_id} user={u} onUserDeleted={fetchUsers} onEdit={(usr) => setEditingUser(usr)} />
         ))
       )}
     </ScrollView>
