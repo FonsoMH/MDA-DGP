@@ -89,7 +89,7 @@ ON CONFLICT (slug) DO NOTHING;
 
 -- 3. Populate Users
 INSERT INTO users (name, email, password_hash, role_id) 
-VALUES ('Anne Admin', 'admin@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'admin'))
+VALUES ('Anne Admin', 'admin@app.com', 'scrypt:32768:8:1$XwpRqEHq2gbnQsiX$29f6167d7863fb4f878d244e0306edce02ebde305a6c24d559d05f87304c7829ea96d4f34ed3928edbf77cedb751b4e5a9aaa73efe1bf2e44f8ce391affb1049', (SELECT role_id FROM roles WHERE role_name = 'admin'))
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO users (name, email, password_hash, role_id) 
