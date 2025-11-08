@@ -1,27 +1,9 @@
 from app.db import get_db_cursor
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash 
+from ..users.user_common import get_user_by_email, get_role_by_id
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
-
-def get_user_by_email(cursor, email):
-    """Obtiene el registro del usuario (incluyendo el hash) basado en el email."""
-    
-    query = "SELECT user_id, name, email, role_id, password_hash FROM users WHERE email = %s;"
-    
-
-    cursor.execute(query, (email,))
-    
-    return cursor.fetchone()
-
-def get_role_by_id(cursor, id_rol):
-    
-    query = "SELECT role_name FROM roles WHERE role_id = %s;"
-    
-
-    cursor.execute(query, (id_rol,))
-    
-    return cursor.fetchone()
 
 @auth_bp.route('/login', methods=['POST'])
 def login():

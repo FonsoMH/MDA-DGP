@@ -32,7 +32,7 @@ def create_app():
     from . import games
     app.register_blueprint(games.bp)
 
-    from . import auth
+    from .login import auth
     app.register_blueprint(auth.auth_bp)
 
     from .accessibilitySettings import accessibility_settings_bp
