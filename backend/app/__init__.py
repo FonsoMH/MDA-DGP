@@ -38,13 +38,13 @@ def create_app():
     from .accessibilitySettings import accessibility_settings_bp
     app.register_blueprint(accessibility_settings_bp)
 
-    from .users.teacher import teacher_bp
+    from .users.teachers import teacher_bp
     app.register_blueprint(teacher_bp)
 
     from .users.students import students_bp
     app.register_blueprint(students_bp)
 
-    from .users.admin import admin_bp
+    from .users.admins import admin_bp
     app.register_blueprint(admin_bp)
 
     from . import general_users
