@@ -25,8 +25,8 @@ def create_app():
     with app.app_context():
         init_db()
     
-    from . import feedback
-    app.register_blueprint(feedback.bp)
+    from .feedback import feedback
+    app.register_blueprint(feedback.feedback_bp)
 
     from . import games
     app.register_blueprint(games.bp)
