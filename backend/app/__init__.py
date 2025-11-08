@@ -47,8 +47,7 @@ def create_app():
     from .users.admins import admin_bp
     app.register_blueprint(admin_bp)
 
-    from . import general_users
-    app.register_blueprint(general_users.bp)
-    
+    from .users.general_users import users_bp
+    app.register_blueprint(users_bp)
 
     return app
