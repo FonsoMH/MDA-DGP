@@ -49,7 +49,6 @@ def update_accessibility(student_id):
     font_size = data.get("font_size", 16)
 
     # --- Validation ---
-
     #TODO no se si las validaciones sobran
     errores = []
 

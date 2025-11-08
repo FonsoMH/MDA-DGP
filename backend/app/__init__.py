@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 
-
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
@@ -35,7 +34,7 @@ def create_app():
     from .login import auth
     app.register_blueprint(auth.auth_bp)
 
-    from .accessibilitySettings import accessibility_settings_bp
+    from .accesibility.accessibilitySettings import accessibility_settings_bp
     app.register_blueprint(accessibility_settings_bp)
 
     from .users.teachers import teacher_bp
