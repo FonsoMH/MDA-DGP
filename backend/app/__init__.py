@@ -28,8 +28,8 @@ def create_app():
     from .feedback import feedback
     app.register_blueprint(feedback.feedback_bp)
 
-    from . import games
-    app.register_blueprint(games.bp)
+    from .games import game_config
+    app.register_blueprint(game_config.config_bp)
 
     from .login import auth
     app.register_blueprint(auth.auth_bp)
