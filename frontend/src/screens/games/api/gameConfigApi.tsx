@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GameConfigFrontend, GameConfigApiData } from "../../types/games";
+import { GameConfigApiData, GameConfigFrontend } from "../../../types/games";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;

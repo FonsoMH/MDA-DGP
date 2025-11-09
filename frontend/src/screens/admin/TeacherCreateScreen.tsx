@@ -3,56 +3,48 @@ import {
   ScrollView,
   View,
   Text,
-  TextInput,
   Pressable,
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import axios from 'axios';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
+import { useCreateTeacher } from './hook/useCreateTeacher';
+import { useStudentPagination } from './hook/useStudentpagination';
+import BasicCredentialsForm from './components/BasicCredentialsForm';
+import { useForm } from 'react-hook-form';
+import { CredentialsData, credentialsSchema } from '../../types/validationSchemas';
+import { yupResolver } from '@hookform/resolvers/yup';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-const API_TIMEOUT = process.env.API_TIMEOUT;
 
 type Props = NativeStackScreenProps<any, 'TeacherCreate'>;
 
-type Student = { id: number; name: string; email: string };
 
 export default function TeacherCreateScreen({ navigation }: Props) {
-  const [name, setName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [students, setStudents] = React.useState<Student[]>([]);
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
-  const [loading, setLoading] = React.useState(false);
-  const [page, setPage] = React.useState(1);
-  const [totalPages, setTotalPages] = React.useState(1);
 
-  const pageSize = 10;
+  const { 
+        control,
+        handleSubmit,
+        formState: { errors, isSubmitting: isFormValidating }
+    } = useForm({
+        resolver: yupResolver(credentialsSchema),
+        defaultValues: { 
+            name: '', 
+            email: '', 
+            password: '',
+        },
+        mode: 'onBlur',
+    });
 
-  React.useEffect(() => {
-    loadStudents(page);
-  }, [page]);
+  const { 
+      students,
+      isLoading: studentsLoading,
+      currentPage,
+      totalPages, 
+      changePage,
+      error 
+  } = useStudentPagination();
 
-  const loadStudents = async (p: number) => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${BASE_URL}/api/students/no_teacher`, {
-        params: { page: p, page_size: pageSize },
-        timeout: +API_TIMEOUT
-      });
-
-      const data = res.data || [];
-      const students = data.items || [];
-      setStudents(students);
-      if (data.total_pages) setTotalPages(data.total_pages);
-    } catch (e) {
-      console.error('Error cargando estudiantes', e);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
@@ -60,72 +52,45 @@ export default function TeacherCreateScreen({ navigation }: Props) {
     );
   };
 
-  const onSubmit = async () => {
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      alert('Todos los campos son obligatorios');
-      return;
-    }
+  const { isSubmitting: isApiSubmitting, onSubmitFrom } = useCreateTeacher();
 
-    try {
-      setLoading(true);
-      const payload = {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password: password.trim(),
-        assigned_students_ids: selectedIds,
-      };
-      await axios.post(`${BASE_URL}/api/teachers`, payload);
-      alert('Tutor creado correctamente');
-      navigation.goBack();
-    } catch (e: any) {
-      console.error(e?.response?.data || e.message);
-      alert('Error creando tutor');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const isTotalSubmitting = isFormValidating || isApiSubmitting; 
+
+  const onSubmitRHF = (data: CredentialsData) => {
+        const payload = {
+            name: data.name,
+            email: data.email,
+            password: data.password ?? '',
+            assigned_students_ids: selectedIds,
+        };
+        
+        onSubmitFrom(payload); 
+        navigation.goBack();
+    };
 
   return (
     <View style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Crear Nuevo Tutor</Text>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Nombre Completo</Text>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Ej: Juan Pérez"
-            style={styles.input}
-          />
-
-          <Text style={styles.label}>Correo Electrónico</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="ejemplo@correo.com"
-            style={styles.input}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-
-          <Text style={styles.label}>Contraseña</Text>
-          <PasswordInput
-            style={styles.input}
-            onChangeText={setPassword}
-            value={password}
-          />
-        </View>
+        <BasicCredentialsForm
+            control={control}
+            userRole='teacher'
+            
+            nameError={errors.name?.message}
+            emailError={errors.email?.message}
+            passwordError={errors.password?.message}
+        />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Asignar Estudiantes</Text>
           <Text style={styles.help}>Selecciona los estudiantes que estarán a cargo del tutor</Text>
 
-          {loading && <ActivityIndicator style={{ marginVertical: 10 }} />}
+          {studentsLoading && <ActivityIndicator style={{ marginVertical: 10 }} />}
 
-          {!loading &&
+          {!studentsLoading &&
             students.map((s) => {
-              const active = selectedIds.includes(s.id);
+              const active = selectedIds.includes(s.id); 
               return (
                 <Pressable
                   key={s.id}
@@ -141,22 +106,21 @@ export default function TeacherCreateScreen({ navigation }: Props) {
               );
             })}
 
-          {/* Paginación */}
           <View style={styles.paginationRow}>
             <Pressable
-              disabled={page <= 1}
-              style={[styles.pageBtn, page <= 1 && { opacity: 0.5 }]}
-              onPress={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1 || studentsLoading}
+              style={[styles.pageBtn, (currentPage <= 1 || studentsLoading) && { opacity: 0.5 }]}
+              onPress={() => changePage(currentPage - 1)}
             >
               <Text style={styles.pageBtnText}>Anterior</Text>
             </Pressable>
             <Text style={styles.pageInfo}>
-              Página {page} de {totalPages}
+              Página {currentPage.toString()} de {totalPages.toString()} 
             </Text>
             <Pressable
-              disabled={page >= totalPages}
-              style={[styles.pageBtn, page >= totalPages && { opacity: 0.5 }]}
-              onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage >= totalPages || studentsLoading}
+              style={[styles.pageBtn, (currentPage >= totalPages || studentsLoading) && { opacity: 0.5 }]}
+              onPress={() => changePage(currentPage + 1)}
             >
               <Text style={styles.pageBtnText}>Siguiente</Text>
             </Pressable>
@@ -168,11 +132,12 @@ export default function TeacherCreateScreen({ navigation }: Props) {
             <Text style={[styles.btnText, styles.btnTextSecondary]}>Cancelar</Text>
           </Pressable>
           <Pressable
-            style={[styles.btn, styles.btnPrimary, loading && { opacity: 0.7 }]}
-            onPress={onSubmit}
-            disabled={loading}
+            style={[styles.btn, styles.btnPrimary, isTotalSubmitting && { opacity: 0.7 }]}
+            onPress={handleSubmit(onSubmitRHF)} // 10. RHF llama a onSubmitRHF si es válido
+            disabled={isTotalSubmitting}
           >
-            <Text style={styles.btnText}>Crear Tutor</Text>
+          <Text style={styles.btnText}>{isApiSubmitting ? 'Guardando...' : 'Crear Tutor'}</Text>    
+          
           </Pressable>
         </View>
       </ScrollView>

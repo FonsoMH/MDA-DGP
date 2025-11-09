@@ -1,9 +1,12 @@
 import axios from "axios";
-import { UserFrontend, UserApiData } from "../../../types/users";
+import { UserFrontend, UserApiData, CreateTeacherPayload, Student, PaginatedResponse } from "../../../types/users";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
+const sleep = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
 
 /**
  * Obtiene todos los usuarios y los mapea al formato frontend.
@@ -31,5 +34,45 @@ export async function fetchUsers(): Promise<UserFrontend[]> {
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     return [];
+  }
+}
+
+export async function loadStudentsApi(page :number, pageSize : number): Promise<PaginatedResponse<Student>> {
+  const endpoint = `${BASE_URL}/api/students/no_teacher`;
+
+  try {
+
+    await sleep(2000);
+
+    const response = await axios.get<PaginatedResponse<Student>>(endpoint, {
+        params: { page: page, page_size: pageSize },
+        timeout: +API_TIMEOUT
+      });
+    const apiData = response.data;
+
+    return apiData;
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    return {
+      current_page: 0,
+      items: [],
+      total_count: 0,
+      total_pages: 0
+    };
+  }
+}
+
+export async function createTeacherApi(payload: CreateTeacherPayload): Promise<void> {
+  const endpoint = `${BASE_URL}/api/teachers`;
+
+  try {
+    const response = await axios.post<any>(endpoint, payload, {
+      timeout: API_TIMEOUT,
+    });
+
+
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+
   }
 }
