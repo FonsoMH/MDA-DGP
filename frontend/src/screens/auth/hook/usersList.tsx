@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { StudentLogin } from '../../types/login';
 import { fetchStudents } from '../api/loginApi';
+import { StudentLogin } from '../../../types/login';
 
 
 interface UseStudentsDataResult {

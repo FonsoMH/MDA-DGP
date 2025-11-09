@@ -2,18 +2,12 @@ import * as React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'; 
 
 import { RootStackParamList } from '../types/navigation';
-import StudentCreateScreen from '../students/StudentCreateScreen';
-import GameMenuScreen from '../games/gameMenuScreen';
-import StudentGameConfigScreen from '../students/StudentGameConfigScreen';
 import GameNavigator from './GameNavigator';
-import UserList from '../userlist/UserList';
-import LoginScreen from '../auth/screens/LoginScreen';
-import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
-import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
-import TeacherLoginScreen from '../auth/screens/TeacherLoginScreen';
-import TeacherCreateScreen from '../users/TeacherCreateScreen';
 import LoginNavigator from './LoginNavigator';
 import AdminNavigator from './AdminNavigator';
+import GameMenuScreen from '../screens/games/gameMenuScreen';
+import LoginScreen from '../screens/auth/screens/LoginScreen';
+import StudentGameConfigScreen from '../screens/teacher/StudentGameConfigScreen';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

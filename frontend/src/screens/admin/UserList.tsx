@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, Pressable } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
 
-import BackButton from '../components/common/BackButton/BackButton';
-import StateCard from '../components/users/StateCard';
-import FilterButtons, { FilterOption } from '../components/users/FilterButtons';
-import UserCard, { User } from '../components/users/UserCard';
+import BackButton from '../../components/common/BackButton/BackButton';
+import StateCard from '../../components/users/StateCard';
+import FilterButtons, { FilterOption } from '../../components/users/FilterButtons';
+import UserCard, { User } from '../../components/users/UserCard';
 
-import { useUsers } from './hook/useUserList';  
-import { UserFrontend } from '../types/users';
+
+import { UserFrontend } from '../../types/users';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AdminStackParamList } from '../../navigation/AdminNavigator';
+import { useUsers } from './hook/useUserList';
 
 type UserListProps = NativeStackScreenProps<any, 'UserList'>;
 
@@ -20,7 +22,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
 
   const [showMenu, setShowMenu] = useState(false);
 
-  const handleNavigation = (screen: string) => {
+  const handleNavigation = (screen: keyof AdminStackParamList) => {
     navigation.navigate('Admin', {
         screen: screen,
     });

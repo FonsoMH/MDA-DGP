@@ -1,9 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StudentLogin } from '../types/login';
-import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
-import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
-import TeacherLoginScreen from '../auth/screens/TeacherLoginScreen';
+import StudentLoginScreen from '../screens/auth/screens/StudentLoginScreen';
+import StudentPasswordScreen from '../screens/auth/screens/StudentPasswordScreen';
+import TeacherLoginScreen from '../screens/auth/screens/TeacherLoginScreen';
 
 export type LoginStackParamList = {
     StudentLogin: undefined;

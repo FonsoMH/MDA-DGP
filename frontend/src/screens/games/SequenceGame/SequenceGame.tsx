@@ -5,15 +5,16 @@ import {
     useSharedValue,
     useAnimatedRef,
 } from 'react-native-reanimated';
-
-import BackButton from '../../components/common/BackButton/BackButton';
-import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
-import FeedbackScreen from '../../components/FeedBack/Feedback';
-import { generateRandomOptions } from '../utils/gameUtils';
+import { useAccessibilitySettings } from '../../../accessibilitySettings/hooks/useAccessibilitySettings';
+import BackButton from '../../../components/common/BackButton/BackButton';
+import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
+import FeedbackScreen from '../../../components/FeedBack/Feedback';
 import { useGameManager } from '../utils/gameManager';
-import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
+import { generateRandomOptions } from '../utils/gameUtils';
 import DraggableItem from './DraggableItem';
-import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useAccessibilitySettings';
+
+
 
 
 const GAME_ID = 2; 

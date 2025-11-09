@@ -1,20 +1,28 @@
+import { useState } from 'react';
 import { View ,Text, StyleSheet, ScrollView } from 'react-native';
 import PasswordItem from '../components/PasswordItem';
-import type { RootStackParamList } from '../../types/navigation';
-import { useUser } from '../../hooks/useUser';
 
-import {Icon, iconsMap, unknowICon} from '../../types/passwordIconList';
-import trashCanIcon from '../../../assets/trash_can.png';
+
+
+import trashCanIcon from '../../../../assets/trash_can.png';
 import TextImageButton from '../components/TextImageButton';
-import paperPlaneIcon from '../../../assets/paper_plane.png';
+import paperPlaneIcon from '../../../../assets/paper_plane.png';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import BackButton from '../../components/common/BackButton/BackButton';
-import { useState } from 'react';
+
+import BackButton from '../../../components/common/BackButton/BackButton';
+import { unknowICon, iconsMap, Icon } from '../../../types/passwordIconList';
+import { LoginStackParamList } from '../../../navigation/LoginNavigator';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackNavigationProp } from '../../../types/navigation';
+import { useUser } from '../../../hooks/useUser';
 
 
-type StudentPasswordProps = NativeStackScreenProps<RootStackParamList, 'StudentPassword'>;
+
+type StudentPasswordProps = NativeStackScreenProps<LoginStackParamList, 'StudentPassword'>;
 
 export default function StudentPasswordScreen({ route, navigation }: StudentPasswordProps){
+
+    const rootNavigation = useNavigation<RootStackNavigationProp>(); // 👈 Hook para acceder al RootStack
 
     const { userParam } = route.params;
 
@@ -56,7 +64,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
             );
 
             if(user){
-                navigation.navigate('GameMenu');
+                rootNavigation.navigate('GameMenu');
             }
 
             
@@ -247,3 +255,4 @@ const styles = StyleSheet.create({
         padding: 5,
     },
 });
+

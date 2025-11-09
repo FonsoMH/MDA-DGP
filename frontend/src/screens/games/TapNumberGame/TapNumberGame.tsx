@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-
-import NumberDisplay from '../../components/common/NumberDisplays/NumberDisplay';
-import BackButton from '../../components/common/BackButton/BackButton';
-import FeedbackScreen from '../../components/FeedBack/Feedback';
-import { playTTS } from '../../components/ttsListener';
-import { generateOptionsWithTarget, getRandomNumber } from '../utils/gameUtils';
+import { useAccessibilitySettings } from '../../../accessibilitySettings/hooks/useAccessibilitySettings';
+import BackButton from '../../../components/common/BackButton/BackButton';
+import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
+import FeedbackScreen from '../../../components/FeedBack/Feedback';
+import { playTTS } from '../../../components/ttsListener';
 import { useGameManager } from '../utils/gameManager';
-import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
-import { useUser } from '../../hooks/useUser';
-import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useAccessibilitySettings';
+import { getRandomNumber, generateOptionsWithTarget } from '../utils/gameUtils';
+
+
 
 
 
@@ -109,7 +109,7 @@ function TapNumberGame() {
             <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
             <TouchableOpacity onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
                 <Image
-                source={require('../../../assets/icons/listen.png')}
+                source={require('../../../../assets/icons/listen.png')}
                 style={styles.clickableImage}
                 accessibilityLabel="Botón de imagen"
                 />

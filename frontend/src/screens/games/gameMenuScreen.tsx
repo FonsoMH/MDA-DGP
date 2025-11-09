@@ -8,10 +8,10 @@ import {
     ImageSourcePropType,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../types/navigation'; 
-import { GameStackParamList } from '../navigation/GameNavigator';
-import BackButton from '../components/common/BackButton/BackButton';
-import { useAccessibilitySettings } from '../accessibilitySettings/hooks/useAccessibilitySettings';
+import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useAccessibilitySettings';
+import BackButton from '../../components/common/BackButton/BackButton';
+import { GameStackParamList } from '../../navigation/GameNavigator';
+import { RootStackParamList } from '../../types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;
 
@@ -25,22 +25,22 @@ const GAMES: Game[] = [
     {
         id: 'TapNumberGame',
         title: 'Toca el número que suena',
-        image: require('../../assets/icons/games_icons/icon_game1.png'),
+        image: require('../../../assets/icons/games_icons/icon_game1.png'),
     },
     {
         id: 'SequenceGame',
         title: 'Ordena la secuencia',
-        image: require('../../assets/icons/games_icons/icon_game2.png'),
+        image: require('../../../assets/icons/games_icons/icon_game2.png'),
     },
     {
         id: 'Game3',
         title: 'Reparte el mismo número',
-        image: require('../../assets/icons/games_icons/icon_game3.png'),
+        image: require('../../../assets/icons/games_icons/icon_game3.png'),
     },
     {
         id: 'Game4',
         title: 'Deja el mismo númeroooooo',
-        image: require('../../assets/icons/games_icons/icon_game4.png'),
+        image: require('../../../assets/icons/games_icons/icon_game4.png'),
     },
 ];
 

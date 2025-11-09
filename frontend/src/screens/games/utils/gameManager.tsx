@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameConfig } from '../hooks/useGameConfig';
 import { DEFAULT_REPEATS } from './gameUtils';
-import { useUser } from '../../hooks/useUser';
+import { useUser } from '../../../hooks/useUser';
 
 /**
  * @file Manages the core game loop and state for a game session.

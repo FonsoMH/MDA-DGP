@@ -1,8 +1,8 @@
 import { createContext , ReactNode, useCallback, useState} from "react";
 import Constants from 'expo-constants';
-import { AuthResponse, LoginCredentials, StudentLogin } from "../../types/login";
+import { AuthResponse, LoginCredentials, StudentLogin } from "../../../types/login";
+import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
 import { performLogin } from "../api/loginApi";
-import { useAccessibilitySettings } from "../../accessibilitySettings/hooks/useAccessibilitySettings";
 
 interface UserContextType {
     user: StudentLogin | null,

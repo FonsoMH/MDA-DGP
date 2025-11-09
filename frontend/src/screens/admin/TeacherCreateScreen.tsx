@@ -10,13 +10,12 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../types/navigation';
-import PasswordInput from '../components/common/PasswordInput/PasswordInput';
+import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
-type Props = NativeStackScreenProps<RootStackParamList, 'TeacherCreate'>;
+type Props = NativeStackScreenProps<any, 'TeacherCreate'>;
 
 type Student = { id: number; name: string; email: string };
 

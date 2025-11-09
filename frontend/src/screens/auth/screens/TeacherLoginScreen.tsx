@@ -1,10 +1,9 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { View ,Text , StyleSheet, Pressable , TextInput} from 'react-native';
-import { useUser } from '../../hooks/useUser';
-import BackButton from '../../components/common/BackButton/BackButton';
-import { useState } from 'react';
-import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
+import PasswordInput from '../../../components/common/PasswordInput/PasswordInput';
+import BackButton from '../../../components/common/BackButton/BackButton';
+import { useUser } from '../../../hooks/useUser';
 
 const MAX_WIDTH = 450;
 

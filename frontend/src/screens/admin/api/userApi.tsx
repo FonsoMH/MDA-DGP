@@ -1,5 +1,5 @@
 import axios from "axios";
-import { UserFrontend, UserApiData } from "../../types/users";
+import { UserFrontend, UserApiData } from "../../../types/users";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;

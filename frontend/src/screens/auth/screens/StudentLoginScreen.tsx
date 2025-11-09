@@ -2,10 +2,10 @@ import { View, Text, StyleSheet, Button } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import StudentLoginCard from '../components/StudentLoginCard';
-import BackButton from '../../components/common/BackButton/BackButton';
+import BackButton from '../../../components/common/BackButton/BackButton';
+import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import { StudentLogin } from '../../../types/login';
 import { useStudentsData } from '../hook/usersList';
-import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
-import { StudentLogin } from '../../types/login';
 
 
 type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;

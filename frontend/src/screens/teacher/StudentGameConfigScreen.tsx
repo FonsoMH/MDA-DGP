@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Switch, useWindowDimensions } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../types/navigation';
-import { getAllConfig, updateConfig } from '../api/studentConfig';
+import { getAllConfig, updateConfig } from '../../api/studentConfig';
+import { RootStackParamList } from '../../types/navigation';
 
 // Add route type in navigation types: StudentGameConfig: { studentId: number }
 type Props = NativeStackScreenProps<RootStackParamList, 'StudentGameConfig'>;

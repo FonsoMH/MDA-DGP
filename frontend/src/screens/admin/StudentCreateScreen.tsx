@@ -12,12 +12,11 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../types/navigation';
-
-import { PICTOGRAMS, type Pictogram } from '../pictograms/catalog';
+import { AdminStackParamList } from '../../navigation/AdminNavigator';
+import { Pictogram, PICTOGRAMS } from '../../pictograms/catalog';
 
 // Route: 'StudentCreate'
-type Props = NativeStackScreenProps<RootStackParamList, 'StudentCreate'>;
+type Props = NativeStackScreenProps<AdminStackParamList, 'StudentCreate'>;
 
 //Definimos un punto de corte para "pantalla grande"
 const LARGE_SCREEN_BREAKPOINT = 768; // Ancho de un iPad en vertical
