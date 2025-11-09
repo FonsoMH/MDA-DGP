@@ -1,7 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// 1. Importa las pantallas de tus juegos
 import TapNumberGame from '../games/TapNumberGame/TapNumberGame';
 import SequenceGame from '../games/SequenceGame/SequenceGame';
 // import Game3 from '../games/Game3/Game3';

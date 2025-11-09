@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, Pressable } from 'react-native';
 
 import BackButton from '../components/common/BackButton/BackButton';
 import StateCard from '../components/users/StateCard';
@@ -10,9 +10,8 @@ import { useUsers } from './hook/useUserList';
 import { UserFrontend } from '../types/users';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
 
-type UserListProps = NativeStackScreenProps<RootStackParamList, 'UserList'>;
+type UserListProps = NativeStackScreenProps<any, 'UserList'>;
 
 export default function UserListScreen({ navigation }: UserListProps) { 
   const { users, isLoading } = useUsers();
@@ -20,6 +19,12 @@ export default function UserListScreen({ navigation }: UserListProps) {
   const [filter, setFilter] = useState<FilterOption>('todos');
 
   const [showMenu, setShowMenu] = useState(false);
+
+  const handleNavigation = (screen: string) => {
+    navigation.navigate('Admin', {
+        screen: screen,
+    });
+  }
 
   const roleMap: Record<FilterOption, string | null> = {
     todos: null,
@@ -87,13 +92,13 @@ export default function UserListScreen({ navigation }: UserListProps) {
 
       {showMenu && (
           <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('AdminCreate'); }}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }}>
               <Text style={styles.menuText}>Crear Administrador</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('TeacherCreate'); }}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate'); }}>
               <Text style={styles.menuText}>Crear Tutor</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { navigation.navigate('StudentCreate'); }}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); }}>
               <Text style={styles.menuText}>Crear Estudiante</Text>
           </TouchableOpacity>
       </View>

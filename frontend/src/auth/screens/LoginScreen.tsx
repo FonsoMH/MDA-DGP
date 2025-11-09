@@ -7,11 +7,15 @@ type LoginProps = NativeStackScreenProps<any, 'Login'>;
 export default function LoginScreen({ navigation }: LoginProps){
 
     const handleStudentLogin = () => {
-        navigation.navigate('StudentLogin');
+        navigation.navigate('Auth', {
+            screen: 'StudentLogin'
+        });
     }
 
     const handleTeacherLogin = () => {
-        navigation.navigate('TeacherLogin');
+        navigation.navigate('Auth', {
+            screen: 'TeacherLogin'
+        });
     }
 
     return (

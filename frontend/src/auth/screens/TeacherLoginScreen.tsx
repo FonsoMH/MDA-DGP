@@ -96,7 +96,9 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
             );
 
             if(user?.role == 'admin'){
-                navigation.navigate('UserList');
+                navigation.navigate('Admin', {
+                    screen: 'UserList'
+                });
             }
 
 

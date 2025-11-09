@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'; 
 
-import { RootStackParamList } from '../types/navigation'; 
-import HomeScreen from '../screens/HomeScreen';
+import { RootStackParamList } from '../types/navigation';
 import StudentCreateScreen from '../students/StudentCreateScreen';
 import GameMenuScreen from '../games/gameMenuScreen';
 import StudentGameConfigScreen from '../students/StudentGameConfigScreen';
@@ -13,6 +12,8 @@ import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
 import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
 import TeacherLoginScreen from '../auth/screens/TeacherLoginScreen';
 import TeacherCreateScreen from '../users/TeacherCreateScreen';
+import LoginNavigator from './LoginNavigator';
+import AdminNavigator from './AdminNavigator';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,11 +26,6 @@ export default function AppNavigator() {
             headerShown: false
         }}
     >
-      
-      <Stack.Screen 
-        name="Home" 
-        component={HomeScreen}
-      />
 
       <Stack.Screen 
          name="GameMenu" 
@@ -49,57 +45,18 @@ export default function AppNavigator() {
           headerShown: false
         }}
       />
-      <Stack.Screen
-        name="StudentLogin"
-        component={StudentLoginScreen} 
-        options={{
-          title: 'Iniciar Sesión Estudiante',
-          headerShown: false
-        }}
-      />
-      <Stack.Screen
-        name="StudentPassword"
-        component={StudentPasswordScreen} 
-        options={{
-          title: 'Pantalla de Contraseña Estudiante',
-          headerShown: false
-        }}
-      />
-      <Stack.Screen
-        name="TeacherLogin"
-        component={TeacherLoginScreen} 
-        options={{
-          title: 'Iniciar Sesión Profesor',
-          headerShown: false
-        }}
+
+      <Stack.Screen 
+        name="Auth" 
+        component={LoginNavigator}
       />
 
       <Stack.Screen 
-        name="UserList" 
-        component={UserList} 
-        options={{ 
-          title: 'Lista de Usuarios',
-          headerShown: false
-        }} 
+        name="Admin" 
+        component={AdminNavigator}
       />
 
-      <Stack.Screen
-        name="TeacherCreate"
-        component={TeacherCreateScreen}
-        options={{
-          title: 'Crear Tutor',
-          headerShown: false
-        }}
-      />
       
-      <Stack.Screen
-        name="StudentCreate"
-        component={StudentCreateScreen}
-        options={{
-          title: 'Crear Estudiante',
-          headerShown: false,
-        }}
-      />
       <Stack.Screen 
         name="StudentGameConfig" 
         component={StudentGameConfigScreen} 
