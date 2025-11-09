@@ -1,78 +1,63 @@
-import { useState } from 'react';
 import { View ,Text, StyleSheet, ScrollView } from 'react-native';
-import PasswordItem from '../components/PasswordItem';
-
-
-
+import PasswordItem from '../components/PasswordItem'; 
 import trashCanIcon from '../../../../assets/trash_can.png';
 import TextImageButton from '../components/TextImageButton';
 import paperPlaneIcon from '../../../../assets/paper_plane.png';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-
 import BackButton from '../../../components/common/BackButton/BackButton';
-import { unknowICon, iconsMap, Icon } from '../../../types/passwordIconList';
+
 import { LoginStackParamList } from '../../../navigation/LoginNavigator';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackNavigationProp } from '../../../types/navigation';
 import { useUser } from '../../../hooks/useUser';
+import { usePictogramPassword } from '../../../utils/usePictogramPassword';
 
 
+interface StudentParam {
+    name: string;
+    email: string;
+}
 
 type StudentPasswordProps = NativeStackScreenProps<LoginStackParamList, 'StudentPassword'>;
 
 export default function StudentPasswordScreen({ route, navigation }: StudentPasswordProps){
 
-    const rootNavigation = useNavigation<RootStackNavigationProp>(); // 👈 Hook para acceder al RootStack
+    const rootNavigation = useNavigation<RootStackNavigationProp>(); 
+    const userParam: StudentParam = route.params.userParam; 
+    const { login } = useUser();
+    
+    const { 
+        password, 
+        addPictogram, 
+        clearPassword, 
+        getPasswordSequence, 
+        isPasswordComplete,
+        availableIcons,
+        maxPasswordLength,
+    } = usePictogramPassword();
 
-    const { userParam } = route.params;
 
-    const { user , login } = useUser();
+    const handleLogIn = async (): Promise<void> => {
 
-    const [password, setPassword] = useState<Icon[]>([
-        unknowICon,unknowICon,unknowICon,unknowICon
-    ]);
-
-    const onPressPasswordItem = (item : { name: string, icon: any }) => {
-        const newPassword = [...password];
-        for(let i = 0; i < newPassword.length; i++){
-            if(newPassword[i].name === unknowICon.name){
-                newPassword[i] = item;
-                break;
-            }
-        }
-        setPassword(newPassword);
-    }
-
-    const removePassword = () => {
-        const newPassword = Array(4).fill(unknowICon); 
-        setPassword(newPassword);
-    }
-
-    const handleLogIn = async (): Promise<boolean> => {
-
-        const isPasswordComplete = password.every(item => item.name !== unknowICon.name);
-        
         if (!isPasswordComplete) {
-            return false;
+            return;
         }
 
         try {
-            const passwordSequence = password.map(item => item.code).join();
-            const user = await login(
+            const passwordSequence = getPasswordSequence();
+            
+            const loggedInUser = await login(
                 {username: userParam.email, 
                     password: passwordSequence}
             );
 
-            if(user){
+            if(loggedInUser){
                 rootNavigation.navigate('GameMenu');
             }
-
-            
-            return true; 
             
         } catch (error) {
-            //TODO handle error
-            return false;
+            // TODO handle error (mostrar un mensaje al usuario)
+            console.error("Login failed:", error);
         }
     };
 
@@ -81,7 +66,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
             <BackButton width={215} height={76} />
             <View style={styles.header}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>¡Selecciona tu contraseña {userParam.name}!</Text>
-                <Text style={{ fontSize: 16, color: '#666' }}>Elige 4 pictogramas en orden</Text>
+                <Text style={{ fontSize: 16, color: '#666' }}>Elige {maxPasswordLength} pictogramas en orden</Text>
             </View>
 
             <View style={styles.passwordBox}>
@@ -105,14 +90,14 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                     </View>
                     <View style={styles.passwordOptions}>
                         <TextImageButton 
+                        //TODO disable
                             icon={paperPlaneIcon} 
-                            // TODO deshabilitar si no valido
                             onPress={handleLogIn} 
                             label="Entrar" 
                         />
                         <TextImageButton 
                             icon={trashCanIcon} 
-                            onPress={removePassword} 
+                            onPress={clearPassword}
                             label="Limpiar" 
                         />
                     </View>
@@ -123,12 +108,12 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
             <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
                 <View style={styles.passwordElements}>
                     {
-                        iconsMap.map((item, index) => {
+                        availableIcons.map((item, index) => {
                             return <PasswordItem 
                             key={index} 
                             icon={item.icon} 
                             text={item.name} 
-                            onPress={() => onPressPasswordItem(item)}
+                            onPress={() => addPictogram(item)}
                             height={130}
                             width={175}
                             />
@@ -139,18 +124,16 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
 
         </View>
     )
-
 }
 
 const styles = StyleSheet.create({
-
     safe: {
         flex: 1,
         backgroundColor: '#F7F8FA',
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
-		margin:20
+        margin:20
     },
 
     header:{
@@ -255,4 +238,3 @@ const styles = StyleSheet.create({
         padding: 5,
     },
 });
-

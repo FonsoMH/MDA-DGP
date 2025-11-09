@@ -23,18 +23,18 @@ export default function TeacherCreateScreen({ navigation }: Props) {
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
 
   const { 
-        control,
-        handleSubmit,
-        formState: { errors, isSubmitting: isFormValidating }
-    } = useForm({
-        resolver: yupResolver(credentialsSchema),
-        defaultValues: { 
-            name: '', 
-            email: '', 
-            password: '',
-        },
-        mode: 'onBlur',
-    });
+      control,
+      handleSubmit,
+      formState: { errors, isSubmitting: isFormValidating }
+  } = useForm({
+      resolver: yupResolver(credentialsSchema),
+      defaultValues: { 
+          name: '', 
+          email: '', 
+          password: '',
+      },
+      mode: 'onBlur',
+  });
 
   const { 
       students,
@@ -57,16 +57,16 @@ export default function TeacherCreateScreen({ navigation }: Props) {
   const isTotalSubmitting = isFormValidating || isApiSubmitting; 
 
   const onSubmitRHF = (data: CredentialsData) => {
-        const payload = {
-            name: data.name,
-            email: data.email,
-            password: data.password ?? '',
-            assigned_students_ids: selectedIds,
-        };
-        
-        onSubmitFrom(payload); 
-        navigation.goBack();
-    };
+      const payload = {
+          name: data.name,
+          email: data.email,
+          password: data.password ?? '',
+          assigned_students_ids: selectedIds,
+      };
+      
+      onSubmitFrom(payload); 
+      navigation.goBack();
+  };
 
   return (
     <View style={styles.safe}>
@@ -133,7 +133,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
           </Pressable>
           <Pressable
             style={[styles.btn, styles.btnPrimary, isTotalSubmitting && { opacity: 0.7 }]}
-            onPress={handleSubmit(onSubmitRHF)} // 10. RHF llama a onSubmitRHF si es válido
+            onPress={handleSubmit(onSubmitRHF)}
             disabled={isTotalSubmitting}
           >
           <Text style={styles.btnText}>{isApiSubmitting ? 'Guardando...' : 'Crear Tutor'}</Text>    

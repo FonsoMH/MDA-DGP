@@ -75,8 +75,8 @@ def create_student():
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip().lower()
-    pictogram_password = (data.get('pictogram_password') or '').strip()
-    assigned_teacher_id = data.get('assigned_teacher_id')
+    pictogram_password = (data.get('password') or '').strip()
+    assigned_teacher_id = data.get('assigned_teacher')
 
     password_hash = generate_password_hash(pictogram_password)
 

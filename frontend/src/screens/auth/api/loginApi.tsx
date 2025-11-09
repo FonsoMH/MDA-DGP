@@ -41,6 +41,8 @@ export async function performLogin(credentials: LoginCredentials): Promise<AuthR
     
     try {
 
+        console.log(credentials);
+        
         const response = await axios.post<AuthResponse>(
             endpoint, 
             credentials,

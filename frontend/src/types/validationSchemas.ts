@@ -3,7 +3,7 @@ import * as yup from 'yup';
 export interface CredentialsData {
   name: string;
   email: string;
-  password: string | undefined;
+  password?: string | undefined;
 }
 
 export const credentialsSchema = yup.object().shape({
