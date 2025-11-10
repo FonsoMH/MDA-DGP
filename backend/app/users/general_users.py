@@ -1,10 +1,9 @@
 from flask import Blueprint, request, jsonify
-from .db import get_db_cursor
+from ..db import get_db_cursor
 
-bp = Blueprint('users', __name__)
+users_bp = Blueprint('users', __name__, url_prefix='/api')
 
-
-@bp.route('/users', methods=['GET'])
+@users_bp.route('/users', methods=['GET'])
 def get_users():
     # filter by role
     role = request.args.get('role')
@@ -65,19 +64,18 @@ def get_users():
     cur.close()
     return jsonify(users)
 
-@bp.route('/users/<int:user_id>', methods=['DELETE'])
+@users_bp.route('/users/<int:user_id>', methods=['GET'])
 def delete_user(user_id):
     cur = get_db_cursor()
-    cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
-
+    cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (user_id,))
     user = cur.fetchone()
-
-    if not user:
-        cur.close()
-        return jsonify({'error': 'User not found.'}), 404
-    
-    cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
-    cur.connection.commit()
     cur.close()
 
-    return jsonify({'message': f'User {user_id} deleted successfully.'}), 200
+    if not user:
+        return jsonify({'error': 'User not found.'}), 404
+
+    return jsonify({
+        'user_id': user['user_id'],
+        'name': user['name'],
+        'email': user['email']
+    })

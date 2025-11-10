@@ -4,11 +4,64 @@ from ..db import get_db_cursor
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
 from werkzeug.security import generate_password_hash
 
-admin_bp = Blueprint('admin', __name__)
+admin_bp = Blueprint('admins', __name__, url_prefix='/api')
 
-#TODO : Poner aquí el create_admin cuando se haga merge de la gestion de admins
+# Implement CRUD operations for admin users
 
-@admin_bp.route('/api/admin/<int:user_id>', methods=['PUT'])
+# Create a new admin
+@admin_bp.route('/admins', methods=['POST'])
+def create_admin():
+    data = request.get_json() or {}
+    name = (data.get('name') or '').strip()
+    email = (data.get('email') or '').strip().lower()
+    password = (data.get('password') or '').strip()
+
+    if not name or not email or not password:
+        return jsonify({'error': 'Name, email, and password are required.'}), 400
+
+    cur = get_db_cursor()
+    try:
+        if email_in_use(cur, email):
+            return jsonify({'error': 'Email is already in use.'}), 400
+
+        password_hash = generate_password_hash(password)
+
+        cur.execute("""
+            INSERT INTO users (name, email, password_hash, role)
+            VALUES (%s, %s, %s, %s)
+            RETURNING user_id
+        """, (name, email, password_hash, 'admin'))
+
+        new_user_id = cur.fetchone()['user_id']
+
+        commit_or_rollback(cur, True)
+        return jsonify({'message': 'Admin created successfully.', 'user_id': new_user_id}), 201
+
+    except Exception as e:
+        commit_or_rollback(cur, False)
+        current_app.logger.error(f"Error creating admin: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()
+
+# Read all admins
+@admin_bp.route('/admins', methods=['GET'])
+def get_admins():
+    cur = get_db_cursor()
+    try:
+        cur.execute("SELECT user_id, name, email FROM users WHERE role = %s", ('admin',))
+        admins = cur.fetchall()
+        admin_list = [{'id': admin['user_id'], 'name': admin['name'], 'email': admin['email']} for admin in admins]
+        return jsonify(admin_list), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching admins: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()
+
+# Update an admin
+@admin_bp.route('/admins/<int:user_id>', methods=['PUT'])
 def update_admin(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -47,8 +100,8 @@ def update_admin(user_id):
     finally:
         cur.close()
 
-
-@admin_bp.route('/api/admin/<int:user_id>', methods=['DELETE'])
+# Delete an admin
+@admin_bp.route('/admins/<int:user_id>', methods=['DELETE'])
 def delete_admin(user_id):
     cur = get_db_cursor()
     try:

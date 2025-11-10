@@ -4,9 +4,12 @@ from psycopg2 import sql
 from werkzeug.security import generate_password_hash
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
 
-teacher_bp = Blueprint('teacher', __name__)
+teacher_bp = Blueprint('teachers', __name__, url_prefix='/api')
 
-@teacher_bp.route('/api/teachers', methods=['POST'])
+# Implement CRUD operations for teacher users and additional endpoint for assigned students
+
+# Create a new teacher
+@teacher_bp.route('/teachers', methods=['POST'])
 def create_teacher():
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -76,8 +79,54 @@ def create_teacher():
     finally:
         cur.close()
 
+# Read all teachers
+@teacher_bp.route('/teachers', methods=['GET'])
+def get_teachers():
+    """
+    Endpoint que devuelve todos los usuarios con role_id = 2 (estudiantes).
+    Ruta: GET /users/students
+    """
 
-@teacher_bp.route('/api/teachers/<int:user_id>', methods=['PUT'])
+    try:
+        cur = get_db_cursor()
+
+        cur = get_db_cursor()
+
+        cur.execute("SELECT role_id FROM roles WHERE role_name = 'teacher';")
+        role_record = cur.fetchone()
+
+        if not role_record:
+            cur.close()
+            return jsonify({"error": "Error de configuración: Rol 'teacher' no encontrado"}), 500
+
+        STUDENT_ROLE_ID = role_record['role_id']
+
+
+        query = """
+        SELECT 
+            user_id AS id, 
+            name, 
+            email,
+            role_id as role
+        FROM users 
+        WHERE role_id = %s;
+        """
+        cur.execute(query, (STUDENT_ROLE_ID,)) 
+
+
+        student_records = cur.fetchall()
+
+
+        cur.close()
+
+        return jsonify(student_records), 200
+
+    except Exception as e:
+        print(f"Error al listar estudiantes: {e}")
+        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
+    
+# Update a teacher
+@teacher_bp.route('/teachers/<int:user_id>', methods=['PUT'])
 def update_teacher(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -128,8 +177,8 @@ def update_teacher(user_id):
     finally:
         cur.close()
 
-
-@teacher_bp.route('/api/teachers/<int:user_id>', methods=['DELETE'])
+# Delete a teacher
+@teacher_bp.route('/teachers/<int:user_id>', methods=['DELETE'])
 def delete_teacher(user_id):
     cur = get_db_cursor()
     try:
@@ -157,8 +206,8 @@ def delete_teacher(user_id):
     finally:
         cur.close()
 
-
-@teacher_bp.route('/api/teachers/<int:user_id>/students', methods=['GET'])
+# Get assigned students for a specific teacher
+@teacher_bp.route('/teachers/<int:user_id>/students', methods=['GET'])
 def get_assigned_students_by_teacher(user_id):
     cur = get_db_cursor()
     try:
@@ -197,48 +246,5 @@ def get_assigned_students_by_teacher(user_id):
         cur.close()
 
 
-@teacher_bp.route('/api/teachers', methods=['GET'])
-def get_teachers():
-    """
-    Endpoint que devuelve todos los usuarios con role_id = 2 (estudiantes).
-    Ruta: GET /users/students
-    """
 
-    try:
-        cur = get_db_cursor()
-
-        cur = get_db_cursor()
-
-        cur.execute("SELECT role_id FROM roles WHERE role_name = 'teacher';")
-        role_record = cur.fetchone()
-
-        if not role_record:
-            cur.close()
-            return jsonify({"error": "Error de configuración: Rol 'teacher' no encontrado"}), 500
-
-        STUDENT_ROLE_ID = role_record['role_id']
-
-
-        query = """
-        SELECT 
-            user_id AS id, 
-            name, 
-            email,
-            role_id as role
-        FROM users 
-        WHERE role_id = %s;
-        """
-        cur.execute(query, (STUDENT_ROLE_ID,)) 
-
-
-        student_records = cur.fetchall()
-
-
-        cur.close()
-
-        return jsonify(student_records), 200
-
-    except Exception as e:
-        print(f"Error al listar estudiantes: {e}")
-        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
 
