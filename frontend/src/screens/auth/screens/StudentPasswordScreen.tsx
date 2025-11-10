@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RootStackNavigationProp } from '../../../types/navigation';
 import { useUser } from '../../../hooks/useUser';
 import { usePictogramPassword } from '../../../utils/usePictogramPassword';
+import { useState } from 'react';
 
 
 interface StudentParam {
@@ -25,6 +26,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
     const rootNavigation = useNavigation<RootStackNavigationProp>(); 
     const userParam: StudentParam = route.params.userParam; 
     const { login } = useUser();
+    const [failedPassword, setFailedPassword] =  useState(false);
     
     const { 
         password, 
@@ -54,9 +56,15 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
             if(loggedInUser){
                 rootNavigation.navigate('GameMenu');
             }
+            else{
+                console.error("Invalid credentials");
+                clearPassword();
+                setFailedPassword(true);
+            }
             
         } catch (error) {
             // TODO handle error (mostrar un mensaje al usuario)
+            clearPassword();
             console.error("Login failed:", error);
         }
     };
@@ -78,12 +86,12 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                         {
                             password.map((item, index) => (
                                 <PasswordItem 
-                                    key={index} 
-                                    icon={item.icon} 
-                                    text={item.name} 
-                                    onPress={() => {}}
-                                    height={100}
-                                    width={100}
+                                key={index} 
+                                icon={item.icon} 
+                                text={item.name} 
+                                onPress={() => {}}
+                                height={100}
+                                width={100}
                                 />
                             ))
                         }
@@ -91,18 +99,19 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                     <View style={styles.passwordOptions}>
                         <TextImageButton 
                         //TODO disable
-                            icon={paperPlaneIcon} 
-                            onPress={handleLogIn} 
-                            label="Entrar" 
+                        icon={paperPlaneIcon} 
+                        onPress={handleLogIn} 
+                        label="Entrar" 
                         />
                         <TextImageButton 
                             icon={trashCanIcon} 
                             onPress={clearPassword}
                             label="Limpiar" 
-                        />
+                            />
                     </View>
                 </View>
 
+                {failedPassword ? <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 }}>Intentalo de Nuevo</Text> : null}
             </View>
             
             <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
@@ -113,7 +122,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             key={index} 
                             icon={item.icon} 
                             text={item.name} 
-                            onPress={() => addPictogram(item)}
+                            onPress={() => { addPictogram(item); setFailedPassword(false); }}
                             height={130}
                             width={175}
                             />
