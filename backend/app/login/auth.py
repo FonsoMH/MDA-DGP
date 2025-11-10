@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash 
 from ..users.user_common import get_user_by_email, get_role_by_id
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+auth_bp = Blueprint('auth', __name__, url_prefix='/api')
 
 @auth_bp.route('/login', methods=['POST'])
 def login():

@@ -10,7 +10,7 @@ const API_TIMEOUT = process.env.API_TIMEOUT;
  * @returns {Promise<UserFrontend[]>} Lista de usuarios adaptados.
  */
 export async function fetchUsers(): Promise<UserFrontend[]> {
-  const endpoint = `${BASE_URL}/users`;
+  const endpoint = `${BASE_URL}/api/users`;
 
   try {
     const response = await axios.get<UserApiData[]>(endpoint, {

@@ -4,7 +4,7 @@ import psycopg2
 from ..db import get_db
 from .feedback_common import get_feedback_info
 
-feedback_bp = Blueprint('feedback', __name__)
+feedback_bp = Blueprint('feedback', __name__, url_prefix='/api')
 
 @feedback_bp.route('/feedback', methods=['GET'])
 def get_feedback():

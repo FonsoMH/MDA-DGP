@@ -4,12 +4,12 @@ from psycopg2 import sql
 from werkzeug.security import generate_password_hash
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
 
-students_bp = Blueprint('students', __name__)
+students_bp = Blueprint('students', __name__, url_prefix='/api')
 
 # Implement CRUD operations for students users and other student-related endpoints
 
 # Create a new student
-@students_bp.route('/api/students', methods=['POST'])
+@students_bp.route('/students', methods=['POST'])
 def create_student():
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -115,7 +115,7 @@ def get_students():
         return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
     
 # Update a student
-@students_bp.route('/api/students/<int:user_id>', methods=['PUT'])
+@students_bp.route('/students/<int:user_id>', methods=['PUT'])
 def update_student(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -160,7 +160,7 @@ def update_student(user_id):
         cur.close()
 
 # Delete a student
-@students_bp.route('/api/students/<int:user_id>', methods=['DELETE'])
+@students_bp.route('/students/<int:user_id>', methods=['DELETE'])
 def delete_student(user_id):
     cur = get_db_cursor()
     try:
@@ -181,7 +181,7 @@ def delete_student(user_id):
         cur.close()
 
 # Get students without assigned teacher with pagination
-@students_bp.route('/api/students/no_teacher', methods=['GET'])
+@students_bp.route('/students/no_teacher', methods=['GET'])
 def get_students_without_teacher():
     cur = None
     try:
@@ -240,7 +240,7 @@ def get_students_without_teacher():
                 pass
 
 # Get assigned teacher for a student
-@students_bp.route('/api/students/<int:user_id>/teacher', methods=['GET'])
+@students_bp.route('/students/<int:user_id>/teacher', methods=['GET'])
 def get_teacher_by_student(user_id):
     cur = get_db_cursor()
     try:

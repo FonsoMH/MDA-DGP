@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.db import get_db_cursor, get_db
 import re
 
-bp = Blueprint("accessibility", __name__, url_prefix="/accessibility")
+bp = Blueprint("accessibility", __name__, url_prefix="/api")
 
 # --- Validation ---
 def validate_color_hex(color):
@@ -21,7 +21,7 @@ def validate_booleano(val):
     return isinstance(val, bool)
 
 # --- GET ---
-@bp.route("/<int:student_id>", methods=["GET"])
+@bp.route("/accesibility/<int:student_id>", methods=["GET"])
 def get_accessibility(student_id):
     cur = get_db_cursor()
     cur.execute("SELECT * FROM accessibility_settings WHERE student_id = %s", (student_id,))
@@ -32,7 +32,7 @@ def get_accessibility(student_id):
     return jsonify(settings), 200
 
 # --- PUT ---
-@bp.route("/<int:student_id>", methods=["PUT"])
+@bp.route("/accesibility/<int:student_id>", methods=["PUT"])
 def update_accessibility(student_id):
     data = request.get_json()
     if not data:

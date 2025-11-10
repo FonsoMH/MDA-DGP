@@ -21,7 +21,7 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
         return DEFAULT_CONFIG;
     }
 
-    const endpoint = `${BASE_URL}/accessibility/${studentId}`;
+    const endpoint = `${BASE_URL}/api/accessibility/${studentId}`;
 
     try {
 

@@ -4,12 +4,12 @@ from ..db import get_db_cursor
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
 from werkzeug.security import generate_password_hash
 
-admin_bp = Blueprint('admins', __name__)
+admin_bp = Blueprint('admins', __name__, url_prefix='/api')
 
 # Implement CRUD operations for admin users
 
 # Create a new admin
-@admin_bp.route('/api/admins', methods=['POST'])
+@admin_bp.route('/admins', methods=['POST'])
 def create_admin():
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -45,7 +45,7 @@ def create_admin():
         cur.close()
 
 # Read all admins
-@admin_bp.route('/api/admins', methods=['GET'])
+@admin_bp.route('/admins', methods=['GET'])
 def get_admins():
     cur = get_db_cursor()
     try:
@@ -61,7 +61,7 @@ def get_admins():
         cur.close()
 
 # Update an admin
-@admin_bp.route('/api/admins/<int:user_id>', methods=['PUT'])
+@admin_bp.route('/admins/<int:user_id>', methods=['PUT'])
 def update_admin(user_id):
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
@@ -101,7 +101,7 @@ def update_admin(user_id):
         cur.close()
 
 # Delete an admin
-@admin_bp.route('/api/admins/<int:user_id>', methods=['DELETE'])
+@admin_bp.route('/admins/<int:user_id>', methods=['DELETE'])
 def delete_admin(user_id):
     cur = get_db_cursor()
     try:

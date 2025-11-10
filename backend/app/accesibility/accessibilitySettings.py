@@ -1,7 +1,7 @@
 from ..db import get_db_cursor
 from flask import Blueprint, jsonify, current_app
 
-accessibility_settings_bp = Blueprint('accessibility_settings', __name__)
+accessibility_settings_bp = Blueprint('accessibility_settings', __name__, url_prefix='/api')
 
 @accessibility_settings_bp.route('/accessibility/<int:student_id>', methods=['GET'])
 def get_accessibility_settings(student_id):
