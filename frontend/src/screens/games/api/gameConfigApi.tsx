@@ -24,7 +24,7 @@ export async function fetchGameConfiguration( studentId: number, gameId: number 
         return DEFAULT_CONFIG;
     }
 
-    const endpoint = `${BASE_URL}/games/students/${studentId}/config/${gameId}`;
+    const endpoint = `${BASE_URL}/api/students/${studentId}/config/${gameId}`;
 
     try {
         

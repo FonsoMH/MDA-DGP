@@ -1,31 +1,12 @@
 import random
-
 from flask import Blueprint, request, jsonify
 import psycopg2
+from ..db import get_db
+from .feedback_common import get_feedback_info
 
-from .db import get_db
+feedback_bp = Blueprint('feedback', __name__, url_prefix='/api')
 
-bp = Blueprint('feedback', __name__, url_prefix='/feedback')
-
-
-def get_feedback_info():
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-    cur.execute("""
-        SELECT url, texto 
-        FROM multimedia 
-        WHERE type = 'fondo' AND feedback IS TRUE;
-    """)
-
-    all_feedbacks = cur.fetchall()
-
-    random_feedback = random.choice(all_feedbacks)
-    cur.close()
-
-    return random_feedback
-
-@bp.route('/', methods=['GET'])
+@feedback_bp.route('/feedback', methods=['GET'])
 def get_feedback():
     try:
         random_feedback = get_feedback_info()

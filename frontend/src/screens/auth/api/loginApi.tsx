@@ -14,7 +14,7 @@ export async function fetchStudents(): Promise<StudentLogin[]> {
         throw new Error("Configuration Error: BASE_URL is not defined in environment.");
     }
 
-    const endpoint = `${BASE_URL}/students`; 
+    const endpoint = `${BASE_URL}/api/students`; 
     
     
     try {
@@ -37,7 +37,7 @@ export async function performLogin(credentials: LoginCredentials): Promise<AuthR
         throw new Error("Configuration Error: BASE_URL is not defined in environment.");
     }
 
-    const endpoint = `${BASE_URL}/auth/login`; 
+    const endpoint = `${BASE_URL}/api/login`; 
     
     try {
 

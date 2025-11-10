@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 
-
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
@@ -26,29 +25,28 @@ def create_app():
     with app.app_context():
         init_db()
     
-    from . import feedback
-    app.register_blueprint(feedback.bp)
+    from .feedback import feedback
+    app.register_blueprint(feedback.feedback_bp)
 
-    from . import games
-    app.register_blueprint(games.bp)
+    from .games import game_config
+    app.register_blueprint(game_config.config_bp)
 
-    from . import auth
+    from .login import auth
     app.register_blueprint(auth.auth_bp)
 
-    from .accessibilitySettings import accessibility_settings_bp
+    from .accesibility.accessibilitySettings import accessibility_settings_bp
     app.register_blueprint(accessibility_settings_bp)
 
-    from .users.teacher import teacher_bp
+    from .users.teachers import teacher_bp
     app.register_blueprint(teacher_bp)
 
     from .users.students import students_bp
     app.register_blueprint(students_bp)
 
-    from .users.admin import admin_bp
+    from .users.admins import admin_bp
     app.register_blueprint(admin_bp)
 
-    from . import general_users
-    app.register_blueprint(general_users.bp)
-    
+    from .users.general_users import users_bp
+    app.register_blueprint(users_bp)
 
     return app
