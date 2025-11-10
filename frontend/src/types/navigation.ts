@@ -1,24 +1,12 @@
 export type RootStackParamList = {
-  Home: undefined; 
+  
+  Login: undefined;
   GameMenu: undefined;
 
-  UserList: undefined;
 
   Games: NavigatorScreenParams<GameStackParamList>; 
-
-  Details: { itemId: number };
-
-  Login: undefined;
-
-  StudentLogin: undefined;
-
-  StudentPassword: { userParam: StudentLogin };
-
-  TeacherLogin: undefined;
-
-  AdminCreate: undefined;
-  TeacherCreate: undefined;
-  StudentCreate: undefined;
+  Auth: NavigatorScreenParams<LoginStackParamList>; 
+  Admin: NavigatorScreenParams<AdminStackParamList>; 
   
   // Nueva ruta para configuración de juegos por estudiante
   StudentGameConfig: { studentId: number };
@@ -27,6 +15,7 @@ export type RootStackParamList = {
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { GameStackParamList } from '../navigation/GameNavigator';
-import { StudentLogin } from './login';
+import { LoginStackParamList } from '../navigation/LoginNavigator';
+import { AdminStackParamList } from '../navigation/AdminNavigator';
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

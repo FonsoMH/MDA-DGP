@@ -15,3 +15,29 @@ export interface UserFrontend {
   assignedStudents?: string[];     
   studentsCount?: number;          
 }
+
+
+export interface BaseCredentialsPayload {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface CreateTeacherPayload extends BaseCredentialsPayload {
+  assigned_students_ids: number[];
+}
+
+export interface CreateStudentPayload extends BaseCredentialsPayload {
+  assigned_teacher: number;
+}
+
+export type Student = { id: number; name: string; email: string };
+
+export type Teacher = { id: number; name: string; email: string };
+
+export interface PaginatedResponse<T> {
+  current_page: number;
+  items: T[];
+  total_count: number;
+  total_pages: number;
+}

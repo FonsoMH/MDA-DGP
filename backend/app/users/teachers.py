@@ -82,49 +82,65 @@ def create_teacher():
 # Read all teachers
 @teacher_bp.route('/teachers', methods=['GET'])
 def get_teachers():
-    """
-    Endpoint que devuelve todos los usuarios con role_id = 2 (estudiantes).
-    Ruta: GET /users/students
-    """
 
     try:
-        cur = get_db_cursor()
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 10))
+
+        offset = (page - 1) * page_size
 
         cur = get_db_cursor()
 
         cur.execute("SELECT role_id FROM roles WHERE role_name = 'teacher';")
         role_record = cur.fetchone()
 
-        if not role_record:
-            cur.close()
-            return jsonify({"error": "Error de configuración: Rol 'teacher' no encontrado"}), 500
+        TEACHER_ROLE_ID = role_record['role_id']
 
-        STUDENT_ROLE_ID = role_record['role_id']
+        cur.execute("SELECT COUNT(*) AS count FROM users WHERE role_id = %s AND assigned_teacher_id IS NULL", (TEACHER_ROLE_ID,))
+        total_row = cur.fetchone()
+        total_count = total_row['count'] if total_row else 0
+
 
 
         query = """
         SELECT 
             user_id AS id, 
             name, 
-            email,
-            role_id as role
+            email
         FROM users 
-        WHERE role_id = %s;
+        WHERE role_id = %s
+        ORDER BY name ASC
+        LIMIT %s OFFSET %s;
         """
-        cur.execute(query, (STUDENT_ROLE_ID,)) 
+        cur.execute(query, (TEACHER_ROLE_ID, page_size, offset)) 
 
+        rows = cur.fetchall()
 
-        student_records = cur.fetchall()
+        
+        teachers = [
+            {
+                'id': row['id'],
+                'name': row['name'],
+                'email': row['email']
+            }
+            for row in rows
+        ]
 
+        total_pages = (total_count + page_size - 1) // page_size if total_count else 0
 
         cur.close()
 
-        return jsonify(student_records), 200
+        return jsonify({
+            'items': teachers,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'current_page': page
+        }), 200
 
     except Exception as e:
         print(f"Error al listar estudiantes: {e}")
         return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
-    
+
 # Update a teacher
 @teacher_bp.route('/teachers/<int:user_id>', methods=['PUT'])
 def update_teacher(user_id):
@@ -244,7 +260,6 @@ def get_assigned_students_by_teacher(user_id):
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()
-
 
 
 

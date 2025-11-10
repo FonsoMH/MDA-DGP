@@ -29,3 +29,8 @@ pgdata/
 .vscode/
 .idea/
 *.swp
+
+*/cypress/videos/
+*/cypress/screenshots/
+*/cypress/downloads/
+*/.cypress-cache/
