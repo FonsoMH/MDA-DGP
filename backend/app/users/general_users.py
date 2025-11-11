@@ -66,16 +66,45 @@ def get_users():
 
 @users_bp.route('/users/<int:user_id>', methods=['GET'])
 def delete_user(user_id):
+    """
+     Permite a un administrador eliminar un usuario y registrar la eliminación en la tabla user_deletion.
+    """
+    # Comprobamos que el usuario que realiza la eliminación es un administrador
+    admin_id = request.args.get('admin_id', type=int)
+
+    if not admin_id:
+        return jsonify({'error': 'admin_id is required'}), 400
+    
     cur = get_db_cursor()
-    cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (user_id,))
-    user = cur.fetchone()
-    cur.close()
+    try:
+        # Verificar que el admin_id corresponde a un administrador
+        cur.execute("""
+            SELECT user_id FROM users WHERE user_id = %s AND role_id = (SELECT role_id FROM roles WHERE role_name = 'admin')
+        """, (admin_id,))
+        admin = cur.fetchone()
+        if not admin:
+            return jsonify({'error': 'Unauthorized'}), 403
 
-    if not user:
-        return jsonify({'error': 'User not found.'}), 404
+        # Verificar que el usuario a eliminar existe
+        cur.execute("""
+            SELECT user_id FROM users where user_id = %s
+        """, (user_id,))
+        user = cur.fetchone()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Insertamos el registro en user_deletion antes de eliminar el usuario
+        cur.execute("""
+            INSERT INTO user_deletion (delete_admin_id, delete_user_id, deleted_user_email, deleted_user_name)
+            VALUES (%s, %s, %s, %s);
+        """, (admin_id, user_id, user['email'], user['name']))
 
-    return jsonify({
-        'user_id': user['user_id'],
-        'name': user['name'],
-        'email': user['email']
-    })
+        # Eliminar el usuario
+        cur.execute("DELETE FROM users WHERE user_id = %s;", (user_id,))
+
+        cur.close()
+        return jsonify({'message': 'User deleted successfully'}), 200
+    
+    except Exception as e:
+        cur.close()
+        return jsonify({'error': str(e)}), 500
