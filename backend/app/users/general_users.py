@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from .user_common import commit_or_rollback
 from ..db import get_db_cursor
 
