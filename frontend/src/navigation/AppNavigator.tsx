@@ -1,16 +1,13 @@
 import * as React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'; 
 
-import { RootStackParamList } from '../types/navigation'; 
-import HomeScreen from '../screens/HomeScreen';
-import GameMenuScreen from '../games/gameMenuScreen';
+import { RootStackParamList } from '../types/navigation';
 import GameNavigator from './GameNavigator';
-import UserList from '../userlist/UserList';
-import LoginScreen from '../auth/screens/LoginScreen';
-import StudentLoginScreen from '../auth/screens/StudentLoginScreen';
-import StudentPasswordScreen from '../auth/screens/StudentPasswordScreen';
-import TeacherLoginScreen from '../auth/screens/TeacherLoginScreen';
-import TeacherCreateScreen from '../users/TeacherCreateScreen';
+import LoginNavigator from './LoginNavigator';
+import AdminNavigator from './AdminNavigator';
+import GameMenuScreen from '../screens/games/gameMenuScreen';
+import LoginScreen from '../screens/auth/screens/LoginScreen';
+import StudentGameConfigScreen from '../screens/teacher/StudentGameConfigScreen';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -23,11 +20,6 @@ export default function AppNavigator() {
             headerShown: false
         }}
     >
-      
-      <Stack.Screen 
-        name="Home" 
-        component={HomeScreen}
-      />
 
       <Stack.Screen 
          name="GameMenu" 
@@ -47,50 +39,27 @@ export default function AppNavigator() {
           headerShown: false
         }}
       />
-      <Stack.Screen
-        name="StudentLogin"
-        component={StudentLoginScreen} 
-        options={{
-          title: 'Iniciar Sesión Estudiante',
-          headerShown: false
-        }}
-      />
-      <Stack.Screen
-        name="StudentPassword"
-        component={StudentPasswordScreen} 
-        options={{
-          title: 'Pantalla de Contraseña Estudiante',
-          headerShown: false
-        }}
-      />
-      <Stack.Screen
-        name="TeacherLogin"
-        component={TeacherLoginScreen} 
-        options={{
-          title: 'Iniciar Sesión Profesor',
-          headerShown: false
-        }}
+
+      <Stack.Screen 
+        name="Auth" 
+        component={LoginNavigator}
       />
 
       <Stack.Screen 
-        name="UserList" 
-        component={UserList} 
-        options={{ 
-          title: 'Lista de Usuarios',
-          headerShown: false
-        }} 
-      />
-
-      <Stack.Screen
-        name="TeacherCreate"
-        component={TeacherCreateScreen}
-        options={{
-          title: 'Crear Tutor',
-          headerShown: false
-        }}
+        name="Admin" 
+        component={AdminNavigator}
       />
 
       
+      <Stack.Screen 
+        name="StudentGameConfig" 
+        component={StudentGameConfigScreen} 
+        options={{ 
+          title: 'Configurar juegos',
+          headerShown: true 
+        }} 
+      />
+      {/** Pantalla alternativa eliminado: GameSelected */}
     </Stack.Navigator>
   );
 }

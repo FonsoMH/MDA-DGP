@@ -66,6 +66,16 @@ CREATE TABLE IF NOT EXISTS game_results (
     played_parameters JSONB NOT NULL -- New column to store game parameters as JSONB for historical results
 );
 
+-- 
+CREATE TABLE user_deletion (
+    deletion_id SERIAL PRIMARY KEY,
+    delete_admin_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    delete_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    deleted_user_email VARCHAR(255),
+    deleted_user_name VARCHAR(255),
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes on foreign keys
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role_id);
 CREATE INDEX IF NOT EXISTS idx_users_assigned_teacher ON users(assigned_teacher_id);
@@ -89,7 +99,7 @@ ON CONFLICT (slug) DO NOTHING;
 
 -- 3. Populate Users
 INSERT INTO users (name, email, password_hash, role_id) 
-VALUES ('Anne Admin', 'admin@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'admin'))
+VALUES ('Anne Admin', 'admin@app.com', 'scrypt:32768:8:1$XwpRqEHq2gbnQsiX$29f6167d7863fb4f878d244e0306edce02ebde305a6c24d559d05f87304c7829ea96d4f34ed3928edbf77cedb751b4e5a9aaa73efe1bf2e44f8ce391affb1049', (SELECT role_id FROM roles WHERE role_name = 'admin'))
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO users (name, email, password_hash, role_id) 

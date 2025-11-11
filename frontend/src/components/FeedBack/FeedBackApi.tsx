@@ -28,7 +28,7 @@ const DEFAULT_INFO: FeedbackData = {
 export const FeedBackApi = async (): Promise<FeedbackData> => {
     try {
 
-        const response = await axios.get< FeedbackData>(`${BASE_URL}/feedback`, { 
+        const response = await axios.get< FeedbackData>(`${BASE_URL}/api/feedback`, { 
             timeout: +API_TIMEOUT 
         });
 
