@@ -6,7 +6,7 @@ def test_user_deletion(client, temp_admin, temp_student):
     student_id, student_email = temp_student
 
     # Ejecutar DELETE
-    response = client.delete(f"/api/users_deletion/{student_id}?admin_id={admin_id}")
+    response = client.delete(f"/api/users/{student_id}?admin_id={admin_id}")
     assert response.status_code == 200
     data = response.get_json()
     assert "deleted successfully" in data["message"]
