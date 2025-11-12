@@ -1,4 +1,4 @@
-import { View ,Text, StyleSheet, ScrollView } from 'react-native';
+import { View ,Text, StyleSheet, ScrollView , Image} from 'react-native';
 import PasswordItem from '../components/PasswordItem'; 
 import trashCanIcon from '../../../../assets/trash_can.png';
 import TextImageButton from '../components/TextImageButton';
@@ -111,7 +111,12 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                     </View>
                 </View>
 
-                {failedPassword ? <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 }}>Intentalo de Nuevo</Text> : null}
+                {failedPassword ? 
+                    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'center', gap: 10 }}>
+                        <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 }}>Intentalo de Nuevo</Text>
+                        <Image source={require("../../../../assets/de_nuevo.png")} style={{ width: 50, height: 50 }} />
+                    </View>
+                : null}
             </View>
             
             <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
