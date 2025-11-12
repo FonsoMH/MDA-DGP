@@ -94,6 +94,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             icon={paperPlaneIcon} 
                             onPress={handleLogIn} 
                             label="Entrar" 
+                            testID="enter-password-button"
                         />
                         <TextImageButton 
                             icon={trashCanIcon} 
@@ -113,6 +114,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             key={index} 
                             icon={item.icon} 
                             text={item.name} 
+                            testID={`pictogram-${item.name}`}
                             onPress={() => addPictogram(item)}
                             height={130}
                             width={175}

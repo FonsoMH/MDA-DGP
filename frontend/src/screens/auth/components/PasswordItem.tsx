@@ -4,12 +4,13 @@ import { View , StyleSheet, Pressable , Image} from 'react-native';
 type PasswordItemProps = {
     icon: any;
     text: string;
+    testID?: string;
     onPress: () => void;
     height?: number; 
     width?: number; 
 }
 
-export default function PasswordItem({ icon, text , onPress, height = 130, width = 130}: PasswordItemProps) {
+export default function PasswordItem({ icon, text, testID, onPress, height = 130, width = 130}: PasswordItemProps) {
 
     const iconSize = height * 0.7;
     
@@ -23,6 +24,7 @@ export default function PasswordItem({ icon, text , onPress, height = 130, width
                 }
             ]} 
             onPress={onPress}
+            testID={testID}
         >
             <View style={styles.contentWrapper}>
                 <Image 
