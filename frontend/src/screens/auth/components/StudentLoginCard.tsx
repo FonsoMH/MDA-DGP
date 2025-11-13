@@ -32,7 +32,7 @@ const StudentLoginCard: React.FC<StudentLoginCardProps> = ({ id, user, onPress }
 
     return (
         <Pressable 
-            
+            testID={`student-card-${user.replace(/\s+/g, '-')}`}
             style={({ pressed }) => [
                 styles.card, 
                 { backgroundColor: vibrantColor },

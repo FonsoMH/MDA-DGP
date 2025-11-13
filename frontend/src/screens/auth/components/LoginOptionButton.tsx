@@ -4,16 +4,17 @@ interface LoginOptionButtonProps {
     onPress: () => void;
     icon: string;
     label: string;
+    testID?: string;
 }
 
 
-export default function LoginOptionButton({ onPress, icon, label }: LoginOptionButtonProps) {
+export default function LoginOptionButton({ onPress, icon, label, testID }: LoginOptionButtonProps) {
     const handleSubmit = () => {
         onPress();
     };
 
     return (
-        <Pressable onPress={handleSubmit}>
+        <Pressable onPress={handleSubmit} testID={testID}>
             <View style={styles.optionContainer}>
                 <Text style={{ fontSize: 144 }}>{icon}</Text>
                 <Text style={{ fontSize: 24 }}>{label}</Text>

@@ -107,13 +107,18 @@ function TapNumberGame() {
         
         <View style={styles.screenContainer}>
             <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
-            <TouchableOpacity onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
+            <TouchableOpacity testID="tts-button" onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
                 <Image
                 source={require('../../../../assets/icons/listen.png')}
                 style={styles.clickableImage}
                 accessibilityLabel="Botón de imagen"
                 />
             </TouchableOpacity>
+
+            {/* 🔹 Target number oculto para testing */}
+            <Text testID="target-number" style={{ display: 'none'}}>
+                {targetNumber}
+            </Text>
 
             <View style={styles.header}>
                 <Text style={styles.title}>Escucha atentamente y toca el número correcto</Text>
@@ -123,6 +128,7 @@ function TapNumberGame() {
                 {options.map((num, index) => (
                     <TouchableOpacity 
                         key={index} 
+                        testID={`option-${num}`}
                         onPress={() => handleSelection(num)}
                         style={styles.optionWrapper}
                     >
@@ -134,7 +140,7 @@ function TapNumberGame() {
                 ))}
             </View>
 
-            <FeedbackScreen visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
+            <FeedbackScreen testID="feedback-screen" visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
 
     );
