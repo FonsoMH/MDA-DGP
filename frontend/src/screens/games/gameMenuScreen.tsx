@@ -33,7 +33,7 @@ const GAMES: Game[] = [
         image: require('../../../assets/icons/games_icons/icon_game2.png'),
     },
     {
-        id: 'Game3',
+        id: 'ContainerSort',
         title: 'Reparte el mismo número',
         image: require('../../../assets/icons/games_icons/icon_game3.png'),
     },
