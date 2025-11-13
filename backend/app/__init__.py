@@ -49,4 +49,7 @@ def create_app():
     from .users.general_users import users_bp
     app.register_blueprint(users_bp)
 
+    from .users.user_deletion import users_deletion_bp
+    app.register_blueprint(users_deletion_bp)
+
     return app

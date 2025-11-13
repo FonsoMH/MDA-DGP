@@ -9,7 +9,7 @@ def test_update_admin_basic_fields(client, temp_admin):
         "password_hash": "new_hash_123"
     }
 
-    response = client.put(f"/api/admin/{user_id}", json=update_payload)
+    response = client.put(f"/api/admins/{user_id}", json=update_payload)
     assert response.status_code == 200
     assert response.get_json()["message"] == "Admin updated successfully."
 
