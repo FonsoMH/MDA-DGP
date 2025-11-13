@@ -26,10 +26,10 @@ export default function LoginScreen({ navigation }: LoginProps){
             </View>
             <View style={styles.optionsContainer}>
 
-                <LoginOptionButton icon="👦" label="Soy Estudiante" onPress={handleStudentLogin} />
+                <LoginOptionButton icon="👦" label="Soy Estudiante" testID='student-login-button' onPress={handleStudentLogin} />
 
-                <LoginOptionButton icon="👩‍🏫" label="Soy Profesor" onPress={handleTeacherLogin} />
-                
+                <LoginOptionButton icon="👩‍🏫" label="Soy Profesor" testID='teacher-login-button' onPress={handleTeacherLogin} />
+
             </View>
         </View>
     )
