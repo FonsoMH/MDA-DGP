@@ -82,19 +82,25 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                     Tu Contraseña:
                 </Text>
                 <View style={styles.passwordMainRow}>
-                    <View style={styles.passwordDisplay}>
-                        {
-                            password.map((item, index) => (
-                                <PasswordItem 
-                                key={index} 
-                                icon={item.icon} 
-                                text={item.name} 
-                                onPress={() => {}}
-                                height={100}
-                                width={100}
-                                />
-                            ))
-                        }
+                    <View style={{ flexDirection: 'column', flex: 1, alignContent: 'center' , gap: 10}}>
+                        <View style={styles.passwordDisplay}>
+                            {
+                                password.map((item, index) => (
+                                    <PasswordItem 
+                                    key={index} 
+                                    icon={item.icon} 
+                                    text={item.name} 
+                                    onPress={() => {}}
+                                    height={100}
+                                    width={100}
+                                    />
+                                ))
+                            }
+                            
+                        </View>
+                        {failedPassword ? 
+                            <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 , color: 'red' }}>Inténtalo de nuevo</Text>
+                        : null}
                     </View>
                     <View style={styles.passwordOptions}>
                         <TextImageButton 
@@ -111,12 +117,6 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                     </View>
                 </View>
 
-                {failedPassword ? 
-                    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'center', gap: 10 }}>
-                        <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 }}>Intentalo de Nuevo</Text>
-                        <Image source={require("../../../../assets/de_nuevo.png")} style={{ width: 50, height: 50 }} />
-                    </View>
-                : null}
             </View>
             
             <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
