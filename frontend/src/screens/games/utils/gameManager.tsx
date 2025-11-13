@@ -75,7 +75,7 @@ export const useGameManager = (
             setModalVisible(true);
         } else {
             setTimeout(() => {
-                onGameInit(maxRange, optionsCount);
+                onGameInit(maxRange, optionsCount, numContainers, haveToSum);
                 setGames(prevGames => prevGames + 1);
             }, 300);
         }
@@ -101,7 +101,7 @@ export const useGameManager = (
     const resetGame = () => {
         setGames(1);
         setModalVisible(false);
-        onGameInit(maxRange, optionsCount);
+        onGameInit(maxRange, optionsCount, numContainers, haveToSum);
         updateScore(0);
     };
 
