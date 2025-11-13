@@ -44,7 +44,7 @@ def get_default_accessibility():
     finally:
         cur.close()
 
-@accessibility_bp.route("/accesibility/<int:student_id>", methods=["GET"])
+@accessibility_bp.route("/accessibility/<int:student_id>", methods=["GET"])
 def get_accessibility(student_id):
     cur = get_db_cursor()
     cur.execute("SELECT * FROM accessibility_settings WHERE student_id = %s", (student_id,))
@@ -55,7 +55,7 @@ def get_accessibility(student_id):
     return jsonify(settings), 200
 
 # --- PUT ---
-@accessibility_bp.route("/accesibility/<int:student_id>", methods=["PUT"])
+@accessibility_bp.route("/accessibility/<int:student_id>", methods=["PUT"])
 def update_accessibility(student_id):
     data = request.get_json()
     if not data:
@@ -140,3 +140,4 @@ def update_accessibility(student_id):
         "message": "Configuración actualizada correctamente",
         "updated_settings": updated_settings
     }), 200
+
