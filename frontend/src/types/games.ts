@@ -19,3 +19,13 @@ export interface GameConfigFrontend {
     upward: boolean;
     sum: boolean;
 }
+
+
+export interface Option {
+    id: string,
+    value: number
+}
+
+export const EMPTY_COLOR = '#D1D5DC';
+export const CORRECT_COLOT = '#00C950';
+export const ERROR_COLOR = '#FF0000';
