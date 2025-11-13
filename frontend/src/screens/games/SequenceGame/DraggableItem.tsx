@@ -91,8 +91,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
                 { translateX: translateX.value },
                 { translateY: translateY.value },
             ],
-            // zIndex: (translateX.value !== 0 || translateY.value !== 0) ? 9999 : 1,
-        };
+        } as ViewStyle;
     });
 
     const combinedGesture = Gesture.Race(tapGesture, panGesture);
