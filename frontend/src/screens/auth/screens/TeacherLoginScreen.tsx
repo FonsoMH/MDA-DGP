@@ -99,7 +99,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                     screen: 'UserList'
                 });
             }else if(user?.role == 'teacher'){
-                navigation.navigate('TeacherStudentList', {
+                navigation.navigate('Teacher', {
                     screen: 'TeacherStudentList'
                 });
             }

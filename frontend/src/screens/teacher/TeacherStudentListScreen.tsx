@@ -2,15 +2,16 @@ import * as React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import BackButton from '../../components/common/BackButton/BackButton';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import type { RootStackNavigationProp, RootStackParamList } from '../../types/navigation';
 import type { RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { TeacherStackParamList } from '../../navigation/TeacherNavigator';
 import { useTeacherStudents } from './hooks/useTeacherStudents';
 import StudentRow from '../../components/users/StudentRow';
 import { useUser } from '../../hooks/useUser';
 
 export default function TeacherStudentListScreen() {
-  const navigation = useNavigation<RootStackNavigationProp>();
-  const route = useRoute<RouteProp<RootStackParamList, 'TeacherStudentList'>>();
+  const navigation = useNavigation<NativeStackNavigationProp<TeacherStackParamList>>();
+  const route = useRoute<RouteProp<TeacherStackParamList, 'TeacherStudentList'>>();
   const { user } = useUser();
 
   const teacherId = React.useMemo(() => {

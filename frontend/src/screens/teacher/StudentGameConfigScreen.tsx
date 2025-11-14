@@ -2,10 +2,10 @@ import * as React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Switch, useWindowDimensions } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { getAllConfig, updateConfig } from '../../api/studentConfig';
-import { RootStackParamList } from '../../types/navigation';
+import type { TeacherStackParamList } from '../../navigation/TeacherNavigator';
 
 // Add route type in navigation types: StudentGameConfig: { studentId: number }
-type Props = NativeStackScreenProps<RootStackParamList, 'StudentGameConfig'>;
+type Props = NativeStackScreenProps<TeacherStackParamList, 'StudentGameConfig'>;
 
 export default function StudentGameConfigScreen({ route }: Props) {
   const { studentId } = route.params;
