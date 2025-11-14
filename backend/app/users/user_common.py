@@ -26,7 +26,6 @@ def check_basic_values(cur, name=None, email=None, password_hash=None, user_id=N
 
     return fields, values
 
-
 def email_in_use(cur, email, exclude_user_id=None):
     if exclude_user_id:
         cur.execute("SELECT user_id FROM users WHERE email = %s AND user_id != %s", (email, exclude_user_id))
@@ -39,3 +38,22 @@ def commit_or_rollback(cur, success=True):
         cur.execute("COMMIT;" if success else "ROLLBACK;")
     except Exception:
         pass
+
+def get_user_by_email(cursor, email):
+    """Obtiene el registro del usuario (incluyendo el hash) basado en el email."""
+    
+    query = "SELECT user_id, name, email, role_id, password_hash FROM users WHERE email = %s;"
+    
+
+    cursor.execute(query, (email,))
+    
+    return cursor.fetchone()
+
+def get_role_by_id(cursor, id_rol):
+    
+    query = "SELECT role_name FROM roles WHERE role_id = %s;"
+    
+
+    cursor.execute(query, (id_rol,))
+    
+    return cursor.fetchone()

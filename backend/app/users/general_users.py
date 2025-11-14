@@ -1,8 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
+from .user_common import commit_or_rollback
 from ..db import get_db_cursor
 
-users_bp = Blueprint('users', __name__)
-
+users_bp = Blueprint('users', __name__, url_prefix='/api')
 
 @users_bp.route('/users', methods=['GET'])
 def get_users():
@@ -65,123 +65,44 @@ def get_users():
     cur.close()
     return jsonify(users)
 
+
 @users_bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
+    admin_id = request.args.get('admin_id', type=int)
+    if not admin_id:
+        return jsonify({'error': 'admin_id query parameter is required.'}), 400
+
     cur = get_db_cursor()
+    try:
+        # Verificar si el usuario existe
+        cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+        user = cur.fetchone()
+        if not user:
+            return jsonify({'error': 'User not found.'}), 404
 
-    # Fetch the user and its role
-    cur.execute("""
-        SELECT u.user_id, r.role_name
-        FROM users u
-        JOIN roles r ON u.role_id = r.role_id
-        WHERE u.user_id = %s
-    """, (user_id,))
-
-    user = cur.fetchone()
-
-    if not user:
-        cur.close()
-        return jsonify({'error': 'User not found.'}), 404
-
-    # Prevent deleting the last admin: ensure there's at least one admin left
-    if user.get('role_name') == 'admin':
+        # Registrar la eliminación antes de borrar
         cur.execute("""
-            SELECT COUNT(*) as cnt
-            FROM users u
-            JOIN roles r ON u.role_id = r.role_id
-            WHERE r.role_name = 'admin'
-        """)
-        count_row = cur.fetchone()
-        # count may be returned under different key names depending on cursor; try common ones
-        admin_count = None
-        if count_row is None:
-            admin_count = 0
-        elif 'cnt' in count_row:
-            admin_count = count_row['cnt']
-        elif 'count' in count_row:
-            admin_count = count_row['count']
-        else:
-            # take first value
-            admin_count = list(count_row.values())[0]
+            INSERT INTO user_deletion (delete_admin_id, delete_user_id, deleted_user_email, deleted_at)
+            VALUES (%s, %s, %s, NOW())
+            RETURNING delete_admin_id, delete_user_id, deleted_user_email
+        """, (admin_id, user_id, user['email']))
 
-        try:
-            admin_count = int(admin_count)
-        except Exception:
-            admin_count = 0
+        deletion_record = cur.fetchone()
 
-        if admin_count <= 1:
-            cur.close()
-            return jsonify({'error': 'No se puede eliminar al último administrador del sistema. Debe haber al menos un administrador.'}), 400
+        # Borrar al usuario
+        cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
 
-    # Proceed to delete
-    cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
-    cur.connection.commit()
-    cur.close()
+        commit_or_rollback(cur, True)
 
-    return jsonify({'message': f'User {user_id} deleted successfully.'}), 200
-'''
-# obtain user by id
-@users_bp.route('/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    cur = get_db_cursor()
-    cur.execute("""
-        SELECT u.user_id, u.name, u.email, r.role_name
-        FROM users u
-        JOIN roles r ON u.role_id = r.role_id
-        WHERE u.user_id = %s
-    """, (user_id,))
+        # Devolver mensaje + registro para test
+        return jsonify({
+            'message': f'User {user_id} deleted successfully.',
+            'user_deletion_record': deletion_record
+        }), 200
 
-    row = cur.fetchone()
-    cur.close()
-
-    if not row:
-        return jsonify({'error': 'User not found.'}), 404
-
-    user = {
-        'id': row['user_id'],
-        'name': row['name'],
-        'email': row['email'],
-        'role': row['role_name']
-    }
-
-    return jsonify(user)
-
-# update user by id
-@users_bp.route('/users/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
-    data = request.get_json() or {}
-    name = (data.get('name') or '').strip()
-    email = (data.get('email') or '').strip().lower()
-
-    if not name or not email:
-        return jsonify({'error': 'Every field is required.'}), 400
-
-    cur = get_db_cursor()
-    cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
-
-    user = cur.fetchone()
-
-    if not user:
+    except Exception as e:
+        commit_or_rollback(cur, False)
+        current_app.logger.error(f"Error deleting user: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
         cur.close()
-        return jsonify({'error': 'User not found.'}), 404
-
-    update_fields = []
-    update_values = []
-
-    if name:
-        update_fields.append("name = %s")
-        update_values.append(name)
-    
-    if email:
-        update_fields.append("email = %s")
-        update_values.append(email)
-
-    update_values.append(user_id)
-
-    update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE user_id = %s"
-    cur.execute(update_query, tuple(update_values))
-    cur.connection.commit()
-    cur.close()
-
-    return jsonify({'message': f'User {user_id} updated successfully.'}), 200
-'''

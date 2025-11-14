@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'; 
 
-import { RootStackParamList } from '../types/navigation'; 
-import HomeScreen from '../screens/HomeScreen';
-import DetailsScreen from '../screens/DetailsScreen';
-import CreateStudent from '../screens/CreateStudent';
-import TestUsers from '../screens/TestUsers';
-import TapNumberGame from '../games/TapNumberGame/TapNumberGame';
-import UserListScreen from '../screens/UserListScreen';
+import { RootStackParamList } from '../types/navigation';
+import GameNavigator from './GameNavigator';
+import LoginNavigator from './LoginNavigator';
+import AdminNavigator from './AdminNavigator';
+import GameMenuScreen from '../screens/games/gameMenuScreen';
+import LoginScreen from '../screens/auth/screens/LoginScreen';
+import StudentGameConfigScreen from '../screens/teacher/StudentGameConfigScreen';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -15,56 +15,51 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function AppNavigator() {
   return (
     <Stack.Navigator 
-      initialRouteName="Home"
+      initialRouteName="Login"
+      screenOptions={{
+            headerShown: false
+        }}
     >
+
       <Stack.Screen 
-        name="Home" 
-        component={HomeScreen} 
-        options={{ 
-            title: 'Listado Principal',
-            headerShown: false
-        }} 
+         name="GameMenu" 
+        component={GameMenuScreen}
       />
+
       <Stack.Screen 
-        name="Details" 
-        component={DetailsScreen} 
-        options={{ 
-            title: 'Detalles del Ítem',
-            headerShown: false
-        }}
+        name="Games" 
+        component={GameNavigator}
       />
-      <Stack.Screen 
-        name="CreateStudent" 
-        component={CreateStudent} 
-        options={{ 
-            title: 'Crear Estudiante',
-            headerShown: true
-        }}
-      />
+      
       <Stack.Screen
-        name="TestUsers"
-        component={TestUsers}
+        name="Login"
+        component={LoginScreen}
         options={{
-            title: 'Test Users',
-            headerShown: true
+          title: 'Iniciar Sesión',
+          headerShown: false
         }}
       />
+
       <Stack.Screen 
-        name="TapNumberGame" 
-        component={TapNumberGame} 
+        name="Auth" 
+        component={LoginNavigator}
+      />
+
+      <Stack.Screen 
+        name="Admin" 
+        component={AdminNavigator}
+      />
+
+      
+      <Stack.Screen 
+        name="StudentGameConfig" 
+        component={StudentGameConfigScreen} 
         options={{ 
-          title: 'Juego de Números',
-          headerShown: false
+          title: 'Configurar juegos',
+          headerShown: true 
         }} 
       />
-      <Stack.Screen 
-        name="UserList" 
-        component={UserListScreen} 
-        options={{ 
-          title: 'Lista de Usuarios',
-          headerShown: false
-        }} 
-      />
+      {/** Pantalla alternativa eliminado: GameSelected */}
     </Stack.Navigator>
   );
 }

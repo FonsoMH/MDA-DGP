@@ -45,10 +45,10 @@ Nuestro grupo está compuesto por seis integrantes, cada uno con un rol específ
 docker-compose up --build
 ```
 
-3. Verificar /hello
+3. Verificar
 
 ```bash
-http://localhost:5000/hello
+http://localhost:5000
 ```
 
 ### Configuración inicial frontend
@@ -73,11 +73,7 @@ npm start
 
 - Presiona w → web, a → Android, i → iOS, o escanea QR con Expo Go.
 
-4. Cambiar URL en App.tsx si es necesario
 
-```
-http://TU_IP_LOCAL:5000/hello
-```
 
 
 ### IMPORTANTE:

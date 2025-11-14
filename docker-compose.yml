@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:15
+    container_name: tato-db
+    env_file:
+      - ./backend/.env 
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web-backend:
+    build: ./backend 
+    container_name: tato-backend
+    command: flask run --host=0.0.0.0 --debugger --reload 
+    volumes:
+      - ./backend:/app 
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env 
+    environment:
+      - FLASK_ENV=development 
+    depends_on:
+      - db
+
+  web-frontend:
+    build: ./frontend
+    container_name: tato-frontend
+    command: npm run start
+    volumes:
+      - ./frontend:/app 
+      - /app/node_modules
+    ports:
+      - "8081:8081"
+    depends_on:
+      - web-backend
+
+volumes:
+  pgdata:

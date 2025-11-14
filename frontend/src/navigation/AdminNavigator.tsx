@@ -1,0 +1,37 @@
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import UserList from '../screens/admin/UserList';
+import StudentCreateScreen from '../screens/admin/StudentCreateScreen';
+import TeacherCreateScreen from '../screens/admin/TeacherCreateScreen';
+
+
+
+
+export type AdminStackParamList = {
+    UserList: undefined;
+    AdminCreate: undefined;
+    TeacherCreate: undefined;
+    StudentCreate: undefined;
+};
+
+const AdminStack = createNativeStackNavigator<AdminStackParamList>();
+
+
+function AdminNavigator() {
+  return (
+    <AdminStack.Navigator
+      screenOptions={{
+            headerShown: false
+        }}
+    >
+        <AdminStack.Screen name="UserList" component={UserList}/>
+
+      <AdminStack.Screen name="TeacherCreate" component={TeacherCreateScreen}/>
+      
+      <AdminStack.Screen name="StudentCreate" component={StudentCreateScreen}/>
+
+    </AdminStack.Navigator>
+  );
+}
+
+export default AdminNavigator;
