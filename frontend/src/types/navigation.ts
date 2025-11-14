@@ -8,6 +8,9 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<LoginStackParamList>; 
   Admin: NavigatorScreenParams<AdminStackParamList>; 
   
+  // Listado de estudiantes para tutores (teacherId opcional, se toma del usuario logeado por defecto)
+  TeacherStudentList: { teacherId?: number };
+
   // Nueva ruta para configuración de juegos por estudiante
   StudentGameConfig: { studentId: number };
 };

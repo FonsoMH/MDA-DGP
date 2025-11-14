@@ -8,6 +8,7 @@ import AdminNavigator from './AdminNavigator';
 import GameMenuScreen from '../screens/games/gameMenuScreen';
 import LoginScreen from '../screens/auth/screens/LoginScreen';
 import StudentGameConfigScreen from '../screens/teacher/StudentGameConfigScreen';
+import TeacherStudentListScreen from '../screens/teacher/TeacherStudentListScreen';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -15,6 +16,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function AppNavigator() {
   return (
     <Stack.Navigator 
+      id={undefined}
       initialRouteName="Login"
       screenOptions={{
             headerShown: false
@@ -50,6 +52,15 @@ export default function AppNavigator() {
         component={AdminNavigator}
       />
 
+      <Stack.Screen 
+        name="TeacherStudentList" 
+        component={TeacherStudentListScreen} 
+        options={{ 
+          title: 'Estudiantes',
+          headerShown: false 
+        }} 
+      />
+      
       
       <Stack.Screen 
         name="StudentGameConfig" 
