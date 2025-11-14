@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.db import get_db_cursor, get_db
 import re
 
-bp = Blueprint("accessibility", __name__, url_prefix="/api")
+accessibility_bp = Blueprint("accessibility", __name__, url_prefix="/api")
 
 # --- Validation ---
 def validate_color_hex(color):
@@ -21,7 +21,30 @@ def validate_booleano(val):
     return isinstance(val, bool)
 
 # --- GET ---
-@bp.route("/accesibility/<int:student_id>", methods=["GET"])
+
+@accessibility_bp.route("/accessibility/defaults", methods=["GET"])
+def get_default_accessibility():
+    cur = get_db_cursor()
+    try:
+        default_settings = {
+            "background_color": "#F7F8FA",
+            "foreground_color": "#000000",
+            "number_color": "#000000",
+            "box_color": "#D9D9D9",
+            "icon_position": "izquierda",
+            "high_contrast_mode": False,
+            "show_numbers_mode": True,
+            "font_size": 16
+        }
+
+        return jsonify(default_settings), 200
+
+    except Exception as e:
+        return jsonify({"error": "Error al obtener configuración por defecto"}), 500
+    finally:
+        cur.close()
+
+@accessibility_bp.route("/accessibility/<int:student_id>", methods=["GET"])
 def get_accessibility(student_id):
     cur = get_db_cursor()
     cur.execute("SELECT * FROM accessibility_settings WHERE student_id = %s", (student_id,))
@@ -32,7 +55,7 @@ def get_accessibility(student_id):
     return jsonify(settings), 200
 
 # --- PUT ---
-@bp.route("/accesibility/<int:student_id>", methods=["PUT"])
+@accessibility_bp.route("/accessibility/<int:student_id>", methods=["PUT"])
 def update_accessibility(student_id):
     data = request.get_json()
     if not data:
@@ -117,3 +140,4 @@ def update_accessibility(student_id):
         "message": "Configuración actualizada correctamente",
         "updated_settings": updated_settings
     }), 200
+
