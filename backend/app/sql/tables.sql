@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS game_results (
 );
 
 -- 
-CREATE TABLE user_deletion (
+CREATE TABLE IF NOT EXISTS user_deletion (
     deletion_id SERIAL PRIMARY KEY,
     delete_admin_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     delete_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
