@@ -122,9 +122,13 @@ function Container({
             ))}
         </TouchableOpacity>
 
-        <OperacionDisplay 
-        containerColor={borderColor}
-        numbers={myNumbers} operationType="suma"/>
+        {targetSum && (
+            <OperacionDisplay 
+                containerColor={borderColor}
+                numbers={myNumbers} 
+                operationType="suma"
+            />
+        )}
 
         </View>
 
