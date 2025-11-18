@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import {StyleSheet, TouchableOpacity } from "react-native";
+import {StyleSheet, TouchableOpacity, View } from "react-native";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import { Gesture } from "react-native-gesture-handler";
 import { scheduleOnRN } from "react-native-worklets";
-import { CORRECT_COLOT, EMPTY_COLOR, ERROR_COLOR, Option } from "../../../types/games";
+import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option } from "../../../types/games";
+import OperacionDisplay from "./OperationDisplay";
 
 
 interface ContainerProps{
@@ -11,13 +12,13 @@ interface ContainerProps{
     onDropSuccess: () => void;
     onItemReturned: (itemId: Option) => void;
     onUniformityChange: (color: string) => void;
-    sum: number | null;
+    targetSum: number | null;
     resetSignal: boolean;
 }
 
 
 function Container({
-    sum, 
+    targetSum, 
     currentSelectedNumber, 
     onDropSuccess, 
     onItemReturned,
@@ -37,7 +38,18 @@ function Container({
         const firstValue = numbers[0].value;
         const allSame = numbers.every(item => item.value === firstValue);
         
-        return allSame ? CORRECT_COLOT : ERROR_COLOR;
+        return allSame ? CORRECT_COLOR : ERROR_COLOR;
+    };
+
+    const checkSum = (numbers: Option[]): string => {
+        
+        if (numbers.length === 0) {
+            return EMPTY_COLOR;
+        }
+        
+        const totalSum = numbers.reduce((sum, current) => sum + current.value, 0);
+
+        return totalSum === targetSum ? CORRECT_COLOR : ERROR_COLOR;
     };
 
     useEffect(() => {
@@ -49,6 +61,14 @@ function Container({
     }, [resetSignal]);
 
     useEffect(() => {
+        
+        if(targetSum){
+            const color = checkSum(myNumbers);
+            setBorderColor(color);
+            onUniformityChange(color);
+            return;
+        }
+
         const color = checkUniformity(myNumbers);
         setBorderColor(color);
         onUniformityChange(color);
@@ -86,34 +106,51 @@ function Container({
             });
 
     return (
+        <View style={styles.area}>
+
         <TouchableOpacity 
         style={[styles.container, {borderColor: borderColor}]} 
         onPress={handleContainerClick}>
             {myNumbers.map((option, index) => (
                 <TouchableOpacity onPress={() => handleNumberCLick(option)}>
                     <NumberDisplay
-                        key={`option-${option.id}-${index}`}
+                        key={`opt-${option.id}-${index}`}
                         numberProp={option.value} 
                         size={80}
                     ></NumberDisplay>
                 </TouchableOpacity>
             ))}
         </TouchableOpacity>
+
+        <OperacionDisplay 
+        containerColor={borderColor}
+        numbers={myNumbers} operationType="suma"/>
+
+        </View>
+
     )
     
 }
 
 const styles = StyleSheet.create({ 
+
+    area: {
+        flex:1,
+        alignItems: 'center',
+        margin: 15,
+    },
+
     container: {
         backgroundColor: '#FFFFFF', 
         flex: 1,
+        width: '90%',
         flexDirection: 'row',
         flexWrap: 'wrap',
+        padding: 16,
         
         borderWidth: 2.21,
         borderRadius: 8, 
-        padding: 16,
-        margin: 15,
+        
 
         justifyContent: 'center',
         alignItems: 'center',
