@@ -6,7 +6,7 @@ import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/u
 import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import Container from "./Container";
-import { CORRECT_COLOT, EMPTY_COLOR, Option } from "../../../types/games";
+import { CORRECT_COLOR, EMPTY_COLOR, Option } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 
 const GAME_ID = 3; 
@@ -100,9 +100,6 @@ function ContainerSort() {
 
             setTargetSum(result.targetSum);
 
-            console.log(result.puzzleArray);
-            console.log(result.targetSum);
-
         }
 
         else {
@@ -114,8 +111,6 @@ function ContainerSort() {
             }));
 
             setOptions(newItemsWithOptions);
-
-            console.log(newOptions);
         }
 
 
@@ -162,7 +157,7 @@ function ContainerSort() {
             return;
         }
 
-        const allGreen = containerStatuses.every(status => status === CORRECT_COLOT);
+        const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
 
         if (allGreen && options.length == 0) {
             setResetSignal(true);
@@ -210,9 +205,9 @@ function ContainerSort() {
                         // >
                         <TouchableOpacity
                             onPress={() => handleNumberSelect(option)}
+                            key={`option-${option.id}`}
                         >
                             <NumberDisplay
-                                key={`option-${option.id}`}
                                 numberProp={option.value} 
                                 size={100}
                             />
@@ -223,8 +218,8 @@ function ContainerSort() {
 
             <View style={styles.resultsContainer}>
                 {Array(containers).fill(null).map((_, index) => (
-                    <Container sum={targetSum}
-                    currentSelectedNumber={selectedNumber} // <- El número que el hijo necesita
+                    <Container targetSum={targetSum}
+                    currentSelectedNumber={selectedNumber}
                     onDropSuccess={clearSelectedNumber}
                     onItemReturned={(option: Option) => handleItemReturnedFromContainer(option)}
                     onUniformityChange={(color: string) => handleContainerStatusUpdate(color, index)}
