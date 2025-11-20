@@ -142,7 +142,7 @@ function TapNumberGame() {
                 style={styles.ttsButtonContainer} // Usamos un nuevo estilo para el contenedor
             >
                 <Image
-                    source={require('../../../../assets/icons/listen.png')}
+                    source={require('../../../../assets/icons/sound.png')}
                     style={styles.clickableImage}
                     accessibilityLabel="Escuchar el número objetivo de nuevo"
                 />
