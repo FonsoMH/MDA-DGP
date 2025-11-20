@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import {StyleSheet, TouchableOpacity, View } from "react-native";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
-import { Gesture } from "react-native-gesture-handler";
-import { scheduleOnRN } from "react-native-worklets";
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option } from "../../../types/games";
 import OperacionDisplay from "./OperationDisplay";
+import DraggableItem from "../SequenceGame/DraggableItem";
+import { SharedValue, useAnimatedRef } from "react-native-reanimated";
+
+type Layout = { x: number; y: number; width: number; height: number; };
 
 
 interface ContainerProps{
@@ -14,6 +16,11 @@ interface ContainerProps{
     onUniformityChange: (color: string) => void;
     targetSum: number | null;
     resetSignal: boolean;
+    topZoneLayout: SharedValue<Layout[] | null>;
+
+    containerIndex: number;
+    onLayoutMeasured?: (layout: Layout, index: number) => void;
+    receivedIndex: number | null
 }
 
 
@@ -23,7 +30,11 @@ function Container({
     onDropSuccess, 
     onItemReturned,
     onUniformityChange,
-    resetSignal
+    resetSignal,
+    topZoneLayout,
+    containerIndex,
+    onLayoutMeasured,
+    receivedIndex
 }: ContainerProps) {
 
     const [myNumbers, setMyNumbers] = useState<Option[]>([]);
@@ -100,25 +111,45 @@ function Container({
         
     }
 
-    const tapGesture = Gesture.Tap()
-            .onEnd(() => {
-                scheduleOnRN(handleContainerClick);
-            });
+    const containerRef = useAnimatedRef<View>();
+
+    useEffect(() => {
+        
+        if(receivedIndex == containerIndex){
+            handleContainerClick();
+        }
+    }, [receivedIndex])
 
     return (
-        <View style={styles.area}>
+        <View style={styles.area}
+        ref={containerRef}
+        onLayout={() => {
+            containerRef.current?.measureInWindow((x, y, width, height) => {
+                const layout: Layout = { x, y, width, height };
+                
+                onLayoutMeasured(layout, containerIndex);
+            });
+        }}
+        >
 
         <TouchableOpacity 
         style={[styles.container, {borderColor: borderColor}]} 
         onPress={handleContainerClick}>
             {myNumbers.map((option, index) => (
-                <TouchableOpacity onPress={() => handleNumberCLick(option)}>
+                <DraggableItem
+                onPress={() => handleNumberCLick(option)}
+                onDrop={() => handleNumberCLick(option)}
+                dropZonesLayouts={topZoneLayout} 
+                isDisabled={false} 
+                key={`opt-${option.id}-${index}`}
+                comeBack={false}
+                style={styles.optionWrapper}
+                 >
                     <NumberDisplay
-                        key={`opt-${option.id}-${index}`}
                         numberProp={option.value} 
                         size={80}
                     ></NumberDisplay>
-                </TouchableOpacity>
+                </DraggableItem>
             ))}
         </TouchableOpacity>
 
@@ -168,7 +199,12 @@ const styles = StyleSheet.create({
     numberText: {
         fontWeight: 'bold',
         color: '#101828',
-    }
+    },
+
+    optionWrapper: {
+        margin: 5, 
+        zIndex: 2,
+    },
 }); 
 
 export default Container;

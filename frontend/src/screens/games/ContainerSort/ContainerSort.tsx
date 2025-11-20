@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useGameManager } from "../utils/gameManager";
 import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions } from "../utils/gameUtils";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
@@ -8,11 +8,13 @@ import NumberDisplay from "../../../components/common/NumberDisplays/NumberDispl
 import Container from "./Container";
 import { CORRECT_COLOR, EMPTY_COLOR, Option } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
+import { useAnimatedRef, useDerivedValue, useSharedValue } from "react-native-reanimated";
+import DraggableItem from "../SequenceGame/DraggableItem";
 
 const GAME_ID = 3; 
 
 //TODO calcular puntuacion
-
+type Layout = { x: number; y: number; width: number; height: number; };
 
 
 function ContainerSort() {
@@ -69,7 +71,12 @@ function ContainerSort() {
             flexDirection: 'row',
             flex: 1,
             width: '100%',
-        }
+        },
+
+        optionWrapper: {
+            margin: 5, 
+            zIndex: 2,
+        },
 
         
 
@@ -133,6 +140,7 @@ function ContainerSort() {
             prevItems.filter(item => item.id !== selectedNumber.id)
         );
         setSelectedNumber(null);
+        setDropSelected(null);
     };
 
     const handleNumberSelect = (numberValue: Option) => {
@@ -171,6 +179,47 @@ function ContainerSort() {
         manager.resetGame();
     };
 
+    const topZoneRef = useAnimatedRef<View>();
+    const topZoneLayout = useSharedValue<Layout[] | null>(null);
+
+    const bottomZoneLayouts = useSharedValue<Layout[]>([]);
+
+    //TODO revisar
+    const handleContainerLayout = ((layout: Layout, index: number) => {
+        'worklet';
+        
+        if ( index == containers -1 ){
+            
+
+            bottomZoneLayouts.set((currentLayouts) => {
+                'worklet';
+                const newLayouts = [...currentLayouts];
+
+                for (let i = index; i>= 0; i--){
+
+                    const newLayout: Layout = {
+                        height: layout.height,
+                        width: layout.width,
+                        x: layout.x - ((containers - i - 1) * (layout.width + 30)),
+                        y: layout.y
+                    }
+
+                    newLayouts[i] = newLayout;
+                    
+
+                }
+                return newLayouts;
+            });
+        }
+        
+    });
+
+
+    const [dropSelected, setDropSelected] =  useState<number | null>(null);
+
+    const handleDropOnContainer = ((index: number) => {
+        setDropSelected(index);
+    });
 
     return (
         <View style={styles.screenContainer}>
@@ -187,32 +236,30 @@ function ContainerSort() {
 
             <View
                 style={[styles.gridContainer, { height: '35%' }]}
-                // ref={topZoneRef}
-                // onLayout={() => {
-                //     topZoneRef.current?.measureInWindow((x, y, width, height) => {
-                //         topZoneLayout.value = { x, y, width, height };
-                //     });
-                // }}
+                ref={topZoneRef}
+                onLayout={() => {
+                    topZoneRef.current?.measureInWindow((x, y, width, height) => {
+                        const layout: Layout = { x, y, width, height };
+                        topZoneLayout.value = [layout]; 
+                    });
+                }}
             >
                     {options.map((option) => (
-                        // <DraggableItem
-                        //     key={`option-${num}-${index}`}
-                        //     onPress={() => handleSelection(num)} 
-                        //     onDrop={() => handleSelection(num)}
-                        //     dropZoneLayout={bottomZoneLayout} 
-                        //     style={styles.optionWrapper}
-                        //     isDisabled={isSelected(num)} 
-                        // >
-                        <TouchableOpacity
+                        <DraggableItem
                             onPress={() => handleNumberSelect(option)}
+                            dropZonesLayouts={bottomZoneLayouts} 
+                            isDisabled={false} 
+                            onStart={() => handleNumberSelect(option)}
+                            onDrop={(targetIndex) => handleDropOnContainer(targetIndex)}
                             key={`option-${option.id}`}
+                            comeBack={false}
+                            style={styles.optionWrapper}
                         >
                             <NumberDisplay
                                 numberProp={option.value} 
                                 size={100}
                             />
-                        </TouchableOpacity>
-                        // </DraggableItem>
+                        </DraggableItem>
                     ))}
             </View>
 
@@ -224,6 +271,11 @@ function ContainerSort() {
                     onItemReturned={(option: Option) => handleItemReturnedFromContainer(option)}
                     onUniformityChange={(color: string) => handleContainerStatusUpdate(color, index)}
                     resetSignal={resetSignal}
+                    topZoneLayout={topZoneLayout}
+
+                    containerIndex={index}
+                    onLayoutMeasured={handleContainerLayout}
+                    receivedIndex={dropSelected}
                     />
                 ))}
             </View>
