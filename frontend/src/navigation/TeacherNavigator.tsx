@@ -24,16 +24,11 @@ function TeacherNavigator() {
 			<TeacherStack.Screen
 				name="TeacherStudentList"
 				component={TeacherStudentListScreen}
-				options={{ headerShown: false }}
 			/>
 
 			<TeacherStack.Screen
 				name="StudentGameConfig"
 				component={StudentGameConfigScreen}
-				options={{
-					title: 'Configurar juegos',
-					headerShown: true,
-				}}
 			/>
 		</TeacherStack.Navigator>
 	);

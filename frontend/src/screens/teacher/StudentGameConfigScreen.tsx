@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Switc
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { getAllConfig, updateConfig } from '../../api/studentConfig';
 import type { TeacherStackParamList } from '../../navigation/TeacherNavigator';
+import BackButton from '../../components/common/BackButton/BackButton';
 
 // Add route type in navigation types: StudentGameConfig: { studentId: number }
 type Props = NativeStackScreenProps<TeacherStackParamList, 'StudentGameConfig'>;
@@ -76,6 +77,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
       contentContainerStyle={[styles.content, { maxWidth: MAX_CONTENT_WIDTH, paddingHorizontal: H_PADDING }]}
       style={{ flex: 1 }}
     >
+      <BackButton width={130} height={50} />
       <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
 
       <View style={[styles.column, { gap: GAP }]}
