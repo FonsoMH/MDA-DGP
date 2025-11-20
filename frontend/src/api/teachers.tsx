@@ -1,6 +1,8 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
 import type { Student } from '../types/users';
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_TIMEOUT = process.env.API_TIMEOUT;
 
 // Respuesta esperada del backend:
 // {
@@ -13,10 +15,21 @@ type TeacherStudentsResponse = {
 } | any[]; // defensivo por si el backend devuelve array directo
 
 export async function getStudentsForTeacher(teacherId: number): Promise<Student[]> {
-  const url = `${API_BASE_URL}/api/teachers/${teacherId}/students`;
+  const endpoint = `${BASE_URL}/api/teachers/${teacherId}/students`;
+
+  console.log("cachouuuu");
+
+  console.log(endpoint);
+  
+  
   try {
-    const res = await axios.get<TeacherStudentsResponse>(url);
-    const payload = res.data;
+    const response = await axios.get<TeacherStudentsResponse>(endpoint, {
+      timeout: API_TIMEOUT,
+    });
+    const payload = response.data;
+
+    console.log(payload);
+    
 
     // Soporta ambos formatos: objeto con { students } o array directo
     const studentsArray: any[] = Array.isArray(payload)
