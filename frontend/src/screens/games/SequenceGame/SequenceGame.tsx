@@ -13,6 +13,7 @@ import FeedbackScreen from '../../../components/FeedBack/Feedback';
 import { useGameManager } from '../utils/gameManager';
 import { generateRandomOptions } from '../utils/gameUtils';
 import DraggableItem from './DraggableItem';
+import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
 
 
 
@@ -139,6 +140,18 @@ function SequenceGame() {
         }
     };
 
+    const getCorrectSequence = (allOptions: number[]): number[] => {
+        if (!manager.config) return [];
+        
+        const compareFn = (a: number, b: number) => {
+            return manager.config!.upward ? a - b : b - a;
+        };
+
+        return [...allOptions].sort(compareFn);
+    };
+
+    const correctSequence = getCorrectSequence(options);
+
     const isGameFinished = (selected: number[], allOptions: number[]): boolean => {
         if (selected.length !== allOptions.length || allOptions.length === 0) {
             return false;
@@ -225,24 +238,43 @@ function SequenceGame() {
                     });
                 }}
             >
-                    {selectedNumbers.map((num, index) => (
-                        <DraggableItem
-                            key={`selected-${num}-${index}`}
-                            onPress={() => handleSelection(num)}
-                            onDrop={() => handleSelection(num)}
-                            dropZonesLayouts={topZoneLayout}
-                            style={styles.optionWrapper}
-                            isDisabled={false}
-                            comeBack={false}
-                        >
-                            <>
+
+                
+                    {selectedNumbers.map((num, index) => {
+                        // 1. Compara el número en la posición 'index' de la selección
+                        //    con el número que debería estar en esa posición en la secuencia correcta.
+                        const isCorrectPosition = num === correctSequence[index];
+
+                        // 2. Determina el estilo de feedback
+                        const feedbackStyle = 
+                            isCorrectPosition && correctSequence.length > 0 // Solo damos feedback si hay opciones
+                                ? CORRECT_COLOR 
+                                : ERROR_COLOR;
+                        
+                        // NOTA: Si la lista está vacía (index 0) y el juego no ha empezado, 
+                        // esto podría dar feedback incorrecto. 
+                        // Lo aplicamos solo si ya hay números seleccionados (selectedNumbers.length > 0).
+
+                        const finalStyle = selectedNumbers.length > 0 ? feedbackStyle : null;
+
+                        return (
+                            <DraggableItem
+                                key={`selected-${num}-${index}`}
+                                onPress={() => handleSelection(num)}
+                                onDrop={() => handleSelection(num)}
+                                dropZonesLayouts={topZoneLayout}
+                                style={styles.optionWrapper}
+                                isDisabled={false}
+                                comeBack={false}
+                            >
                                 <NumberDisplay
                                     numberProp={num} 
                                     size={100}
+                                    style={{backgroundColor: finalStyle}} 
                                 />
-                            </>
-                        </DraggableItem>
-                    ))}
+                            </DraggableItem>
+                        );
+                    })}
             </View>
        
             <FeedbackScreen visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
