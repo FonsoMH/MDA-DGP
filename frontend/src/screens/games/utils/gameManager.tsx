@@ -77,7 +77,7 @@ export const useGameManager = (
             setTimeout(() => {
                 onGameInit(maxRange, optionsCount, numContainers, haveToSum);
                 setGames(prevGames => prevGames + 1);
-            }, 300);
+            }, 700);
         }
     };
 
