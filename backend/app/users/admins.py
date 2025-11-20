@@ -27,10 +27,10 @@ def create_admin():
         password_hash = generate_password_hash(password)
 
         cur.execute("""
-            INSERT INTO users (name, email, password_hash, role)
+            INSERT INTO users (name, email, password_hash, role_id)
             VALUES (%s, %s, %s, %s)
             RETURNING user_id
-        """, (name, email, password_hash, 'admin'))
+        """, (name, email, password_hash, '3'))
 
         new_user_id = cur.fetchone()['user_id']
 

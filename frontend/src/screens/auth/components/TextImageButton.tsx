@@ -2,13 +2,14 @@ import { Text, StyleSheet , Image, Pressable, ImageSourcePropType} from 'react-n
 
 interface LoginOptionButtonProps {
     icon: ImageSourcePropType;        
-    label: string;       
+    label: string;    
+    testID?: string; 
     onPress: () => void; 
 }
 
-export default function TextImageButton({ icon, label , onPress}: LoginOptionButtonProps) {
+export default function TextImageButton({ icon, label, testID, onPress}: LoginOptionButtonProps) {
     return (
-        <Pressable style={styles.button} onPress={onPress}>
+        <Pressable style={styles.button} onPress={onPress} testID={testID}>
             <Text style={styles.text}>{label}</Text>
             <Image source={icon} alt={label} style={styles.buttonImage} />
         </Pressable>

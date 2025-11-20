@@ -1,4 +1,4 @@
-import { View ,Text, StyleSheet, ScrollView } from 'react-native';
+import { View ,Text, StyleSheet, ScrollView , Image} from 'react-native';
 import PasswordItem from '../components/PasswordItem'; 
 import trashCanIcon from '../../../../assets/trash_can.png';
 import TextImageButton from '../components/TextImageButton';
@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RootStackNavigationProp } from '../../../types/navigation';
 import { useUser } from '../../../hooks/useUser';
 import { usePictogramPassword } from '../../../utils/usePictogramPassword';
+import { useState } from 'react';
 
 
 interface StudentParam {
@@ -25,6 +26,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
     const rootNavigation = useNavigation<RootStackNavigationProp>(); 
     const userParam: StudentParam = route.params.userParam; 
     const { login } = useUser();
+    const [failedPassword, setFailedPassword] =  useState(false);
     
     const { 
         password, 
@@ -54,9 +56,15 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
             if(loggedInUser){
                 rootNavigation.navigate('GameMenu');
             }
+            else{
+                console.error("Invalid credentials");
+                clearPassword();
+                setFailedPassword(true);
+            }
             
         } catch (error) {
             // TODO handle error (mostrar un mensaje al usuario)
+            clearPassword();
             console.error("Login failed:", error);
         }
     };
@@ -74,19 +82,25 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                     Tu Contraseña:
                 </Text>
                 <View style={styles.passwordMainRow}>
-                    <View style={styles.passwordDisplay}>
-                        {
-                            password.map((item, index) => (
-                                <PasswordItem 
+                    <View style={{ flexDirection: 'column', flex: 1, alignContent: 'center' , gap: 10}}>
+                        <View style={styles.passwordDisplay}>
+                            {
+                                password.map((item, index) => (
+                                    <PasswordItem 
                                     key={index} 
                                     icon={item.icon} 
                                     text={item.name} 
                                     onPress={() => {}}
                                     height={100}
                                     width={100}
-                                />
-                            ))
-                        }
+                                    />
+                                ))
+                            }
+                            
+                        </View>
+                        {failedPassword ? 
+                            <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 , color: 'red' }}>Inténtalo de nuevo</Text>
+                        : null}
                     </View>
                     <View style={styles.passwordOptions}>
                         <TextImageButton 
@@ -94,12 +108,13 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             icon={paperPlaneIcon} 
                             onPress={handleLogIn} 
                             label="Entrar" 
+                            testID="enter-password-button"
                         />
                         <TextImageButton 
                             icon={trashCanIcon} 
                             onPress={clearPassword}
                             label="Limpiar" 
-                        />
+                            />
                     </View>
                 </View>
 
@@ -113,6 +128,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             key={index} 
                             icon={item.icon} 
                             text={item.name} 
+                            testID={`pictogram-${item.name}`}
                             onPress={() => addPictogram(item)}
                             height={130}
                             width={175}
