@@ -34,8 +34,8 @@ def create_app():
     from .login import auth
     app.register_blueprint(auth.auth_bp)
 
-    from .accesibility.accessibilitySettings import accessibility_settings_bp
-    app.register_blueprint(accessibility_settings_bp)
+    from .accessibility import accessibility
+    app.register_blueprint(accessibility.accessibility_bp)
 
     from .users.teachers import teacher_bp
     app.register_blueprint(teacher_bp)

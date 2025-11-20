@@ -30,12 +30,11 @@ CREATE TABLE IF NOT EXISTS games (
 -- Accessibility Settings (1-to-1 with Student)
 CREATE TABLE IF NOT EXISTS accessibility_settings (
     student_id INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    background_color VARCHAR(7) DEFAULT '#F7F8FA',
-    foreground_color VARCHAR(7) DEFAULT '#000000',
-    number_color VARCHAR(7) DEFAULT '#000000', 
-    box_color VARCHAR(7) DEFAULT '#D9D9D9', 
+    background_color VARCHAR(9) DEFAULT '#F7F8FA',
+    foreground_color VARCHAR(9) DEFAULT '#000000',
+    number_color VARCHAR(9) DEFAULT '#000000', 
+    box_color VARCHAR(9) DEFAULT '#D9D9D9', 
     icon_position VARCHAR(10) DEFAULT 'izquierda' CHECK (icon_position IN ('izquierda', 'derecha')),
-    high_contrast_mode BOOLEAN DEFAULT false,
     show_numbers_mode BOOLEAN DEFAULT true, 
     font_size INTEGER DEFAULT 16 CHECK (font_size > 8)
 );
@@ -67,7 +66,7 @@ CREATE TABLE IF NOT EXISTS game_results (
 );
 
 -- 
-CREATE TABLE user_deletion (
+CREATE TABLE IF NOT EXISTS user_deletion (
     deletion_id SERIAL PRIMARY KEY,
     delete_admin_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     delete_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -113,8 +112,8 @@ VALUES
 ON CONFLICT (email) DO NOTHING;
 
 -- 4. Populate Settings for 1 student (Eva)
-INSERT INTO accessibility_settings (student_id, high_contrast_mode, font_size, icon_position)
-SELECT user_id, true, 20, 'derecha' FROM users WHERE email = 'eva@app.com'
+INSERT INTO accessibility_settings (student_id, font_size, icon_position)
+SELECT user_id, 20, 'derecha' FROM users WHERE email = 'eva@app.com'
 ON CONFLICT (student_id) DO NOTHING;
 
 -- 5. Populate Configurations (Teacher assigns parameters)

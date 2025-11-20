@@ -8,6 +8,7 @@ import AdminNavigator from './AdminNavigator';
 import GameMenuScreen from '../screens/games/gameMenuScreen';
 import LoginScreen from '../screens/auth/screens/LoginScreen';
 import StudentGameConfigScreen from '../screens/teacher/StudentGameConfigScreen';
+import AccessibilitySettingsConfigScreen from '../screens/teacher/AccessibilitySettingsConfigScreen';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -56,8 +57,17 @@ export default function AppNavigator() {
         component={StudentGameConfigScreen} 
         options={{ 
           title: 'Configurar juegos',
-          headerShown: true 
+          headerShown: false 
         }} 
+      />
+
+      <Stack.Screen 
+        name="AccessibilitySettingsConfig"
+        component={AccessibilitySettingsConfigScreen}
+        options={{
+          title: 'Configuración de accesibilidad',
+          headerShown: false
+        }}
       />
       {/** Pantalla alternativa eliminado: GameSelected */}
     </Stack.Navigator>

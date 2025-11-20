@@ -7,6 +7,7 @@ export type RootStackParamList = {
   Games: NavigatorScreenParams<GameStackParamList>; 
   Auth: NavigatorScreenParams<LoginStackParamList>; 
   Admin: NavigatorScreenParams<AdminStackParamList>; 
+  AccessibilitySettingsConfig: undefined;
   
   // Nueva ruta para configuración de juegos por estudiante
   StudentGameConfig: { studentId: number };
