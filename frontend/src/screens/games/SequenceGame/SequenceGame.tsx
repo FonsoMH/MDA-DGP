@@ -116,10 +116,10 @@ function SequenceGame() {
     const manager = useGameManager(GAME_ID, initializeGame);
 
     const topZoneRef = useAnimatedRef<View>();
-    const topZoneLayout = useSharedValue<Layout | null>(null);
+    const topZoneLayout = useSharedValue<Layout[] | null>(null);
     
     const bottomZoneRef = useAnimatedRef<View>();
-    const bottomZoneLayout = useSharedValue<Layout | null>(null);
+    const bottomZoneLayout = useSharedValue<Layout[] | null>(null);
     
     const handlePlayAgain = () => {
         manager.resetGame();
@@ -192,7 +192,8 @@ function SequenceGame() {
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
-                        topZoneLayout.value = { x, y, width, height };
+                        const layout: Layout = { x, y, width, height };
+                        topZoneLayout.value = [layout]; 
                     });
                 }}
             >
@@ -201,9 +202,10 @@ function SequenceGame() {
                             key={`option-${num}-${index}`}
                             onPress={() => handleSelection(num)} 
                             onDrop={() => handleSelection(num)}
-                            dropZoneLayout={bottomZoneLayout} 
+                            dropZonesLayouts={bottomZoneLayout} 
                             style={styles.optionWrapper}
                             isDisabled={isSelected(num)} 
+                            comeBack={true}
                         >
                             <NumberDisplay
                                 numberProp={num} 
@@ -218,7 +220,8 @@ function SequenceGame() {
                 ref={bottomZoneRef}
                 onLayout={() => {
                     bottomZoneRef.current?.measureInWindow((x, y, width, height) => {
-                        bottomZoneLayout.value = { x, y, width, height };
+                        const layout: Layout = { x, y, width, height };
+                        bottomZoneLayout.value = [layout]; 
                     });
                 }}
             >
@@ -227,9 +230,10 @@ function SequenceGame() {
                             key={`selected-${num}-${index}`}
                             onPress={() => handleSelection(num)}
                             onDrop={() => handleSelection(num)}
-                            dropZoneLayout={topZoneLayout}
+                            dropZonesLayouts={topZoneLayout}
                             style={styles.optionWrapper}
                             isDisabled={false}
+                            comeBack={false}
                         >
                             <>
                                 <NumberDisplay

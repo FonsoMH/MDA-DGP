@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS game_results (
 );
 
 -- 
-CREATE TABLE user_deletion (
+CREATE TABLE IF NOT EXISTS user_deletion (
     deletion_id SERIAL PRIMARY KEY,
     delete_admin_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     delete_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
@@ -132,6 +132,11 @@ VALUES
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'ordena-secuencia'),
     50, 4, 0, true, false
+),
+(
+    (SELECT user_id FROM users WHERE email = 'eva@app.com'),
+    (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
+    20, 5, 3, true, false
 ),
 (
     (SELECT user_id FROM users WHERE email = 'leo@app.com'),
