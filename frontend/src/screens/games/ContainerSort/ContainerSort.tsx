@@ -6,7 +6,7 @@ import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/u
 import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import Container from "./Container";
-import { CORRECT_COLOR, EMPTY_COLOR, Option } from "../../../types/games";
+import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 import { useAnimatedRef, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
@@ -229,7 +229,7 @@ function ContainerSort() {
             alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
 
             </BackButton>
-            <Text style={styles.titleText} >Reparte Equitativamente</Text>
+            <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
             <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
             </View>
                 
@@ -244,7 +244,14 @@ function ContainerSort() {
                     });
                 }}
             >
-                    {options.map((option, index) => (
+                    {options.map((option, index) => {
+
+                        const displayColor = option.id === selectedNumber?.id
+                        ? SELECTED_COLOR 
+                        //TODO change to boxCOlor
+                        : accessibilitySettings.backgroundColor;
+
+                        return( 
                         <DraggableItem
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
@@ -258,9 +265,11 @@ function ContainerSort() {
                             <NumberDisplay
                                 numberProp={option.value} 
                                 size={100}
+                                style={{backgroundColor: displayColor}} 
                             />
                         </DraggableItem>
-                    ))}
+                        )
+                        })}
             </View>
 
             <View style={styles.resultsContainer}>
