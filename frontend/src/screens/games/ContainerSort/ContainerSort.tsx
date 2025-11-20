@@ -244,14 +244,14 @@ function ContainerSort() {
                     });
                 }}
             >
-                    {options.map((option) => (
+                    {options.map((option, index) => (
                         <DraggableItem
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
                             isDisabled={false} 
                             onStart={() => handleNumberSelect(option)}
                             onDrop={(targetIndex) => handleDropOnContainer(targetIndex)}
-                            key={`option-${option.id}`}
+                            key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
                         >
