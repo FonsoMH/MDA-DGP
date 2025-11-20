@@ -112,6 +112,10 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                 navigation.navigate('Admin', {
                     screen: 'UserList'
                 });
+            }else if(user?.role == 'teacher'){
+                navigation.navigate('Teacher', {
+                    screen: 'TeacherStudentList'
+                });
             }
            
         } catch (error) {
