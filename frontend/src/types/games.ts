@@ -29,3 +29,4 @@ export interface Option {
 export const EMPTY_COLOR = '#D1D5DC';
 export const CORRECT_COLOR = '#00C950';
 export const ERROR_COLOR = '#FF0000';
+export const SELECTED_COLOR = '#ADD8E6';
