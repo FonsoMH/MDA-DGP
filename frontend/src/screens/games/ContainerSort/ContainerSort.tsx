@@ -10,6 +10,8 @@ import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../typ
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 import { useAnimatedRef, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
+import RoundMessage from "../../../components/RoundMessage/RoundMessage";
+import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
 
 const GAME_ID = 3; 
 
@@ -20,6 +22,8 @@ type Layout = { x: number; y: number; width: number; height: number; };
 function ContainerSort() {
 
     const accessibilitySettings = useAccessibilitySettings();
+    const roundMessage = useRoundMessage();
+    
     
 
     const styles = StyleSheet.create({
@@ -168,8 +172,20 @@ function ContainerSort() {
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
 
         if (allGreen && options.length == 0) {
-            setResetSignal(true);
-            manager.advanceGame();
+
+            const handleRoundComplete = async () => {
+                setResetSignal(true);
+                
+                await roundMessage.show(
+                    "¡Excelente! Has superado la ronda con éxito.", 
+                    1000,
+                    "success"
+                );
+                
+                manager.advanceGame();
+            };
+
+            handleRoundComplete();
             
         }
     }, [containerStatuses]);
@@ -288,6 +304,11 @@ function ContainerSort() {
                     />
                 ))}
             </View>
+            <RoundMessage 
+                message={roundMessage.message} 
+                isVisible={roundMessage.isVisible}
+                type={roundMessage.type}
+            />
             <FeedbackScreen 
             visible={manager.modalVisible} 
             onNotify={handlePlayAgain}/>

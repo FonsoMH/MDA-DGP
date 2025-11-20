@@ -9,6 +9,8 @@ import { playTTS } from '../../../components/ttsListener';
 import { useGameManager } from '../utils/gameManager';
 import { getRandomNumber, generateOptionsWithTarget } from '../utils/gameUtils';
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
+import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
+import RoundMessage from '../../../components/RoundMessage/RoundMessage';
 
 
 
@@ -22,6 +24,7 @@ const GAME_ID = 1;
 function TapNumberGame() {
 
     const accessibilitySettings = useAccessibilitySettings();
+    const roundMessage = useRoundMessage();
     
     const styles = StyleSheet.create({
         screenContainer: {
@@ -114,15 +117,23 @@ function TapNumberGame() {
         manager.resetGame();
     };
 
-    const handleSelection = (selectedNumber: number) => {
+    const handleSelection = async (selectedNumber: number) => {
 
         setSelectedDisplay(selectedNumber);
 
         if (selectedNumber === targetNumber) {
             setResultColor(CORRECT_COLOR);
+            await roundMessage.show(
+                "¡Excelente! Has superado la ronda con éxito.", 
+                1000,
+                "success"
+            );
             manager.advanceGame();
             return;
         }
+
+
+        await roundMessage.show("¡Excelente! Has superado la ronda con éxito.", 1000, "error");
 
         setResultColor(ERROR_COLOR);
     };
@@ -183,7 +194,12 @@ function TapNumberGame() {
                     );
                 })}
             </View>
-
+            
+            <RoundMessage 
+                message={roundMessage.message} 
+                isVisible={roundMessage.isVisible}
+                type={roundMessage.type}
+            />
             <FeedbackScreen testID="feedback-screen" visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
 

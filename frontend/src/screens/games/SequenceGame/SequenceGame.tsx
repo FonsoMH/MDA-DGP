@@ -14,6 +14,8 @@ import { useGameManager } from '../utils/gameManager';
 import { generateRandomOptions } from '../utils/gameUtils';
 import DraggableItem from './DraggableItem';
 import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
+import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
+import RoundMessage from '../../../components/RoundMessage/RoundMessage';
 
 
 
@@ -27,6 +29,8 @@ type Layout = { x: number; y: number; width: number; height: number; };
 function SequenceGame() {
     
     const accessibilitySettings = useAccessibilitySettings();
+    const roundMessage = useRoundMessage();
+    
 
     const styles = StyleSheet.create({
         screenContainer: {
@@ -126,7 +130,7 @@ function SequenceGame() {
         manager.resetGame();
     };
 
-    const handleSelection = (numberSelected: number) => {
+    const handleSelection = async (numberSelected: number) => {
         let newSelectedNumbers;
         if (!selectedNumbers.includes(numberSelected)) {
             newSelectedNumbers = [...selectedNumbers, numberSelected];
@@ -136,6 +140,11 @@ function SequenceGame() {
         setSelectedNumbers(newSelectedNumbers);
         
         if (isGameFinished(newSelectedNumbers, options)) {
+            await roundMessage.show(
+                "¡Excelente! Has superado la ronda con éxito.", 
+                1000,
+                "success"
+            );
             manager.advanceGame();
         }
     };
@@ -176,8 +185,8 @@ function SequenceGame() {
     }
 
     const title = manager.config?.upward 
-        ? "Mueve del pequeño al grande" 
-        : "Mueve del grande al pequeño";
+        ? "Ordena del pequeño al grande" 
+        : "Ordena del grande al pequeño";
 
     const visualIcon = manager.config?.upward  ? (
         <View style={styles.iconContainer}>
@@ -241,19 +250,12 @@ function SequenceGame() {
 
                 
                     {selectedNumbers.map((num, index) => {
-                        // 1. Compara el número en la posición 'index' de la selección
-                        //    con el número que debería estar en esa posición en la secuencia correcta.
                         const isCorrectPosition = num === correctSequence[index];
 
-                        // 2. Determina el estilo de feedback
                         const feedbackStyle = 
-                            isCorrectPosition && correctSequence.length > 0 // Solo damos feedback si hay opciones
+                            isCorrectPosition && correctSequence.length > 0
                                 ? CORRECT_COLOR 
                                 : ERROR_COLOR;
-                        
-                        // NOTA: Si la lista está vacía (index 0) y el juego no ha empezado, 
-                        // esto podría dar feedback incorrecto. 
-                        // Lo aplicamos solo si ya hay números seleccionados (selectedNumbers.length > 0).
 
                         const finalStyle = selectedNumbers.length > 0 ? feedbackStyle : null;
 
@@ -276,7 +278,12 @@ function SequenceGame() {
                         );
                     })}
             </View>
-       
+            
+            <RoundMessage 
+                message={roundMessage.message} 
+                isVisible={roundMessage.isVisible}
+                type={roundMessage.type}
+            />
             <FeedbackScreen visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
     );
