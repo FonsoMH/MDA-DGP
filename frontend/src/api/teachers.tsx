@@ -16,10 +16,6 @@ type TeacherStudentsResponse = {
 
 export async function getStudentsForTeacher(teacherId: number): Promise<Student[]> {
   const endpoint = `${BASE_URL}/api/teachers/${teacherId}/students`;
-
-  console.log("cachouuuu");
-
-  console.log(endpoint);
   
   
   try {
@@ -27,9 +23,6 @@ export async function getStudentsForTeacher(teacherId: number): Promise<Student[
       timeout: API_TIMEOUT,
     });
     const payload = response.data;
-
-    console.log(payload);
-    
 
     // Soporta ambos formatos: objeto con { students } o array directo
     const studentsArray: any[] = Array.isArray(payload)
