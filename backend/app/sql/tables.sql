@@ -134,6 +134,11 @@ VALUES
     50, 4, 0, true, false
 ),
 (
+    (SELECT user_id FROM users WHERE email = 'eva@app.com'),
+    (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
+    20, 5, 3, true, false
+),
+(
     (SELECT user_id FROM users WHERE email = 'leo@app.com'),
     (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
     10, 15, 3, true, true -- sum=true significa que 'reparte' (suma) está activo

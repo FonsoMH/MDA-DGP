@@ -31,8 +31,13 @@ import { useUser } from '../../../hooks/useUser';
  */
 export const useGameManager = (
     gameId: number, 
-    onGameInit: (maxRange: number, optionsCount: number) => void
-) => {
+    onGameInit: (
+        maxRange: number, 
+        optionsCount: number, 
+        numberOptions?: number,
+        sum?: boolean)
+        => void
+    ) => {
 
     const {user} = useUser();
 
@@ -46,6 +51,8 @@ export const useGameManager = (
 
     const maxRange: number = config?.ranges ?? 10;
     const optionsCount = (config?.numElements ?? 9) as number;
+    const numContainers = (config?.numContainers ?? 2) as number;
+    const haveToSum = (config?.sum ?? false) as boolean;
 
     /**
      * Effect to initialize the first game round.
@@ -54,7 +61,7 @@ export const useGameManager = (
      */
     useEffect(() => {
         if (!isLoading && config && !isGameInitialized) {
-            onGameInit(maxRange, optionsCount);
+            onGameInit(maxRange, optionsCount, numContainers, haveToSum);
             setIsGameInitialized(true); 
         }
     }, [isLoading, config, isGameInitialized, onGameInit, maxRange, optionsCount]);
@@ -68,7 +75,7 @@ export const useGameManager = (
             setModalVisible(true);
         } else {
             setTimeout(() => {
-                onGameInit(maxRange, optionsCount);
+                onGameInit(maxRange, optionsCount, numContainers, haveToSum);
                 setGames(prevGames => prevGames + 1);
             }, 300);
         }
@@ -94,7 +101,7 @@ export const useGameManager = (
     const resetGame = () => {
         setGames(1);
         setModalVisible(false);
-        onGameInit(maxRange, optionsCount);
+        onGameInit(maxRange, optionsCount, numContainers, haveToSum);
         updateScore(0);
     };
 

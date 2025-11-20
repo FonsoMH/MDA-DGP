@@ -67,7 +67,14 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         width: '90%',
     },
-    
+    failedInput:{
+        color: 'red',
+        borderColor: 'red',
+        borderWidth: 2
+    },
+    failedText:{
+        color: 'red'
+    }
 });
 
 type TeacherLoginProps = NativeStackScreenProps<any, 'TeacherLogin'>;
@@ -76,13 +83,16 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
 
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [failedPassword, setFailedPassword] = React.useState(false);
 
     const handleEmailChange = (text: string) => {
         setEmail(text);
+        setFailedPassword(false);
     };
 
     const handlePasswordChange = (text: string) => {
         setPassword(text);
+        setFailedPassword(false);
     };
 
     const { login } = useUser();
@@ -94,14 +104,19 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                     password: password}
             );
 
+            if(!user){
+                setFailedPassword(true);
+            }
+
             if(user?.role == 'admin'){
                 navigation.navigate('Admin', {
                     screen: 'UserList'
                 });
+            }else if(user?.role == 'teacher'){
+                navigation.navigate('Teacher', {
+                    screen: 'TeacherStudentList'
+                });
             }
-
-
-           
            
         } catch (error) {
             console.error('Error during login:', error);
@@ -120,19 +135,28 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
             <View style={{ width: '100%' , alignItems: 'center' }}>
                 <View style={styles.inputContainer}>
                     <View style={{ width: '100%'}} >
-                        <Text>Correo Electrónico</Text>
-                        <TextInput placeholder="" testID= "teacher-email-input" style={styles.input} onChangeText={handleEmailChange} />
+                        <Text style={failedPassword ? styles.failedText : null}>
+                            Correo Electrónico
+                        </Text>
+                        <TextInput placeholder="" testID= "teacher-email-input" style={[styles.input, failedPassword ? styles.failedInput : null]} onChangeText={handleEmailChange} />
                     </View>
                     <View style={{ width: '100%'}} >
-                        <Text>Contraseña</Text>
+                        <Text style={failedPassword ? styles.failedText : null}>
+                            Contraseña
+                        </Text>
                         <PasswordInput
-                            style={styles.input}
+                            style={[styles.input, failedPassword ? styles.failedInput : null]}
                             onChangeText={handlePasswordChange}
                             value={password}
                             testID="teacher-password-input"
                         />
                     </View>
                 </View>
+                {failedPassword && (
+                    <Text style={styles.failedText}>
+                        El correo o la contraseña son incorrectos.
+                    </Text>
+                )}
                 <Pressable style={styles.loginButton} onPress={handleLogIn} testID="login-submit-button">
                     <Text style={{ color: '#fff' }}>Iniciar Sesión</Text>
                 </Pressable>
