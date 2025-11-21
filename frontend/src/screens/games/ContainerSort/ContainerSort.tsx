@@ -6,7 +6,7 @@ import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/u
 import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import Container from "./Container";
-import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
+import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 import { useAnimatedRef, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
@@ -186,8 +186,32 @@ function ContainerSort() {
             };
 
             handleRoundComplete();
+
+            return;
             
         }
+
+        if (options.length == 0) {
+
+            const handleRoundComplete = async () => {
+                
+                await roundMessage.show(
+                    "Intentalo de nuevo", 
+                    1000,
+                    "error"
+                );
+                
+                
+            };
+
+            handleRoundComplete();
+
+            return;
+            
+        }
+
+
+
     }, [containerStatuses]);
 
     const handlePlayAgain = () => {
