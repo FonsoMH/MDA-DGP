@@ -133,7 +133,7 @@ function TapNumberGame() {
         }
 
 
-        await roundMessage.show("¡Excelente! Has superado la ronda con éxito.", 1000, "error");
+        await roundMessage.show("Intentalo de nuevo", 1000, "error");
 
         setResultColor(ERROR_COLOR);
     };
