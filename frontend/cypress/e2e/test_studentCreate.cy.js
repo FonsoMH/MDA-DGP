@@ -23,7 +23,7 @@ describe('E2E flujo completo de creación de estudiante', () => {
     cy.get('[data-testid="create-student-button"]').click();
 
     // Paso 5️⃣: Completar los campos del formulario
-    cy.get('[data-testid="name-input"]').type('TEST JUAN TEST');
+    cy.get('[data-testid="name-input"]').type('Juan Test');
     cy.get('[data-testid="email-input"]').type(uniqueEmail);
 
     // Paso 6️⃣: Seleccionar pictogramas de contraseña
