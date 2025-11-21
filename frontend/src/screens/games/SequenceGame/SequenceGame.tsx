@@ -18,7 +18,11 @@ import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessag
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
 
 
-
+type TargetElement = {
+    value: number | null; // El número colocado o null si está vacío
+    correctValue: number; // El número que DEBERÍA ir aquí
+    isCorrect: boolean;
+};
 
 const GAME_ID = 2; 
 
@@ -106,6 +110,17 @@ function SequenceGame() {
         barLarge: {
             height: '100%',
         },
+
+        emptyBox: { 
+            width: 100,
+            height: 100,
+            margin: 5,
+            borderRadius: 12,
+            borderWidth: 2,
+            borderColor: '#888',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }
     });
 
     const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
@@ -146,6 +161,17 @@ function SequenceGame() {
                 "success"
             );
             manager.advanceGame();
+            return
+        }
+        
+        if(newSelectedNumbers.length == options.length){
+            await roundMessage.show(
+                "Intentalo de nuevo", 
+                1000,
+                "error"
+            );
+            setSelectedNumbers([]);
+            return;
         }
     };
 
@@ -174,6 +200,17 @@ function SequenceGame() {
 
         return JSON.stringify(selected) === JSON.stringify(correctOrder);
     };
+
+    const targetElements: TargetElement[] = correctSequence.map((correctValue, index) => {
+        
+        const currentPlacedValue = selectedNumbers[index] !== undefined ? selectedNumbers[index] : null;
+
+        return {
+            value: currentPlacedValue,
+            correctValue: correctValue,
+            isCorrect: currentPlacedValue === correctValue,
+        };
+    });
     
 
     function isSelected(num: number) {
@@ -248,35 +285,37 @@ function SequenceGame() {
                 }}
             >
 
-                
-                    {selectedNumbers.map((num, index) => {
-                        const isCorrectPosition = num === correctSequence[index];
-
-                        const feedbackStyle = 
-                            isCorrectPosition && correctSequence.length > 0
+                {targetElements.map((target, index) => {
+                        const feedbackColor = target.isCorrect 
                                 ? CORRECT_COLOR 
                                 : ERROR_COLOR;
+                                
 
-                        const finalStyle = selectedNumbers.length > 0 ? feedbackStyle : null;
-
-                        return (
-                            <DraggableItem
-                                key={`selected-${num}-${index}`}
-                                onPress={() => handleSelection(num)}
-                                onDrop={() => handleSelection(num)}
-                                dropZonesLayouts={topZoneLayout}
-                                style={styles.optionWrapper}
-                                isDisabled={false}
-                                comeBack={false}
-                            >
-                                <NumberDisplay
-                                    numberProp={num} 
-                                    size={100}
-                                    style={{backgroundColor: finalStyle}} 
-                                />
-                            </DraggableItem>
-                        );
-                    })}
+                        if (target.value !== null) {
+                            return (
+                                <DraggableItem
+                                    key={`selected-${target.value}-${index}`}
+                                    onPress={() => handleSelection(target.value)}
+                                    onDrop={() => handleSelection(target.value)}
+                                    dropZonesLayouts={topZoneLayout}
+                                    style={styles.optionWrapper}
+                                    isDisabled={false}
+                                    comeBack={false}
+                                >
+                                    <NumberDisplay
+                                        numberProp={target.value} 
+                                        size={100}
+                                        style={{backgroundColor: feedbackColor}} 
+                                    />
+                                </DraggableItem>
+                            );
+                        } else {
+                            return (
+                                <View key={`placeholder-${index}`} style={styles.emptyBox}>
+                                </View>
+                            );
+                        }
+                })}
             </View>
             
             <RoundMessage 
