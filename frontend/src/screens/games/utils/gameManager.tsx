@@ -32,7 +32,8 @@ import { useUser } from '../../../hooks/useUser';
 export const useGameManager = (
     gameId: number, 
     onGameInit: (
-        maxRange: number, 
+        minValue: number,
+        maxValue: number, 
         optionsCount: number, 
         numberOptions?: number,
         sum?: boolean)
@@ -49,7 +50,8 @@ export const useGameManager = (
 
     const [score, setScore] = useState(0);
 
-    const maxRange: number = config?.ranges ?? 10;
+    const minValue: number = config?.minValue ?? 0;
+    const maxValue: number = config?.maxValue ?? 10;
     const optionsCount = (config?.numElements ?? 9) as number;
     const numContainers = (config?.numContainers ?? 2) as number;
     const haveToSum = (config?.sum ?? false) as boolean;
@@ -61,10 +63,10 @@ export const useGameManager = (
      */
     useEffect(() => {
         if (!isLoading && config && !isGameInitialized) {
-            onGameInit(maxRange, optionsCount, numContainers, haveToSum);
+            onGameInit(minValue, maxValue, optionsCount, numContainers, haveToSum);
             setIsGameInitialized(true); 
         }
-    }, [isLoading, config, isGameInitialized, onGameInit, maxRange, optionsCount]);
+    }, [isLoading, config, isGameInitialized, onGameInit, minValue, maxValue, optionsCount]);
 
     /**
      * Advances the game to the next round or, if the final round is complete,
@@ -75,7 +77,7 @@ export const useGameManager = (
             setModalVisible(true);
         } else {
             setTimeout(() => {
-                onGameInit(maxRange, optionsCount, numContainers, haveToSum);
+                onGameInit(minValue, maxValue, optionsCount, numContainers, haveToSum);
                 setGames(prevGames => prevGames + 1);
             }, 500);
         }
@@ -101,7 +103,7 @@ export const useGameManager = (
     const resetGame = () => {
         setGames(1);
         setModalVisible(false);
-        onGameInit(maxRange, optionsCount, numContainers, haveToSum);
+        onGameInit(minValue, maxValue, optionsCount, numContainers, haveToSum);
         updateScore(0);
     };
 

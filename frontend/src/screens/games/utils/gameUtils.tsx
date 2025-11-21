@@ -1,26 +1,29 @@
 export const DEFAULT_REPEATS = 5;
 
 /**
- * Generates a random integer between 0 and max (both inclusive).
+ * Generates a random integer between min and max (both inclusive).
+ * @param min The minimum possible number.
  * @param max The maximum possible number.
  * @returns A random number.
  */
-export const getRandomNumber = (max: number): number => {
-  return Math.floor(Math.random() * (max + 1));
+export const getRandomNumber = (min: number, max: number): number => {
+return Math.floor(Math.random() * (max - min + 1)) + min;
+
 };
 
 /**
  * Generates an array of unique random numbers.
  *
+ * @param min The minimun value for the random numbers.
  * @param max The maximum value for the random numbers.
  * @param count The total number of options to generate.
  * @returns A shuffled array of numbers.
  */
-export const generateRandomOptions = (max: number, count: number): number[] => {
+export const generateRandomOptions = (min: number, max: number, count: number): number[] => {
   const uniqueOptions = new Set<number>();
 
   while (uniqueOptions.size < count) {
-    uniqueOptions.add(getRandomNumber(max));
+    uniqueOptions.add(getRandomNumber(min, max));
   }
 
   return Array.from(uniqueOptions).sort(() => Math.random() - 0.5);
@@ -31,12 +34,14 @@ export const generateRandomOptions = (max: number, count: number): number[] => {
  * that a specific 'target' number is included.
  *
  * @param target The number that MUST be included in the options.
+ * @param min The minimun value for the other random numbers.
  * @param max The maximum value for the other random numbers.
  * @param count The total number of options to generate.
  * @returns A shuffled array of numbers.
  */
 export const generateOptionsWithTarget = (
   target: number,
+  min: number,
   max: number,
   count: number
 ): number[] => {
@@ -45,13 +50,14 @@ export const generateOptionsWithTarget = (
   uniqueOptions.add(target);
 
   while (uniqueOptions.size < count) {
-    uniqueOptions.add(getRandomNumber(max));
+    uniqueOptions.add(getRandomNumber(min, max));
   }
 
   return Array.from(uniqueOptions).sort(() => Math.random() - 0.5);
 };
 
 export const generateFixedRepeatedOptions = (
+  min: number,
   max: number,          
   count: number,        
   nOptions: number   
@@ -59,7 +65,7 @@ export const generateFixedRepeatedOptions = (
 
 
 
-  const uniqueOptions = generateRandomOptions(max, nOptions);
+  const uniqueOptions = generateRandomOptions(min, max, nOptions);
   
   const result: number[] = [];
   
@@ -73,7 +79,7 @@ export const generateFixedRepeatedOptions = (
   }
 
   for (let i = 0; i < remainingCount; i++) {
-    const index = getRandomNumber(nOptions - 1);
+    const index = getRandomNumber(min, nOptions - 1);
     
     repetitionsArray[index]++;
   }
@@ -110,7 +116,7 @@ interface EquitableArrayResult {
 /**
  * Generates an array of numbers (number[]) with a fixed size that is GUARANTEED 
  * to be partitionable equally among 'numContainers'.
- * * @param maxValue The largest numerical value an element in the array can have.
+ * @param maxValue The largest numerical value an element in the array can have.
  * @param arraySize The exact number of elements the array must contain (The puzzle size).
  * @param numContainers How many containers the set must be partitionable into.
  * @returns An object containing the solvable array and the target sum per container.
@@ -123,6 +129,7 @@ interface EquitableArrayResult {
 
 export function generateEquitableFixedSizeArray(
   maxValue: number,
+  minValue: number,
   arraySize: number, 
   numContainers: number
 ): EquitableArrayResult { 
@@ -163,7 +170,7 @@ export function generateEquitableFixedSizeArray(
     let sumaTotal = 0;
 
     for (let i = 0; i < arraySize; i++) {
-      const num = Math.floor(Math.random() * maxValue) + 1;
+      const num = getRandomNumber(minValue, maxValue);
       nuevoConjunto.push(num);
       sumaTotal += num;
     }

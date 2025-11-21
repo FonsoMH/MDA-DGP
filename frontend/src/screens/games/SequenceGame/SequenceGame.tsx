@@ -127,8 +127,8 @@ function SequenceGame() {
     const [options, setOptions] = useState<number[]>([]);
 
 
-    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
-        const newOptions = generateRandomOptions(maxRange, optionsCount);
+    const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number) => {    
+        const newOptions = generateRandomOptions(minValue,maxValue, optionsCount);
         setOptions(newOptions);
         setSelectedNumbers([]);
     }, []);

@@ -99,10 +99,10 @@ function TapNumberGame() {
     const [selectedDisplay, setSelectedDisplay] = useState<number | null>(null);
     const [resultColor, setResultColor] = useState<string>();
 
-    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
+    const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number) => {    
         
-        const newTarget = getRandomNumber(maxRange);
-        const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
+        const newTarget = getRandomNumber(minValue, maxValue);
+        const newOptions = generateOptionsWithTarget(newTarget, minValue, maxValue, optionsCount);
         
         setTargetNumber(newTarget);
         setOptions(newOptions);

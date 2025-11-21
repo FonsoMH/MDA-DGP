@@ -96,11 +96,11 @@ function ContainerSort() {
     const [targetSum, setTargetSum] = useState<number | null>(null);
     
     
-    const initializeGame = useCallback((maxRange: number, optionsCount: number, 
+    const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
             
         if ( sum ){
-            const result = generateEquitableFixedSizeArray(maxRange, optionsCount, numContainers);
+            const result = generateEquitableFixedSizeArray(minValue, maxValue, optionsCount, numContainers);
 
             const newItemsWithOptions = result.puzzleArray.map((value, index) => ({
                 id: `item-${index}-${Date.now()}`, 
@@ -114,7 +114,7 @@ function ContainerSort() {
         }
 
         else {
-            const newOptions = generateFixedRepeatedOptions(maxRange, optionsCount, numContainers);
+            const newOptions = generateFixedRepeatedOptions(minValue, maxValue, optionsCount, numContainers);
             
             const newItemsWithOptions = newOptions.map((value, index) => ({
                 id: `item-${index}-${Date.now()}`, 
@@ -183,30 +183,10 @@ function ContainerSort() {
                 );
                 
                 manager.advanceGame();
+                return;
             };
 
             handleRoundComplete();
-
-            return;
-            
-        }
-
-        if (options.length == 0) {
-
-            const handleRoundComplete = async () => {
-                
-                await roundMessage.show(
-                    "Intentalo de nuevo", 
-                    1000,
-                    "error"
-                );
-                
-                
-            };
-
-            handleRoundComplete();
-
-            return;
             
         }
 
