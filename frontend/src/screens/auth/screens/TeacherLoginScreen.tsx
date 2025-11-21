@@ -138,7 +138,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                         <Text style={failedPassword ? styles.failedText : null}>
                             Correo Electrónico
                         </Text>
-                        <TextInput placeholder="" style={[styles.input, failedPassword ? styles.failedInput : null]} onChangeText={handleEmailChange} />
+                        <TextInput placeholder="" testID= "teacher-email-input" style={[styles.input, failedPassword ? styles.failedInput : null]} onChangeText={handleEmailChange} />
                     </View>
                     <View style={{ width: '100%'}} >
                         <Text style={failedPassword ? styles.failedText : null}>
@@ -148,6 +148,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                             style={[styles.input, failedPassword ? styles.failedInput : null]}
                             onChangeText={handlePasswordChange}
                             value={password}
+                            testID="teacher-password-input"
                         />
                     </View>
                 </View>
@@ -156,7 +157,7 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                         El correo o la contraseña son incorrectos.
                     </Text>
                 )}
-                <Pressable style={styles.loginButton} onPress={handleLogIn}>
+                <Pressable style={styles.loginButton} onPress={handleLogIn} testID="login-submit-button">
                     <Text style={{ color: '#fff' }}>Iniciar Sesión</Text>
                 </Pressable>
                 <Pressable style={{marginBottom:20}} onPress={() => { /* Lógica para recuperar contraseña */ }}>
