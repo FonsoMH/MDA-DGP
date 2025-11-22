@@ -108,7 +108,7 @@ def update_one_config(student_id: int, slug: str):
         cur.execute(
             """
             INSERT INTO student_game_configuration (student_id, game_id, min_value, max_value, num_elements, num_containers, upward, sum)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (student_id, game_id)
             DO UPDATE SET
               min_value = EXCLUDED.min_value,
