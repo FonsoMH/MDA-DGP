@@ -57,6 +57,7 @@ function Option({ selected, onPress }: OptionProps) {
 const styles = StyleSheet.create({
   container: {
     margin: 8,
+    width: 40
   },
   row: {
     flexDirection: "row",
