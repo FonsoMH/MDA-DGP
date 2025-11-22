@@ -53,7 +53,6 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
 
 export async function updateAccessibilitySettings(studentId: number, payload: AccessibilitySettingsApiData) {
 
-    console.log("Updating settings for student ID:", studentId, "with payload:", payload);
   const url = `${BASE_URL}/api/accessibility/${studentId}`;
   const res = await axios.put(url, payload);
   return res.data;
