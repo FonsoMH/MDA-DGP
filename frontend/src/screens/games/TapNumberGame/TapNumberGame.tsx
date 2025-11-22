@@ -8,6 +8,9 @@ import FeedbackScreen from '../../../components/FeedBack/Feedback';
 import { playTTS } from '../../../components/ttsListener';
 import { useGameManager } from '../utils/gameManager';
 import { getRandomNumber, generateOptionsWithTarget } from '../utils/gameUtils';
+import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
+import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
+import RoundMessage from '../../../components/RoundMessage/RoundMessage';
 
 
 
@@ -21,6 +24,7 @@ const GAME_ID = 1;
 function TapNumberGame() {
 
     const accessibilitySettings = useAccessibilitySettings();
+    const roundMessage = useRoundMessage();
     
     const styles = StyleSheet.create({
         screenContainer: {
@@ -31,15 +35,32 @@ function TapNumberGame() {
             paddingHorizontal: 20
         },
     
-        imageWrapper: {
+        ttsButtonContainer: {
             padding: 10,
-            borderRadius: 10,
+            borderRadius: 15,
+            backgroundColor: '#F3F4F6', 
+            borderWidth: 1, 
+            borderColor: '#D1D5DB', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            minWidth: 120, 
+            shadowColor: '#000', 
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 3,
         },
-    
+
         clickableImage: {
             width: 155,
             height: 155,
             resizeMode: 'contain',
+        },
+        
+        ttsButtonText: {
+            fontSize: accessibilitySettings.fontSize - 2,
+            fontWeight: '600',
+            color: '#1F2937',
         },
     
         header: {
@@ -75,13 +96,17 @@ function TapNumberGame() {
     const [targetNumber, setTargetNumber] = useState<number>(0);
     const [options, setOptions] = useState<number[]>([]);
 
-    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
+    const [selectedDisplay, setSelectedDisplay] = useState<number | null>(null);
+    const [resultColor, setResultColor] = useState<string>();
+
+    const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number) => {    
         
-        const newTarget = getRandomNumber(maxRange);
-        const newOptions = generateOptionsWithTarget(newTarget, maxRange, optionsCount);
+        const newTarget = getRandomNumber(minValue, maxValue);
+        const newOptions = generateOptionsWithTarget(newTarget, minValue, maxValue, optionsCount);
         
         setTargetNumber(newTarget);
         setOptions(newOptions);
+        setSelectedDisplay(null);
         
         playTTS(newTarget.toString());
     }, []);
@@ -92,10 +117,25 @@ function TapNumberGame() {
         manager.resetGame();
     };
 
-    const handleSelection = (selectedNumber: number) => {
+    const handleSelection = async (selectedNumber: number) => {
+
+        setSelectedDisplay(selectedNumber);
+
         if (selectedNumber === targetNumber) {
-            manager.advanceGame(); 
+            setResultColor(CORRECT_COLOR);
+            await roundMessage.show(
+                "¡Excelente! Has superado la ronda con éxito.", 
+                1000,
+                "success"
+            );
+            manager.advanceGame();
+            return;
         }
+
+
+        await roundMessage.show("Intentalo de nuevo", 1000, "error");
+
+        setResultColor(ERROR_COLOR);
     };
 
     if (manager.isLoading) {
@@ -107,12 +147,18 @@ function TapNumberGame() {
         
         <View style={styles.screenContainer}>
             <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
-            <TouchableOpacity testID="tts-button" onPress={() => playTTS(targetNumber.toString())}  style={styles.imageWrapper}>
+            <TouchableOpacity 
+                testID="tts-button" 
+                onPress={() => playTTS(targetNumber.toString())}  
+                style={styles.ttsButtonContainer} // Usamos un nuevo estilo para el contenedor
+            >
                 <Image
-                source={require('../../../../assets/icons/listen.png')}
-                style={styles.clickableImage}
-                accessibilityLabel="Botón de imagen"
+                    source={require('../../../../assets/icons/sound.png')}
+                    style={styles.clickableImage}
+                    accessibilityLabel="Escuchar el número objetivo de nuevo"
                 />
+                {/* Nuevo texto de instrucción */}
+                <Text style={styles.ttsButtonText}>Escuchar de nuevo</Text> 
             </TouchableOpacity>
 
             {/* 🔹 Target number oculto para testing */}
@@ -125,21 +171,35 @@ function TapNumberGame() {
             </View>
 
             <View style={styles.optionsGrid}>
-                {options.map((num, index) => (
-                    <TouchableOpacity 
-                        key={index} 
-                        testID={`option-${num}`}
-                        onPress={() => handleSelection(num)}
-                        style={styles.optionWrapper}
-                    >
-                        <NumberDisplay key={index}
-                            numberProp={num} 
-                            size={155}
-                        />
-                    </TouchableOpacity>
-                ))}
-            </View>
+                {options.map((num, index) => {
+                    const displayColor = num === selectedDisplay 
+                        ? resultColor 
+                        //TODO change to boxCOlor
+                        : accessibilitySettings.backgroundColor;
 
+                    return (
+                        <TouchableOpacity 
+                            key={index} 
+                            testID={`option-${num}`}
+                            onPress={() => handleSelection(num)}
+                            style={styles.optionWrapper}
+                        >
+                            <NumberDisplay 
+                                key={index}
+                                numberProp={num} 
+                                size={155}
+                                style={{backgroundColor: displayColor}} 
+                            />
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+            
+            <RoundMessage 
+                message={roundMessage.message} 
+                isVisible={roundMessage.isVisible}
+                type={roundMessage.type}
+            />
             <FeedbackScreen testID="feedback-screen" visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
 

@@ -213,6 +213,8 @@ const styles = StyleSheet.create({
     maxWidth: 800,
     width: '100%',
     alignSelf: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 20
   },
   title: {
     fontWeight: '700',

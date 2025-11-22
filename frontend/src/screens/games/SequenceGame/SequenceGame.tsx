@@ -13,9 +13,16 @@ import FeedbackScreen from '../../../components/FeedBack/Feedback';
 import { useGameManager } from '../utils/gameManager';
 import { generateRandomOptions } from '../utils/gameUtils';
 import DraggableItem from './DraggableItem';
+import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
+import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
+import RoundMessage from '../../../components/RoundMessage/RoundMessage';
 
 
-
+type TargetElement = {
+    value: number | null; // El número colocado o null si está vacío
+    correctValue: number; // El número que DEBERÍA ir aquí
+    isCorrect: boolean;
+};
 
 const GAME_ID = 2; 
 
@@ -26,6 +33,8 @@ type Layout = { x: number; y: number; width: number; height: number; };
 function SequenceGame() {
     
     const accessibilitySettings = useAccessibilitySettings();
+    const roundMessage = useRoundMessage();
+    
 
     const styles = StyleSheet.create({
         screenContainer: {
@@ -101,14 +110,25 @@ function SequenceGame() {
         barLarge: {
             height: '100%',
         },
+
+        emptyBox: { 
+            width: 100,
+            height: 100,
+            margin: 5,
+            borderRadius: 12,
+            borderWidth: 2,
+            borderColor: '#888',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }
     });
 
     const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
     const [options, setOptions] = useState<number[]>([]);
 
 
-    const initializeGame = useCallback((maxRange: number, optionsCount: number) => {    
-        const newOptions = generateRandomOptions(maxRange, optionsCount);
+    const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number) => {    
+        const newOptions = generateRandomOptions(minValue,maxValue, optionsCount);
         setOptions(newOptions);
         setSelectedNumbers([]);
     }, []);
@@ -125,7 +145,7 @@ function SequenceGame() {
         manager.resetGame();
     };
 
-    const handleSelection = (numberSelected: number) => {
+    const handleSelection = async (numberSelected: number) => {
         let newSelectedNumbers;
         if (!selectedNumbers.includes(numberSelected)) {
             newSelectedNumbers = [...selectedNumbers, numberSelected];
@@ -135,9 +155,37 @@ function SequenceGame() {
         setSelectedNumbers(newSelectedNumbers);
         
         if (isGameFinished(newSelectedNumbers, options)) {
+            await roundMessage.show(
+                "¡Excelente! Has superado la ronda con éxito.", 
+                1000,
+                "success"
+            );
             manager.advanceGame();
+            return
+        }
+        
+        if(newSelectedNumbers.length == options.length){
+            await roundMessage.show(
+                "Intentalo de nuevo", 
+                1000,
+                "error"
+            );
+            setSelectedNumbers([]);
+            return;
         }
     };
+
+    const getCorrectSequence = (allOptions: number[]): number[] => {
+        if (!manager.config) return [];
+        
+        const compareFn = (a: number, b: number) => {
+            return manager.config!.upward ? a - b : b - a;
+        };
+
+        return [...allOptions].sort(compareFn);
+    };
+
+    const correctSequence = getCorrectSequence(options);
 
     const isGameFinished = (selected: number[], allOptions: number[]): boolean => {
         if (selected.length !== allOptions.length || allOptions.length === 0) {
@@ -152,6 +200,17 @@ function SequenceGame() {
 
         return JSON.stringify(selected) === JSON.stringify(correctOrder);
     };
+
+    const targetElements: TargetElement[] = correctSequence.map((correctValue, index) => {
+        
+        const currentPlacedValue = selectedNumbers[index] !== undefined ? selectedNumbers[index] : null;
+
+        return {
+            value: currentPlacedValue,
+            correctValue: correctValue,
+            isCorrect: currentPlacedValue === correctValue,
+        };
+    });
     
 
     function isSelected(num: number) {
@@ -163,8 +222,8 @@ function SequenceGame() {
     }
 
     const title = manager.config?.upward 
-        ? "Mueve del pequeño al grande" 
-        : "Mueve del grande al pequeño";
+        ? "Ordena del pequeño al grande" 
+        : "Ordena del grande al pequeño";
 
     const visualIcon = manager.config?.upward  ? (
         <View style={styles.iconContainer}>
@@ -225,26 +284,45 @@ function SequenceGame() {
                     });
                 }}
             >
-                    {selectedNumbers.map((num, index) => (
-                        <DraggableItem
-                            key={`selected-${num}-${index}`}
-                            onPress={() => handleSelection(num)}
-                            onDrop={() => handleSelection(num)}
-                            dropZonesLayouts={topZoneLayout}
-                            style={styles.optionWrapper}
-                            isDisabled={false}
-                            comeBack={false}
-                        >
-                            <>
-                                <NumberDisplay
-                                    numberProp={num} 
-                                    size={100}
-                                />
-                            </>
-                        </DraggableItem>
-                    ))}
+
+                {targetElements.map((target, index) => {
+                        const feedbackColor = target.isCorrect 
+                                ? CORRECT_COLOR 
+                                : ERROR_COLOR;
+                                
+
+                        if (target.value !== null) {
+                            return (
+                                <DraggableItem
+                                    key={`selected-${target.value}-${index}`}
+                                    onPress={() => handleSelection(target.value)}
+                                    onDrop={() => handleSelection(target.value)}
+                                    dropZonesLayouts={topZoneLayout}
+                                    style={styles.optionWrapper}
+                                    isDisabled={false}
+                                    comeBack={false}
+                                >
+                                    <NumberDisplay
+                                        numberProp={target.value} 
+                                        size={100}
+                                        style={{backgroundColor: feedbackColor}} 
+                                    />
+                                </DraggableItem>
+                            );
+                        } else {
+                            return (
+                                <View key={`placeholder-${index}`} style={styles.emptyBox}>
+                                </View>
+                            );
+                        }
+                })}
             </View>
-       
+            
+            <RoundMessage 
+                message={roundMessage.message} 
+                isVisible={roundMessage.isVisible}
+                type={roundMessage.type}
+            />
             <FeedbackScreen visible={manager.modalVisible} onNotify={handlePlayAgain}></FeedbackScreen>
         </View>
     );
