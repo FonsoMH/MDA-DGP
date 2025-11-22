@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TeacherStudentListScreen from '../screens/teacher/TeacherStudentListScreen';
-import StudentGameConfigScreen from '../screens/teacher/StudentGameConfigScreen';
+import StudentGameConfigScreen from '../screens/teacher/StudentGameConfig/StudentGameConfigScreen';
 
 // Stack de navegación para el área de Tutor/Profesor
 export type TeacherStackParamList = {

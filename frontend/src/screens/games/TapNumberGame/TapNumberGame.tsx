@@ -133,9 +133,9 @@ function TapNumberGame() {
         }
 
 
+        setResultColor(ERROR_COLOR);
         await roundMessage.show("Intentalo de nuevo", 1000, "error");
 
-        setResultColor(ERROR_COLOR);
     };
 
     if (manager.isLoading) {
