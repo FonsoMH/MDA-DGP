@@ -5,14 +5,30 @@ import CornerSelector, { CornerOption } from "./components/CornerSelector";
 import NumberDisplay from "../../components/common/NumberDisplays/NumberDisplay";
 import { AccessibilitySettingsApiData, AccessibilitySettingsFrontend } from "../../types/accessibility";
 import { fetchAccessibilitySettings, updateAccessibilitySettings } from "../../accessibilitySettings/api/accessibilitySettingsApi";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { TeacherStackParamList } from "../../navigation/TeacherNavigator";
+import LoadingSpinner from "../../components/common/LoadingSpinner/LoadingSpinner";
+import { useAccessibilitySettings } from "./hooks/useAccessibilitySettings";
+import { useSubmitAccessibilityChanges } from "./hooks/useSubmitAccessibilityChanges";
 
-export default function AccessibilitySettingsConfigScreen(id: number) {
+type Props = NativeStackScreenProps<TeacherStackParamList, 'AccessibilitySettingsConfig'>;
 
-    const [defaultValue, setDefaultValue] = useState<AccessibilitySettingsFrontend | null>(null);
 
-    const [settings, setSettings] = useState<AccessibilitySettingsFrontend>();
+export default function AccessibilitySettingsConfigScreen({ route, navigation }: Props) {
 
-    // Helpers para mantener la API de setters existente
+    const { studentId } = route.params;
+    
+    const { 
+        settings,
+        isLoading, 
+        error, 
+        setSettings, 
+        resetToDefaults 
+    } = useAccessibilitySettings(studentId);
+
+    const { submitChanges, isSubmitting } = useSubmitAccessibilityChanges({ studentId, settings });
+
+    
     const setBackgroundColor = (color: string) => setSettings(s => ({ ...s, backgroundColor: color }));
     const setForegroundColor = (color: string) => setSettings(s => ({ ...s, foregroundColor: color }));
     const setNumberColor = (color: string) => setSettings(s => ({ ...s, numberColor: color }));
@@ -21,53 +37,23 @@ export default function AccessibilitySettingsConfigScreen(id: number) {
     const setShowNumbersMode = (val: boolean) => setSettings(s => ({ ...s, showNumbersMode: val }));
     const setFontSize = (size: number) => setSettings(s => ({ ...s, fontSize: size }));
 
-    useEffect(() => {
-        const loadSettings = async () => {
-            try {
-                const fetched = await fetchAccessibilitySettings(id);
-                
-                setDefaultValue(fetched);
-                setSettings(fetched);
-            } catch (error) {
-                console.error("Error al cargar configuración de accesibilidad:", error);
-            }
-        };
-
-        loadSettings();
-    }, []);
-
-    const submitChanges = async () => {
-        
-        if (!defaultValue) {
-            console.log("Valores por defecto no cargados aún");
-            return;
-        }
-
-        try {
-
-            const payload: AccessibilitySettingsApiData = {
-                background_color: settings?.backgroundColor,
-                foreground_color: settings?.foregroundColor,
-                number_color: settings?.numberColor,
-                box_color: settings?.boxColor,
-                icon_position: settings?.iconPosition,
-                show_numbers_mode: settings?.showNumbersMode,
-                font_size: settings?.fontSize,
-            };
-
-            await updateAccessibilitySettings(id, payload);
-        } catch (error) {
-            console.error("Error al actualizar la configuración de accesibilidad:", error);
-        }
-
+    if (isLoading) {
+        return (
+            <LoadingSpinner/>
+        );
+    }
+    
+    if (error) {
+         return (
+            <View>
+                <Text>Error al cargar: {error.message}</Text>
+            </View>
+        );
     }
 
-    const resetToDefaults = () => {
-        if (!defaultValue) {
-            console.log("Valores por defecto no cargados aún");
-            return;
-        }
-        setSettings(defaultValue);
+    const handleSubmit = () => {
+        submitChanges();
+        navigation.goBack();
     }
 
     const exampleStyle = StyleSheet.create({
@@ -126,8 +112,14 @@ export default function AccessibilitySettingsConfigScreen(id: number) {
         }
     }); 
 
+    if (isLoading) {
+        return (
+            <LoadingSpinner />
+        );
+    }
+
     return (
-        <View>
+        <View style={styles.screenContainer}>
             <Text style={{fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginVertical: 20}}>
                 Configuración de accesibilidad de {}
             </Text>
@@ -135,7 +127,7 @@ export default function AccessibilitySettingsConfigScreen(id: number) {
                 Ajusta las configuraciones de accesibilidad para mejorar la experiencia de los estudiantes durante los juegos.
             </Text>
 
-            <View style={{flex: 1 , flexDirection: 'row', justifyContent: 'flex-start', width: '100%'}}>
+            <View style={styles.generalContainer}>
 
                 <View style={styles.optionsContainer}>
 
@@ -202,11 +194,18 @@ export default function AccessibilitySettingsConfigScreen(id: number) {
                             style={styles.textInput}
                             keyboardType="numeric"
                             value={settings?.fontSize.toString() ?? ""}
-                            onChangeText={(text) => setFontSize(Number(text))}
+                            onChangeText={(text) => {
+                                const newSize = Number(text);
+                                if (!isNaN(newSize) && newSize >= 1) {
+                                    setFontSize(newSize);
+                                } else if (text === "") {
+                                    setFontSize(1);
+                                }
+                            }}
                             />
                     </View>
                 </View>
-                <View style={{ flexDirection: 'column', flex: 1, justifyContent: 'flex-end', alignItems: 'center', width: '100%', margin: 50}}>
+                <View style={styles.previewContainer}>
 
                     <View style={exampleStyle.background}>
                         <View style={exampleStyle.icon}>
@@ -228,14 +227,22 @@ export default function AccessibilitySettingsConfigScreen(id: number) {
                         </View>
                     </View>
                     <View style={{flexDirection: 'row', justifyContent: 'center', gap: 20}}>
-                        <Pressable style={styles.btn} onPress={resetToDefaults}>
-                            <Text style={{color: 'white', fontWeight: 'bold'}}>
+                        <Pressable style={styles.btn} onPress={handleSubmit}>
+                            <Text style={styles.btnTextPrimary}>
+                                Confirmar cambios
+                            </Text>
+                        </Pressable>
+
+                        <Pressable style={styles.btnSecondary} onPress={resetToDefaults}>
+                            <Text style={styles.btnTextSecondary}>
                                 Restablecer valores predeterminados
                             </Text>
                         </Pressable>    
-                        <Pressable style={styles.btn} onPress={submitChanges}>
-                            <Text style={{color: 'white', fontWeight: 'bold'}}>
-                                Confirmar cambios
+                        
+                        
+                        <Pressable style={styles.btnTertiary} onPress={() => navigation.goBack()}>
+                            <Text style={styles.btnTextTertiary}>
+                                Cancelar
                             </Text>
                         </Pressable>
                     </View>
@@ -247,17 +254,40 @@ export default function AccessibilitySettingsConfigScreen(id: number) {
 }
 
 const styles = StyleSheet.create({
+
+    screenContainer: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 30,
+        paddingHorizontal: 20
+    },
+
+    generalContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+    },
+
     optionsContainer: {
         flexDirection: 'column',
         flexWrap: 'wrap',
         justifyContent: 'space-evenly',
-        margin: 20,
-        width: '30%',
+        width: '20%',
     },
+
+    previewContainer: {
+        flex: 1,
+        flexDirection: 'column',
+        flexWrap: 'wrap',
+        justifyContent: 'space-evenly',
+    },
+
     optionPickContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
+        width: '100%'
     },
     textInput: {
         borderWidth: 1,
@@ -279,6 +309,45 @@ const styles = StyleSheet.create({
         borderRadius: 999,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#2563eb'
+        backgroundColor: '#2563eb' 
     },
+
+    btnSecondary: {
+        backgroundColor: 'transparent', 
+        borderColor: '#2563eb', 
+        borderWidth: 2,
+        minWidth: 120,
+        paddingVertical: 10, 
+        paddingHorizontal: 22,
+        borderRadius: 999,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    
+    btnTertiary: {
+        backgroundColor: 'transparent', 
+        borderColor: '#26b7280',
+        borderWidth: 2,
+        minWidth: 120,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 999,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    
+    btnTextPrimary: {
+        color: 'white',
+        fontWeight: 'bold'
+    },
+    btnTextSecondary: {
+        color: '#2563eb', 
+        fontWeight: 'bold'
+    },
+    btnTextTertiary: {
+        color: '#6b7280', 
+        fontWeight: 'bold'
+    }
 });
