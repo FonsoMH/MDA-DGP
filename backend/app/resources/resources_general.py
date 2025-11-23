@@ -1,5 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
 from ..db import get_db_cursor
+from .resources_utils import MAX_FILE_SIZE_MB, allowed_file, get_extension
+
+
 
 resources_bp = Blueprint('resources', __name__, url_prefix='/api')
 
@@ -115,7 +118,7 @@ def get_resource_by_id(resource_id):
         cur.close()
 
 @resources_bp.route('/resources/<int:resource_id>', methods=['PUT'])
-def create_resource(resource_id):
+def update_resource(resource_id):
     cur = get_db_cursor()
 
     try:
@@ -184,5 +187,102 @@ def create_resource(resource_id):
     finally:
         cur.close()
 
+@resources_bp.route('/resources' , methods=['POST'])
+def create_resource():
+    cur = get_db_cursor()
 
+    try:
+        data = request.form
+        name = data.get('name')
+        file = request.files.get('file')
+        description = data.get('description')
+        type_name = data.get('type')
+        tags_array = request.form.getlist('tags')
+        
+        tags = ','.join(tags_array)
+
+        if not name 
+            return jsonify({'error': 'Resource name is required.'}), 400
+        if not file:
+            return jsonify({'error': 'Resource file is required.'}), 400
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'File type not allowed.'}), 400
+        if not type_name:
+            return jsonify({'error': 'Resource type is required.'}), 400
+        
+        ext = get_extension(file.filename)
+        file.seek(0, 2)
+        file_size = file.tell()
+        file.seek(0)
+
+        if file_size > MAX_FILE_SIZE_MB * 1024 * 1024:
+            return jsonify({'error': 'File size exceeds the maximum limit.'}), 400  
+        
+        from ..google_drive.google_drive_utils import upload_file_to_drive
+        upload_result = upload_file_to_drive(file)
+
+        storage_url = upload_result['webViewLink']
+        mime_type = upload_result['mimeType']
+        file_size = int(upload_result['size'])
+        extension = upload_result['extension']
+
+        cur.execute("""
+                    INSERT INTO resources 
+                    (name, description, storage_url, file_format, file_size, mime_type)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING resource_id
+                """, (name, description, storage_url, extension, file_size, mime_type))
+        
+        resource_id = cur.fetchone()['resource_id']
+
+        if tags_array:
+            for tag_name in tags_array:
+                cur.execute("SELECT tag_id FROM tags WHERE tag_name = %s", (tag_name,))
+                tag = cur.fetchone()
+                if not tag:
+                    cur.execute("INSERT INTO tags (tag_name) VALUES (%s) RETURNING tag_id", (tag_name,))
+                    tag_id = cur.fetchone()['tag_id']
+                else:
+                    tag_id = tag['tag_id']
+                cur.execute("INSERT INTO resource_tags (resource_id, tag_id) VALUES (%s, %s)", (resource_id, tag_id))
+
+        cur.connection.commit()
+        return jsonify({'message': 'Resource created successfully.', 'resource_id': resource_id}), 201
+    
+    except Exception as e:
+        cur.connection.rollback()
+        current_app.logger.error(f"Error creating resource: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()
+
+
+@resources_bp.route('/resources/<int:resource_id>', methods=['DELETE'])
+def delete_resource(resource_id):
+    cur = get_db_cursor()
+
+    try:
+        cur.execute("SELECT * FROM resources WHERE resource_id = %s", (resource_id,))
+        resource = cur.fetchone()
+
+        if not resource:
+            return jsonify({'error': 'Resource not found.'}), 404
+
+        cur.execute("DELETE FROM resource_tags WHERE resource_id = %s", (resource_id,))
+        cur.execute("DELETE FROM resources WHERE resource_id = %s", (resource_id,))
+
+        cur.connection.commit()
+        return jsonify({
+            'message': f"Resource '{resource['name']}' deleted successfully.",
+            'resource_id': resource_id
+        }), 200
+    except Exception as e:
+        cur.connection.rollback()
+        current_app.logger.error(f"Error deleting resource {resource_id}: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+    finally:
+        cur.close()
+
+
+        
 
