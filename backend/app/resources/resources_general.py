@@ -201,7 +201,7 @@ def create_resource():
         
         tags = ','.join(tags_array)
 
-        if not name 
+        if not name: 
             return jsonify({'error': 'Resource name is required.'}), 400
         if not file:
             return jsonify({'error': 'Resource file is required.'}), 400
