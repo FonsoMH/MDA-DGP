@@ -224,14 +224,13 @@ def create_resource():
         storage_url = upload_result['webViewLink']
         mime_type = upload_result['mimeType']
         file_size = int(upload_result['size'])
-        extension = upload_result['extension']
 
         cur.execute("""
                     INSERT INTO resources 
                     (name, description, storage_url, file_format, file_size, mime_type)
                     VALUES (%s, %s, %s, %s, %s, %s)
                     RETURNING resource_id
-                """, (name, description, storage_url, extension, file_size, mime_type))
+                """, (name, description, storage_url, ext, file_size, mime_type))
         
         resource_id = cur.fetchone()['resource_id']
 
