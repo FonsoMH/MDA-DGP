@@ -24,19 +24,19 @@ def _parse_iso_datetime(value: str):
 def get_student_game_statistics(student_id: int, game_id: int):
     cur = get_db_cursor()
     try:
-        # 1) Validate student exists
+        #Validate student exists
         cur.execute("SELECT user_id FROM users WHERE user_id = %s", (student_id,))
         user_row = cur.fetchone()
         if not user_row:
             return jsonify({'error': 'Student not found.'}), 404
 
-        # 2) Validate game exists
+        #Validate game exists
         cur.execute("SELECT game_id FROM games WHERE game_id = %s", (game_id,))
         game_row = cur.fetchone()
         if not game_row:
             return jsonify({'error': 'Game not found.'}), 404
 
-        # 3) Parse optional dates (echo back as received)
+        #Parse optional dates (echo back as received)
         initial_date_str = request.args.get('initial_date')
         final_date_str = request.args.get('final_date')
 
@@ -53,7 +53,7 @@ def get_student_game_statistics(student_id: int, game_id: int):
         if initial_dt and final_dt and initial_dt > final_dt:
             return jsonify({'error': 'initial_date must be before or equal to final_date.'}), 400
 
-        # 4) Build WHERE parameters
+        #Buildparameters
         where = ["student_id = %s", "game_id = %s"]
         params = [student_id, game_id]
 
@@ -61,12 +61,18 @@ def get_student_game_statistics(student_id: int, game_id: int):
             where.append("played_at >= %s")
             params.append(initial_dt)
         if final_dt:
-            where.append("played_at <= %s")
-            params.append(final_dt)
+            # If user passed only a date (length 10, e.g. '2025-11-21'), treat final_date as inclusive end of that day.
+            if final_date_str and len(final_date_str.strip()) == 10:
+                inclusive_final = final_dt + timedelta(days=1)  # next day midnight
+                where.append("played_at < %s")  # exclusive upper bound
+                params.append(inclusive_final)
+            else:
+                where.append("played_at <= %s")
+                params.append(final_dt)
 
         where_sql = " AND ".join(where)
 
-        # 5) Aggregates
+        #Aggregates
         agg_sql = f"""
             SELECT
                 game_id,
@@ -85,7 +91,7 @@ def get_student_game_statistics(student_id: int, game_id: int):
             # No results for that filter – return empty list
             return jsonify([]), 200
 
-        # 6) Times per day
+        #Times per day
         times_sql = f"""
             SELECT
                 DATE(played_at) AS day,
