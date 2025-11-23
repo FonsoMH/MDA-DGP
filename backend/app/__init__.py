@@ -55,4 +55,5 @@ def create_app():
     from .users.user_deletion import users_deletion_bp
     app.register_blueprint(users_deletion_bp)
 
+
     return app

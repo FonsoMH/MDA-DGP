@@ -41,4 +41,4 @@ credentials.json
 # Opcional: ignorar cualquier archivo .json de credenciales
 *.service-account.json
 *credentials*.json
-app/google_drive/*.json
+*/app/google_drive/*.json
