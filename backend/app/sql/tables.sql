@@ -58,9 +58,11 @@ CREATE TABLE IF NOT EXISTS game_results (
     result_id SERIAL PRIMARY KEY,
     student_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE RESTRICT,
-    
+    abandoned BOOLEAN NOT NULL DEFAULT false,
+    successful_plays INTEGER NOT NULL,
+    failed_plays INTEGER NOT NULL,
+
     played_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    score INTEGER NOT NULL,
     time_seconds INTEGER NOT NULL,
 
     played_parameters JSONB NOT NULL -- New column to store game parameters as JSONB for historical results
@@ -150,22 +152,42 @@ ON CONFLICT (student_id, game_id) DO UPDATE SET
     upward = EXCLUDED.upward,
     sum = EXCLUDED.sum;
 
--- 6. Populate Game Results (CON SNAPSHOT)
--- Inserta el resultado Y el JSONB con los parámetros de ese momento.
-INSERT INTO game_results (student_id, game_id, score, time_seconds, played_parameters)
+-- 6. Populate Game Results (valid columns)
+-- Inserta varias partidas para Eva Student en dos fechas distintas para pruebas de estadísticas
+INSERT INTO game_results (student_id, game_id, abandoned, successful_plays, failed_plays, played_at, time_seconds, played_parameters)
 VALUES
+-- Eva en 'toca-numero' (día 2025-11-20)
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
-    100, 45,
-    -- Snapshot de la configuración de Eva para 'toca-numero' (Config 5)
+    false, 3, 1,
+    '2025-11-20T10:00:00+00:00',
+    45,
     '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
 ),
 (
-    (SELECT user_id FROM users WHERE email = 'leo@app.com'),
-    (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
-    80, 120,
-    -- Snapshot de la configuración de Leo para 'reparte-igual' (Config 5)
-    '{"ranges": 10, "num_elements": 15, "num_containers": 3, "upward": true, "sum": true}'
+    (SELECT user_id FROM users WHERE email = 'eva@app.com'),
+    (SELECT game_id FROM games WHERE slug = 'toca-numero'),
+    true, 0, 0,
+    '2025-11-20T12:15:00+00:00',
+    30,
+    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+),
+-- Eva en 'toca-numero' (día 2025-11-21)
+(
+    (SELECT user_id FROM users WHERE email = 'eva@app.com'),
+    (SELECT game_id FROM games WHERE slug = 'toca-numero'),
+    false, 4, 2,
+    '2025-11-21T09:30:00+00:00',
+    60,
+    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+),
+(
+    (SELECT user_id FROM users WHERE email = 'eva@app.com'),
+    (SELECT game_id FROM games WHERE slug = 'toca-numero'),
+    false, 2, 3,
+    '2025-11-21T15:45:00+00:00',
+    55,
+    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
 );
 
