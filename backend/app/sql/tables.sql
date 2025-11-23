@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS resources (
     resource_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     description TEXT,
+    type_id INTEGER NOT NULL REFERENCES resource_types(type_id),
 
     -- URL pública o prefirmada de Drive/S3
     storage_url TEXT NOT NULL,
@@ -92,6 +93,13 @@ CREATE TABLE IF NOT EXISTS resources (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Resource Types Table
+CREATE TABLE IF NOT EXISTS resource_types (
+    type_id SERIAL PRIMARY KEY,
+    type_name VARCHAR(50) NOT NULL UNIQUE,  -- image, pictogram, audio, video...
+    is_default BOOLEAN DEFAULT FALSE
 );
 
 -- Tags Table
