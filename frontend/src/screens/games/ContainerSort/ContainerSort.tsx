@@ -6,10 +6,12 @@ import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/u
 import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import Container from "./Container";
-import { CORRECT_COLOR, EMPTY_COLOR, Option } from "../../../types/games";
+import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 import { useAnimatedRef, useDerivedValue, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
+import RoundMessage from "../../../components/RoundMessage/RoundMessage";
+import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
 
 const GAME_ID = 3; 
 
@@ -20,6 +22,8 @@ type Layout = { x: number; y: number; width: number; height: number; };
 function ContainerSort() {
 
     const accessibilitySettings = useAccessibilitySettings();
+    const roundMessage = useRoundMessage();
+    
     
 
     const styles = StyleSheet.create({
@@ -92,11 +96,11 @@ function ContainerSort() {
     const [targetSum, setTargetSum] = useState<number | null>(null);
     
     
-    const initializeGame = useCallback((maxRange: number, optionsCount: number, 
+    const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
             
         if ( sum ){
-            const result = generateEquitableFixedSizeArray(maxRange, optionsCount, numContainers);
+            const result = generateEquitableFixedSizeArray(minValue, maxValue, optionsCount, numContainers);
 
             const newItemsWithOptions = result.puzzleArray.map((value, index) => ({
                 id: `item-${index}-${Date.now()}`, 
@@ -110,7 +114,7 @@ function ContainerSort() {
         }
 
         else {
-            const newOptions = generateFixedRepeatedOptions(maxRange, optionsCount, numContainers);
+            const newOptions = generateFixedRepeatedOptions(minValue, maxValue, optionsCount, numContainers);
             
             const newItemsWithOptions = newOptions.map((value, index) => ({
                 id: `item-${index}-${Date.now()}`, 
@@ -168,10 +172,26 @@ function ContainerSort() {
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
 
         if (allGreen && options.length == 0) {
-            setResetSignal(true);
-            manager.advanceGame();
+
+            const handleRoundComplete = async () => {
+                setResetSignal(true);
+                
+                await roundMessage.show(
+                    "¡Excelente! Has superado la ronda con éxito.", 
+                    1000,
+                    "success"
+                );
+                
+                manager.advanceGame();
+                return;
+            };
+
+            handleRoundComplete();
             
         }
+
+
+
     }, [containerStatuses]);
 
     const handlePlayAgain = () => {
@@ -229,7 +249,7 @@ function ContainerSort() {
             alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
 
             </BackButton>
-            <Text style={styles.titleText} >Reparte Equitativamente</Text>
+            <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
             <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
             </View>
                 
@@ -244,23 +264,32 @@ function ContainerSort() {
                     });
                 }}
             >
-                    {options.map((option) => (
+                    {options.map((option, index) => {
+
+                        const displayColor = option.id === selectedNumber?.id
+                        ? SELECTED_COLOR 
+                        //TODO change to boxCOlor
+                        : accessibilitySettings.backgroundColor;
+
+                        return( 
                         <DraggableItem
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
                             isDisabled={false} 
                             onStart={() => handleNumberSelect(option)}
                             onDrop={(targetIndex) => handleDropOnContainer(targetIndex)}
-                            key={`option-${option.id}`}
+                            key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
                         >
                             <NumberDisplay
                                 numberProp={option.value} 
                                 size={100}
+                                style={{backgroundColor: displayColor}} 
                             />
                         </DraggableItem>
-                    ))}
+                        )
+                        })}
             </View>
 
             <View style={styles.resultsContainer}>
@@ -279,6 +308,11 @@ function ContainerSort() {
                     />
                 ))}
             </View>
+            <RoundMessage 
+                message={roundMessage.message} 
+                isVisible={roundMessage.isVisible}
+                type={roundMessage.type}
+            />
             <FeedbackScreen 
             visible={manager.modalVisible} 
             onNotify={handlePlayAgain}/>
