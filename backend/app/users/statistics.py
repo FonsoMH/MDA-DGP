@@ -1,8 +1,12 @@
 from flask import Blueprint, request, jsonify, current_app
 from datetime import datetime, timedelta
 from ..db import get_db_cursor
+import json
 
 statistics_bp = Blueprint('statistics', __name__, url_prefix='/api')
+
+# Default number of rounds per session (must stay in sync with frontend DEFAULT_REPEATS)
+DEFAULT_REPEATS = 5
 
 
 def _parse_iso_datetime(value: str):
@@ -127,6 +131,134 @@ def get_student_game_statistics(student_id: int, game_id: int):
 
     except Exception as e:
         current_app.logger.error(f"Error fetching statistics for student {student_id}, game {game_id}: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+    finally:
+        cur.close()
+
+
+@statistics_bp.route('/statistics/game_result/', methods=['POST'])
+def create_game_result():
+    """Persist a finished (or abandoned) game session result.
+
+    Expected JSON body:
+    {
+      "student_id": int,
+      "game_id": int,
+      "successful_plays": int,
+      "failed_plays": int,
+      "abandoned": bool,
+      "time_seconds": int,            # total elapsed seconds for the session
+      "played_parameters": {          # arbitrary dict snapshot of config
+          ...
+      }
+    }
+
+    Rules:
+      - successful_plays + failed_plays <= DEFAULT_REPEATS
+      - If abandoned == False -> sum SHOULD equal DEFAULT_REPEATS (soft check)
+      - student_id must exist and have role 'student'
+      - game_id must exist
+      - time_seconds >= 0
+    """
+    cur = get_db_cursor()
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Missing or invalid JSON body'}), 400
+
+        # played_parameters será opcional inicialmente para simplificar
+        required_fields = [
+            'student_id', 'game_id', 'successful_plays', 'failed_plays',
+            'abandoned', 'time_seconds'
+        ]
+        missing = [f for f in required_fields if f not in data]
+        if missing:
+            return jsonify({'error': 'Missing required fields', 'fields': missing}), 400
+
+        student_id = data['student_id']
+        game_id = data['game_id']
+        successful_plays = data['successful_plays']
+        failed_plays = data['failed_plays']
+        abandoned = data['abandoned']
+        time_seconds = data['time_seconds']
+        played_parameters = data.get('played_parameters')  # opcional
+
+        # Basic type/value validations
+        def _is_int(v):
+            return isinstance(v, int) and v >= 0
+
+        if not _is_int(student_id) or not _is_int(game_id):
+            return jsonify({'error': 'student_id and game_id must be non-negative integers'}), 400
+        if not _is_int(successful_plays) or not _is_int(failed_plays):
+            return jsonify({'error': 'successful_plays and failed_plays must be non-negative integers'}), 400
+        if not _is_int(time_seconds):
+            return jsonify({'error': 'time_seconds must be a non-negative integer'}), 400
+        if not isinstance(abandoned, bool):
+            return jsonify({'error': 'abandoned must be boolean'}), 400
+        if played_parameters is not None and not isinstance(played_parameters, (dict, list)):
+            return jsonify({'error': 'played_parameters must be an object or array when provided'}), 400
+
+        total_rounds_reported = successful_plays + failed_plays
+        if total_rounds_reported > DEFAULT_REPEATS:
+            return jsonify({'error': 'Sum of successful_plays and failed_plays exceeds allowed rounds', 'max_rounds': DEFAULT_REPEATS}), 400
+
+        # If not abandoned we expect completeness (soft validation -> warning only)
+        if not abandoned and total_rounds_reported != DEFAULT_REPEATS:
+            current_app.logger.warning(
+                f"Completed session mismatch for student {student_id}, game {game_id}: reported rounds {total_rounds_reported} != {DEFAULT_REPEATS}"
+            )
+
+        # Validate student & role
+        cur.execute("""
+            SELECT u.user_id, r.role_name
+            FROM users u
+            JOIN roles r ON u.role_id = r.role_id
+            WHERE u.user_id = %s
+        """, (student_id,))
+        stu_row = cur.fetchone()
+        if not stu_row:
+            return jsonify({'error': 'Student not found'}), 404
+        if stu_row['role_name'] != 'student':
+            return jsonify({'error': 'Provided user is not a student'}), 400
+
+        # Validate game
+        cur.execute("SELECT game_id FROM games WHERE game_id = %s", (game_id,))
+        game_row = cur.fetchone()
+        if not game_row:
+            return jsonify({'error': 'Game not found'}), 404
+
+        # Insert result
+        # Si no se envían parámetros, guardamos un objeto vacío para mantener consistencia tipo JSONB
+        stored_params = json.dumps(played_parameters if played_parameters is not None else {})
+        cur.execute(
+            """
+            INSERT INTO game_results (
+              student_id, game_id, abandoned, successful_plays, failed_plays,
+              time_seconds, played_parameters
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING result_id
+            """,
+            (
+                student_id,
+                game_id,
+                abandoned,
+                successful_plays,
+                failed_plays,
+                time_seconds,
+                stored_params
+            )
+        )
+        inserted = cur.fetchone()
+        cur.connection.commit()
+
+        return jsonify({
+            'result_id': inserted['result_id'],
+            'status': 'stored'
+        }), 201
+
+    except Exception as e:
+        cur.connection.rollback()
+        current_app.logger.error(f"Error creating game result: {e}")
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()
