@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from ..db import get_db_cursor
 
 statistics_bp = Blueprint('statistics', __name__, url_prefix='/api')
@@ -33,7 +33,7 @@ def get_student_game_statistics(student_id: int, game_id: int):
         #Validate game exists
         cur.execute("SELECT game_id FROM games WHERE game_id = %s", (game_id,))
         game_row = cur.fetchone()
-        if not game_row:
+        if not game_row and not game_id == -1:
             return jsonify({'error': 'Game not found.'}), 404
 
         #Parse optional dates (echo back as received)
@@ -54,17 +54,23 @@ def get_student_game_statistics(student_id: int, game_id: int):
             return jsonify({'error': 'initial_date must be before or equal to final_date.'}), 400
 
         #Buildparameters
-        where = ["student_id = %s", "game_id = %s"]
-        params = [student_id, game_id]
+        if game_id >= 0 and game_id <= 4:
+            where = ["student_id = %s", "game_id = %s"]
+            params = [student_id, game_id]
+        else:
+            where = ["student_id = %s"]
+            params = [student_id]
 
         if initial_dt:
             where.append("played_at >= %s")
             params.append(initial_dt)
         if final_dt:
-            # If user passed only a date (length 10, e.g. '2025-11-21'), treat final_date as inclusive end of that day.
-            if final_date_str and len(final_date_str.strip()) == 10:
-                inclusive_final = final_dt + timedelta(days=1)  # next day midnight
-                where.append("played_at < %s")  # exclusive upper bound
+            is_midnight = final_dt.time() == time(0,0,0)
+
+            if is_midnight:
+                # Interpretar como final de día completo
+                inclusive_final = final_dt + timedelta(days=1)
+                where.append("played_at < %s")
                 params.append(inclusive_final)
             else:
                 where.append("played_at <= %s")
@@ -112,7 +118,7 @@ def get_student_game_statistics(student_id: int, game_id: int):
             for r in times_rows
         ]
 
-        payload = [{
+        payload = {
             'game_id': agg_row['game_id'],
             'total_plays': int(agg_row['total_plays']),
             'successful_plays': int(agg_row['successful_plays']),
@@ -121,7 +127,7 @@ def get_student_game_statistics(student_id: int, game_id: int):
             'times': times,
             'initial_date': initial_date_str if initial_date_str else None,
             'final_date': final_date_str if final_date_str else None,
-        }]
+        }
 
         return jsonify(payload), 200
 

@@ -35,7 +35,9 @@ export default function TeacherStudentListScreen() {
 
   // Placeholders sin funcionalidad todavía
   const onAccessibility = (_id: number) => {};
-  const onStats = (_id: number) => {};
+  const onStats = (_id: number) => {
+    navigation.navigate('StudentStatistics', { studentId: _id });
+  };
 
   return (
     <View style={styles.container}>
