@@ -2,14 +2,14 @@ from flask import Blueprint, request, jsonify
 from app.db import get_db_cursor, get_db
 import re
 
-bp = Blueprint("accessibility", __name__, url_prefix="/api")
+accessibility_bp = Blueprint("accessibility", __name__, url_prefix="/api")
 
 # --- Validation ---
 def validate_color_hex(color):
     if not isinstance(color, str):
         return False
     # #RRGGBB format
-    return bool(re.fullmatch(r"#[0-9a-fA-F]{6}", color))
+    return bool(re.fullmatch(r"#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?", color))
 
 def validate_icon_position(pos):
     return pos in ("izquierda", "derecha")
@@ -21,7 +21,7 @@ def validate_booleano(val):
     return isinstance(val, bool)
 
 # --- GET ---
-@bp.route("/accesibility/<int:student_id>", methods=["GET"])
+@accessibility_bp.route("/accessibility/<int:student_id>", methods=["GET"])
 def get_accessibility(student_id):
     cur = get_db_cursor()
     cur.execute("SELECT * FROM accessibility_settings WHERE student_id = %s", (student_id,))
@@ -32,7 +32,7 @@ def get_accessibility(student_id):
     return jsonify(settings), 200
 
 # --- PUT ---
-@bp.route("/accesibility/<int:student_id>", methods=["PUT"])
+@accessibility_bp.route("/accessibility/<int:student_id>", methods=["PUT"])
 def update_accessibility(student_id):
     data = request.get_json()
     if not data:
@@ -44,7 +44,6 @@ def update_accessibility(student_id):
     number_color = data.get("number_color", "#000000")
     box_color = data.get("box_color", "#D9D9D9")
     icon_position = data.get("icon_position", "izquierda")
-    high_contrast_mode = data.get("high_contrast_mode", False)
     show_numbers_mode = data.get("show_numbers_mode", True)
     font_size = data.get("font_size", 16)
 
@@ -53,17 +52,15 @@ def update_accessibility(student_id):
     errores = []
 
     if not validate_color_hex(background_color):
-        errores.append("background_color inválido")
+        errores.append("background_color inválido " + background_color)
     if not validate_color_hex(foreground_color):
-        errores.append("foreground_color inválido")
+        errores.append("foreground_color inválido " + foreground_color)
     if not validate_color_hex(number_color):
-        errores.append("number_color inválido")
+        errores.append("number_color inválido " + number_color)
     if not validate_color_hex(box_color):
-        errores.append("box_color inválido")
+        errores.append("box_color inválido " + box_color)
     if not validate_icon_position(icon_position):
         errores.append("icon_position inválido")
-    if not validate_booleano(high_contrast_mode):
-        errores.append("high_contrast_mode debe ser booleano")
     if not validate_booleano(show_numbers_mode):
         errores.append("show_numbers_mode debe ser booleano")
     if not validate_font_size(font_size):
@@ -82,7 +79,6 @@ def update_accessibility(student_id):
             number_color = %s,
             box_color = %s,
             icon_position = %s,
-            high_contrast_mode = %s,
             show_numbers_mode = %s,
             font_size = %s
         WHERE student_id = %s
@@ -92,7 +88,6 @@ def update_accessibility(student_id):
         number_color,
         box_color,
         icon_position,
-        high_contrast_mode,
         show_numbers_mode,
         font_size,
         student_id
