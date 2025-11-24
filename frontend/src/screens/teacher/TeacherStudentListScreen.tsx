@@ -34,7 +34,10 @@ export default function TeacherStudentListScreen() {
   };
 
   // Placeholders sin funcionalidad todavía
-  const onAccessibility = (_id: number) => {};
+  const onAccessibility = (studentId: number) => {
+    navigation.navigate('AccessibilitySettingsConfig', { studentId });
+
+  };
   const onStats = (_id: number) => {};
 
   return (
