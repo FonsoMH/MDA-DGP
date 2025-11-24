@@ -10,35 +10,31 @@ type Layout = { x: number; y: number; width: number; height: number; };
 
 
 interface ContainerProps{
-    currentSelectedNumber: Option | null;
-    onDropSuccess: () => void;
+    items: Option[];
+    onContainerClick: () => void;
     onItemReturned: (itemId: Option) => void;
     onUniformityChange: (color: string) => void;
     targetSum: number | null;
-    resetSignal: boolean;
     topZoneLayout: SharedValue<Layout[] | null>;
 
     containerIndex: number;
     onLayoutMeasured?: (layout: Layout, index: number) => void;
-    receivedIndex: number | null
 }
 
 
 function Container({
-    targetSum, 
-    currentSelectedNumber, 
-    onDropSuccess, 
+    targetSum,
+    items,
+    onContainerClick,
     onItemReturned,
     onUniformityChange,
-    resetSignal,
     topZoneLayout,
     containerIndex,
     onLayoutMeasured,
-    receivedIndex
 }: ContainerProps) {
 
-    const [myNumbers, setMyNumbers] = useState<Option[]>([]);
-    const [myTotal, setMyTotal] = useState(0);
+    // const [myNumbers, setMyNumbers] = useState<Option[]>([]);
+    // const [myTotal, setMyTotal] = useState(0);
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
 
     const checkUniformity = (numbers: Option[]): string => {
@@ -64,61 +60,33 @@ function Container({
     };
 
     useEffect(() => {
-        if (resetSignal) {
-            setMyNumbers([]);
-            setMyTotal(0);
-        }
-        
-    }, [resetSignal]);
-
-    useEffect(() => {
         
         if(targetSum){
-            const color = checkSum(myNumbers);
+            const color = checkSum(items);
             setBorderColor(color);
             onUniformityChange(color);
             return;
         }
 
-        const color = checkUniformity(myNumbers);
+        const color = checkUniformity(items);
         setBorderColor(color);
         onUniformityChange(color);
-    }, [myNumbers]);
+    }, [items]);
 
     const handleContainerClick = () => {
-        
-        if (currentSelectedNumber === null) {
-            return;
-        }
 
-        const newNumbers = [...myNumbers, currentSelectedNumber];
-        setMyNumbers(newNumbers);
-        
-        setMyTotal(myTotal + currentSelectedNumber.value);
-
-        onDropSuccess(); 
+        onContainerClick(); 
         
 
     };
 
     const handleNumberCLick = (itemToReturn: Option) => {
 
-        setMyNumbers(prevItems =>
-            prevItems.filter(item => item.id !== itemToReturn.id)
-        );
-
         onItemReturned(itemToReturn);
         
     }
 
     const containerRef = useAnimatedRef<View>();
-
-    useEffect(() => {
-        
-        if(receivedIndex == containerIndex){
-            handleContainerClick();
-        }
-    }, [receivedIndex])
 
     return (
         <View style={styles.area}
@@ -135,7 +103,7 @@ function Container({
         <TouchableOpacity 
         style={[styles.container, {borderColor: borderColor}]} 
         onPress={handleContainerClick}>
-            {myNumbers.map((option, index) => (
+            {items.map((option, index) => (
                 <DraggableItem
                 onPress={() => handleNumberCLick(option)}
                 onDrop={() => handleNumberCLick(option)}
@@ -156,7 +124,7 @@ function Container({
         {targetSum && (
             <OperacionDisplay 
                 containerColor={borderColor}
-                numbers={myNumbers} 
+                numbers={items} 
                 operationType="suma"
             />
         )}
