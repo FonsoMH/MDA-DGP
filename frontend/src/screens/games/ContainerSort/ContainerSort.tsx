@@ -165,10 +165,8 @@ function ContainerSort() {
 
     const handleItemReturnedFromContainer = useCallback((item: Option, containerIndex: number) => {      
         
-        // 1. Añadir el ítem de vuelta al array de opciones
         setOptions(prevItems => [...prevItems, item]);
 
-        // 2. Quitar el ítem del array del contenedor
         setContainerValues(prevContainers => {
             const newContainers = [...prevContainers];
             newContainers[containerIndex] = newContainers[containerIndex].filter(
@@ -267,10 +265,6 @@ function ContainerSort() {
         
     });
 
-
-    const [dropSelected, setDropSelected] =  useState<number | null>(null);
-
-
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
@@ -325,6 +319,7 @@ function ContainerSort() {
             <View style={styles.resultsContainer}>
                 {Array(containers).fill(null).map((_, index) => (
                     <Container targetSum={targetSum}
+                    key={index}
                     onContainerClick={() => handleContainerClick(index)}
                     items={containerValues[index] || []}
                     onItemReturned={(option: Option) => handleItemReturnedFromContainer(option, index)}
@@ -332,6 +327,7 @@ function ContainerSort() {
                     topZoneLayout={topZoneLayout}
                     containerIndex={index}
                     onLayoutMeasured={handleContainerLayout}
+                    aria-label={`Container-Area-${index}`}
                     />
                 ))}
             </View>
