@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS accessibility_settings (
 CREATE TABLE IF NOT EXISTS student_game_configuration (
     student_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
-    ranges INTEGER NOT NULL DEFAULT 10,
+    min_value INTEGER NOT NULL DEFAULT 0,
+    max_value INTEGER NOT NULL DEFAULT 10,
     num_elements INTEGER NOT NULL DEFAULT 5,
     num_containers INTEGER NOT NULL DEFAULT 2,
     upward BOOLEAN NOT NULL DEFAULT true,
@@ -120,30 +121,36 @@ ON CONFLICT (student_id) DO NOTHING;
 -- Eva: 'toca-numero' (Game 1) -> Rango 20, 5 opciones, sin contenedores, etc.
 -- Eva: 'ordena-secuencia' (Game 2) -> Rango 50, 4 elementos, orden ascendente.
 -- Leo: 'reparte-igual' (Game 3) -> Rango 10 (suma total), 15 elementos, 3 contenedores, requiere suma.
-INSERT INTO student_game_configuration (student_id, game_id, ranges, num_elements, num_containers, upward, sum)
+INSERT INTO student_game_configuration (student_id, game_id, min_value, max_value, num_elements, num_containers, upward, sum)
 VALUES
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
-    20, 5, 0, true, false
+    10, 20, 5, 0, true, false
 ),
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'ordena-secuencia'),
-    50, 4, 0, true, false
+    5, 50, 4, 0, true, false
 ),
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
-    20, 5, 3, true, false
+    0, 20, 5, 3, true, false
+),
+(
+    (SELECT user_id FROM users WHERE email = 'eva@app.com'),
+    (SELECT game_id FROM games WHERE slug = 'deja-igual'),
+    0, 20, 5, 3, true, false
 ),
 (
     (SELECT user_id FROM users WHERE email = 'leo@app.com'),
     (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
-    10, 15, 3, true, true -- sum=true significa que 'reparte' (suma) está activo
+    0, 10, 15, 3, true, true -- sum=true significa que 'reparte' (suma) está activo
 )
 ON CONFLICT (student_id, game_id) DO UPDATE SET
-    ranges = EXCLUDED.ranges,
+    min_value = EXCLUDED.min_value,
+    max_value = EXCLUDED.max_value,
     num_elements = EXCLUDED.num_elements,
     num_containers = EXCLUDED.num_containers,
     upward = EXCLUDED.upward,
@@ -151,20 +158,20 @@ ON CONFLICT (student_id, game_id) DO UPDATE SET
 
 -- 6. Populate Game Results (CON SNAPSHOT)
 -- Inserta el resultado Y el JSONB con los parámetros de ese momento.
-INSERT INTO game_results (student_id, game_id, score, time_seconds, played_parameters)
-VALUES
-(
-    (SELECT user_id FROM users WHERE email = 'eva@app.com'),
-    (SELECT game_id FROM games WHERE slug = 'toca-numero'),
-    100, 45,
-    -- Snapshot de la configuración de Eva para 'toca-numero' (Config 5)
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
-),
-(
-    (SELECT user_id FROM users WHERE email = 'leo@app.com'),
-    (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
-    80, 120,
-    -- Snapshot de la configuración de Leo para 'reparte-igual' (Config 5)
-    '{"ranges": 10, "num_elements": 15, "num_containers": 3, "upward": true, "sum": true}'
-);
+-- INSERT INTO game_results (student_id, game_id, score, time_seconds, played_parameters)
+-- VALUES
+-- (
+--     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
+--     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
+--     100, 45,
+--     -- Snapshot de la configuración de Eva para 'toca-numero' (Config 5)
+--     '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+-- ),
+-- (
+--     (SELECT user_id FROM users WHERE email = 'leo@app.com'),
+--     (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
+--     80, 120,
+--     -- Snapshot de la configuración de Leo para 'reparte-igual' (Config 5)
+--     '{"ranges": 10, "num_elements": 15, "num_containers": 3, "upward": true, "sum": true}'
+-- );
 

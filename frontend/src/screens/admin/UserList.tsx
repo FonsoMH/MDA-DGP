@@ -100,7 +100,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate'); }}>
               <Text style={styles.menuText}>Crear Tutor</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); }}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); }} testID='create-student-button'>
               <Text style={styles.menuText}>Crear Estudiante</Text>
           </TouchableOpacity>
       </View>
@@ -109,6 +109,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
       <TouchableOpacity
           style={styles.fab}
           onPress={() => setShowMenu(!showMenu)}
+          testID='creation-menu-button'
       >
           <Text style={styles.fabText}>{showMenu ? '✕' : '+'}</Text>
       </TouchableOpacity>
