@@ -41,9 +41,8 @@ function ContainerSort() {
         },
 
         titleText: {
-            fontSize: accessibilitySettings.fontSize * 1.5, 
-            color: accessibilitySettings.highContrast ? '#FFFF00' : accessibilitySettings.foregroundColor, 
-            fontWeight: accessibilitySettings.highContrast ? '900' : 'bold',
+            fontSize: accessibilitySettings.fontSize * 1.5,         
+            color: '#101828',
             marginBottom: 5,
             textAlign: 'center',
             
@@ -51,7 +50,7 @@ function ContainerSort() {
 
         instructionText: {
             fontSize: accessibilitySettings.fontSize,
-            color: accessibilitySettings.foregroundColor,
+            color: '#101828',
             marginBottom: 20, 
             textAlign: 'center',
         },
@@ -279,7 +278,7 @@ function ContainerSort() {
                 
 
             <View
-                style={[styles.gridContainer, { height: '35%' }]}
+                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.foregroundColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -292,8 +291,7 @@ function ContainerSort() {
 
                         const displayColor = option.id === selectedNumber?.id
                         ? SELECTED_COLOR 
-                        //TODO change to boxCOlor
-                        : accessibilitySettings.backgroundColor;
+                        : accessibilitySettings.boxColor;
 
                         return( 
                         <DraggableItem
@@ -328,6 +326,7 @@ function ContainerSort() {
                     containerIndex={index}
                     onLayoutMeasured={handleContainerLayout}
                     aria-label={`Container-Area-${index}`}
+                    style={{backgroundColor: accessibilitySettings.foregroundColor}}
                     />
                 ))}
             </View>

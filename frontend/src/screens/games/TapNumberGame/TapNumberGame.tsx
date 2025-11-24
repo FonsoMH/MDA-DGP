@@ -174,8 +174,7 @@ function TapNumberGame() {
                 {options.map((num, index) => {
                     const displayColor = num === selectedDisplay 
                         ? resultColor 
-                        //TODO change to boxCOlor
-                        : accessibilitySettings.backgroundColor;
+                        : accessibilitySettings.boxColor;
 
                     return (
                         <TouchableOpacity 

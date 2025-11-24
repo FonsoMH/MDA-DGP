@@ -117,7 +117,7 @@ function SequenceGame() {
             margin: 5,
             borderRadius: 12,
             borderWidth: 2,
-            borderColor: '#888',
+            borderColor: '#000000',
             justifyContent: 'center',
             alignItems: 'center',
         }
@@ -247,7 +247,7 @@ function SequenceGame() {
                 {visualIcon}
             </View>
             <View
-                style={[styles.gridContainer, { height: '40%' }]}
+                style={[styles.gridContainer, { height: '40%' },{backgroundColor: accessibilitySettings.foregroundColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -269,13 +269,13 @@ function SequenceGame() {
                             <NumberDisplay
                                 numberProp={num} 
                                 size={120}
-                                style={isSelected(num) ? styles.disabled : null}
+                                style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
                             />
                         </DraggableItem>
                     ))}
             </View>
             <View
-                style={[styles.gridContainer, { height: '35%' }]}
+                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.foregroundColor}]}
                 ref={bottomZoneRef}
                 onLayout={() => {
                     bottomZoneRef.current?.measureInWindow((x, y, width, height) => {

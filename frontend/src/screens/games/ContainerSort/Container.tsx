@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {StyleSheet, TouchableOpacity, View } from "react-native";
+import {StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option } from "../../../types/games";
 import OperacionDisplay from "./OperationDisplay";
@@ -19,6 +19,8 @@ interface ContainerProps{
 
     containerIndex: number;
     onLayoutMeasured?: (layout: Layout, index: number) => void;
+    style?: StyleProp<ViewStyle>;
+    
 }
 
 
@@ -31,10 +33,9 @@ function Container({
     topZoneLayout,
     containerIndex,
     onLayoutMeasured,
+    style
 }: ContainerProps) {
 
-    // const [myNumbers, setMyNumbers] = useState<Option[]>([]);
-    // const [myTotal, setMyTotal] = useState(0);
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
 
     const checkUniformity = (numbers: Option[]): string => {
@@ -101,7 +102,7 @@ function Container({
         >
 
         <TouchableOpacity 
-        style={[styles.container, {borderColor: borderColor}]} 
+        style={[styles.container, {borderColor: borderColor}, style]} 
         onPress={handleContainerClick}>
             {items.map((option, index) => (
                 <DraggableItem
