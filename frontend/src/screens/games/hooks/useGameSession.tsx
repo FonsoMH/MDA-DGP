@@ -20,6 +20,7 @@ interface UseGameSessionApi {
   registerError: () => void;
   resolveRound: () => void;
   completeSession: (overrideStats?: SessionStats) => Promise<void>;
+ abandonSession: () => Promise<void>; // marcar sesión como abandonada y enviar parcial
   resetSession: () => void;
   hasErrorThisRound: boolean;
   stats: SessionStats;
@@ -69,7 +70,7 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     return Math.max(0, Math.round((Date.now() - sessionStartRef.current) / 1000));
   };
 
-  const submitSession = async (finalStats: SessionStats) => {
+  const submitSession = async (finalStats: SessionStats) => {//es llamda dentro de complte para hacer el post, tiene q ser async
     if (!user?.id || !gameId) return;
     setIsSubmitting(true);
     setSubmitError(null);
@@ -89,8 +90,9 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     }
   };
 
-  const completeSession = useCallback(async (overrideStats?: SessionStats) => {
+  const completeSession = useCallback(async (overrideStats?: SessionStats) => { //la hago async para q no se haga una condicion de carrera
     if (submittedRef.current) return;
+    //console.log(stats);
     const base = overrideStats ?? stats;
     const finalStats: SessionStats = { ...base, timeSeconds: computeElapsedSeconds() };
     setStats(finalStats);
@@ -119,5 +121,17 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     setSubmitError(null);
   }, []);
 
-  return { currentRound, startRound, registerError, resolveRound, completeSession, resetSession, hasErrorThisRound: roundStateRef.current.hasError, stats, isSubmitting, submitError };
+  const abandonSession = useCallback(async () => {
+    if (submittedRef.current) return;
+    // Base stats
+    let override: SessionStats = { ...stats, abandoned: true };
+    const inProgress = !!roundStateRef.current.startedAt && !roundStateRef.current.resolved;
+    if (inProgress && roundStateRef.current.hasError) {
+      // Contabilizar la ronda en curso como fallo sólo si ya hubo error
+      override = { ...override, failedPlays: override.failedPlays + 1 };
+    }
+    await completeSession(override);
+  }, [stats, completeSession]);
+
+  return { currentRound, startRound, registerError, resolveRound, completeSession, abandonSession, resetSession, hasErrorThisRound: roundStateRef.current.hasError, stats, isSubmitting, submitError };
 }

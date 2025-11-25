@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useAccessibilitySettings } from '../../../accessibilitySettings/hooks/useAccessibilitySettings';
-import BackButton from '../../../components/common/BackButton/BackButton';
+import GameBackButton from '../components/GameBackButton';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
 import FeedbackScreen from '../../../components/FeedBack/Feedback';
@@ -156,7 +156,12 @@ function TapNumberGame() {
     return (
         
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
+            <GameBackButton 
+                width={215} 
+                height={76} 
+                alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
+                session={session}
+            />
             <TouchableOpacity 
                 testID="tts-button" 
                 onPress={() => playTTS(targetNumber.toString())}  
