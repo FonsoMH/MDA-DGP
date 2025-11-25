@@ -110,8 +110,8 @@ ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id) 
 VALUES 
-('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$cqwOvGPYlW6TdyuQ$b1717df1f28a0d52b08fb2a1ee5599ddadd3e1a9c98be3d02accd368b1975ae1994c247a81da01ad4d89d606c6479c4f79032876a70d57af3fd8da343aab8e6a', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com')),
-('Leo Reader', 'leo@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'))
+('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$rBvclRmeu1UqPMP6$ced8eefdf634683cf43a15afbb285b41b2e01fe80d8953ac3be17b4a03775aa743303010b41c971ce48231df15c40659062b41b9f47fd48b9117156a1ac9b1eb', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com')),
+('Leo Reader', 'leo@app.com', 'scrypt:32768:8:1$HzRP2dGZaRn7HUUY$2faba6ea80ed475c04241e5e3079ad91889e21dd361e904e48c1b6182511cd77fa7622e9fe9d50aefa5639f6a70246fa9a50c1fcf7d1586d6c12f99b447f3c0d', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'))
 ON CONFLICT (email) DO NOTHING;
 
 -- 4. Populate Settings for 1 student (Eva)
