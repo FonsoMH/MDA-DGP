@@ -123,12 +123,22 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
 
   const abandonSession = useCallback(async () => {
     if (submittedRef.current) return;
-    // Base stats
+    // Número de rondas realmente resueltas (éxitos + fallos contabilizados por resolveRound)
+    const resolvedRounds = stats.successfulPlays + stats.failedPlays;
+    // Si el usuario abandona sin haber cerrado ninguna ronda, NO enviamos resultados (ruido)
+    if (resolvedRounds === 0) {
+      submittedRef.current = true; // Marcamos para no intentar enviar luego
+      // Opcional: reflejar estado de abandono en UI/local sin post
+      setStats(s => ({ ...s, abandoned: true }));
+      return;
+    }
+    // Caso normal: calcular override y enviar parcial.
     let override: SessionStats = { ...stats, abandoned: true };
     const inProgress = !!roundStateRef.current.startedAt && !roundStateRef.current.resolved;
     if (inProgress && roundStateRef.current.hasError) {
-      // Contabilizar la ronda en curso como fallo sólo si ya hubo error
-      override = { ...override, failedPlays: override.failedPlays + 1 };
+      // Si hay una ronda iniciada con error sin resolver, NO la contamos como fallo para evitar inflar métricas.
+      // si queremos contarla descomentar abajo, puede dar problemas con juego 2
+      // override = { ...override, failedPlays: override.failedPlays + 1 };
     }
     await completeSession(override);
   }, [stats, completeSession]);
