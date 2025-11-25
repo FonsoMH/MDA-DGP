@@ -39,7 +39,8 @@ export const usePictogramPassword = (): PictogramPasswordHook => {
     };
 
     const getPasswordSequence = (): string => {
-        return password.map(item => item.code).join(); 
+        
+        return password.map(item => item.code).join(''); 
     };
 
     const isPasswordComplete = useMemo(() => {

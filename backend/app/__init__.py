@@ -4,6 +4,9 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
+# from .students import bp as students_bp
+# from .users import users_bp
+
 
 
 load_dotenv()  # carga las variables del .env
