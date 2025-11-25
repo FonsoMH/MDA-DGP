@@ -2,11 +2,23 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager, Alert } from 'react-native';
 import { UserApiData } from '../../types/users';
 import { DeleteUserHook } from './hook/DeleteUserHook';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types/navigation';
+import { AdminStackParamList } from '../../navigation/AdminNavigator';
+
+
+type UserListScreenProps = NativeStackScreenProps<any, 'UserList'>;
+
+// 2. ⭐️ Define el tipo de la propiedad 'navigation' extrayéndolo del tipo completo
+//    Esto es el objeto que contiene el método 'navigate'.
+type UserListNavigationProp = UserListScreenProps['navigation'];
 
 interface UserCardProps {
   user: UserApiData;
   onUserDeleted?: () => void;
   onEdit?: (user: UserApiData) => void;
+  navigation: UserListNavigationProp;
+  adminId?: number | null;
 }
 
 const roleColors = {
@@ -15,7 +27,7 @@ const roleColors = {
   student: { bg: '#DCFCE7', text: '#016630' },
 };
 
-export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps) {
+export default function UserCard({ user, onUserDeleted, onEdit, navigation, adminId }: UserCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const { isDeleting, error, deleteUser } = DeleteUserHook();
@@ -29,28 +41,31 @@ export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps)
   };
 
   const handleDelete = async () => {
-    console.log("1. [UserCard] Botón pulsado. Datos del usuario:", user);
-    //const success = await deleteUser(user);
 
     if (!user.id) {
         console.error("⚠️ ERROR: El usuario no tiene ID. No se puede borrar.");
         return;
     }
 
-    console.log("2. [UserCard] Llamando a deleteUser...");
+    const success = await deleteUser(adminId, user);
 
-    const success = await deleteUser(user);
-    //if (success && onUserDeleted) {
-    //  onUserDeleted();
-    //}
-
-    console.log("5. [UserCard] Resultado de deleteUser:", success);
 
     if (success && onUserDeleted) {
-      console.log("6. [UserCard] Notificando al padre (onUserDeleted)");
       onUserDeleted();
     }
   };
+
+  const handleEditClick = () => {
+
+    if (user.role == 'teacher'){
+      navigation.navigate('TeacherCreate', { teacher: user })
+    }
+
+    else if (user.role == 'student'){
+      navigation.navigate('StudentCreate', { student: user })
+    }
+
+  }
 
   return (
     <View>
@@ -108,7 +123,7 @@ export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps)
 
         {/* Buttons */}
         <View style={[styles.cell, { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
-            <TouchableOpacity style={styles.editButton} onPress={() => onEdit && onEdit(user)} disabled={isDeleting}>
+            <TouchableOpacity style={styles.editButton} onPress={() => handleEditClick()} disabled={isDeleting}>
               <Text style={styles.editText}>Editar</Text>
             </TouchableOpacity>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} disabled={isDeleting}>

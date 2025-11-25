@@ -36,23 +36,19 @@ export const DeleteUserHook = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const deleteUser = async (user: UserApiData): Promise<boolean> => {
-        console.log("--- INICIANDO PROCESO DE BORRADO ---"); // CHIVATO
+    const deleteUser = async (adminId:number, user: UserApiData): Promise<boolean> => {
         setError(null);
 
         const confirmed = await askConfirm();
-        console.log("Confirmación recibida:", confirmed); // CHIVATO
 
         if (!confirmed) {
-            console.log("Llamando a API para borrar ID:", user.id); // CHIVATO
             return false;
         }
 
         setIsDeleting(true);
 
         try {
-            console.log("Llamando a API para borrar ID:", user.id); // CHIVATO
-            await DeleteUserApi(user);
+            await DeleteUserApi(adminId ,user);
             
             setIsDeleting(false);
             
@@ -69,7 +65,7 @@ export const DeleteUserHook = () => {
             console.error("Error en API:", err); // CHIVATO
             setIsDeleting(false);
             setError(err.message || 'Error al eliminar usuario');
-            
+
             if (Platform.OS === 'web') {
                 window.alert(`Error: ${err.message || 'Error al eliminar usuario'}`);
             } else {
@@ -79,19 +75,6 @@ export const DeleteUserHook = () => {
             return false;
         }
 
-        /*
-        try {
-            await DeleteUserApi(user);
-            setIsDeleting(false);
-            Alert.alert('Éxito', 'Usuario eliminado correctamente.');
-            return true;
-        } catch (err: any) {
-            setIsDeleting(false);
-            setError(err.message || 'Error al eliminar usuario');
-            Alert.alert('Error', err.message || 'Error al eliminar usuario');
-            return false;
-        }
-        */
     };
 
     return { isDeleting, error, deleteUser };

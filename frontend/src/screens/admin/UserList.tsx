@@ -5,17 +5,18 @@ import BackButton from '../../components/common/BackButton/BackButton';
 import StateCard from '../../components/users/StateCard';
 import FilterButtons, { FilterOption } from '../../components/users/FilterButtons';
 import UserCard from '../../components/users/UserCard';
-import EditUserForm from '../../components/users/EditUserForm';
 import { UserFrontend, UserApiData } from '../../types/users';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { useUsers } from './hook/useUserList';
 import { set } from 'react-hook-form';
+import { useUser } from '../../hooks/useUser';
 
 type UserListProps = NativeStackScreenProps<any, 'UserList'>;
 
 export default function UserListScreen({ navigation }: UserListProps) { 
+  const {user} = useUser();
   const { users, isLoading, refetch } = useUsers();
   const [filteredUsers, setFilteredUsers] = useState<UserFrontend[]>([]);
   const [filter, setFilter] = useState<FilterOption>('todos');
@@ -119,9 +120,10 @@ export default function UserListScreen({ navigation }: UserListProps) {
                   user={userApiData}
                   onEdit={handleOpenEditModal}
                   onUserDeleted={() => {
-                    console.log("Usuario borrado, refrescando lista...");
                     refetch();
                   }}
+                  navigation={navigation}
+                  adminId={user.id}
               />
           );
         })
@@ -150,7 +152,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
           <Text style={styles.fabText}>{showMenu ? '✕' : '+'}</Text>
       </TouchableOpacity>
 
-      {selectedUserForEdit && (
+      {/* {selectedUserForEdit && (
           <EditUserForm
               user={selectedUserForEdit}
               visible={isEditModalVisible}
@@ -158,7 +160,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
               onClose={handleCloseEditModal}
               onSaved={handleSavedUser}
           />
-      )}
+      )} */}
     </View>
     
   );

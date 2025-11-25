@@ -23,6 +23,7 @@ export interface UpdateUserPayload {
   email?: string;
   password?: string;
   assigned_teacher_id?: number | null;    
+  assigned_students_ids?: number[];
 }
 
 export interface BaseCredentialsPayload {
