@@ -21,6 +21,28 @@ def validate_booleano(val):
     return isinstance(val, bool)
 
 # --- GET ---
+@accessibility_bp.route("/accessibility/defaults", methods=["GET"])
+def get_default_accessibility():
+    cur = get_db_cursor()
+    try:
+        default_settings = {
+            "background_color": "#F7F8FA",
+            "foreground_color": "#000000",
+            "number_color": "#000000",
+            "box_color": "#D9D9D9",
+            "icon_position": "izquierda",
+            "high_contrast_mode": False,
+            "show_numbers_mode": True,
+            "font_size": 16
+        }
+
+        return jsonify(default_settings), 200
+
+    except Exception as e:
+        return jsonify({"error": "Error al obtener configuración por defecto"}), 500
+    finally:
+        cur.close()
+
 @accessibility_bp.route("/accessibility/<int:student_id>", methods=["GET"])
 def get_accessibility(student_id):
     cur = get_db_cursor()
@@ -112,3 +134,4 @@ def update_accessibility(student_id):
         "message": "Configuración actualizada correctamente",
         "updated_settings": updated_settings
     }), 200
+
