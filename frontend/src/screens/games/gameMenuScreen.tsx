@@ -48,7 +48,6 @@ export default function GameMenuScreen({ navigation }: Props) {
     
     const accessibilitySettings = useAccessibilitySettings();   
 
-    console.log("accessibilitySettings in GameMenuScreen:", accessibilitySettings);
     
     const styles = StyleSheet.create({
         safe: {
