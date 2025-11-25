@@ -14,7 +14,7 @@ const BASE_FONT_SIZE = 18;
 const BASE_BUTTON_HEIGHT = 48;
 
 //TODO nombre de la main de profe
-const HOME_SCREENS = ['GameMenu', 'UserList'];
+const HOME_SCREENS = ['GameMenu', 'UserList', 'TeacherStudentList'];
 
 function BackButton({ width, height, alignSelf = 'flex-start' }: BackProps){
   const navigation = useNavigation();

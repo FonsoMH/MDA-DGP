@@ -9,15 +9,16 @@ import Animated, {
     SharedValue,
 } from "react-native-reanimated";
 
-import { scheduleOnRN } from 'react-native-worklets'
+import { runOnJS, scheduleOnRN } from 'react-native-worklets'
 
 type Layout = { x: number; y: number; width: number; height: number; };
 
 interface DraggableItemProps {
-    onDrop: () => void; 
+    onDrop?: (targetIndex: number) => void; 
+    onStart?: () => void;
     onPress: () => void; 
-    dropZoneLayout: SharedValue<Layout | null>; 
-    style: StyleProp<ViewStyle>;
+    dropZonesLayouts: SharedValue<Layout[] | null>; 
+    style?: StyleProp<ViewStyle>;
     isDisabled: boolean;
     children: React.ReactNode;
     testID: string;
@@ -25,8 +26,9 @@ interface DraggableItemProps {
 
 const DraggableItem: React.FC<DraggableItemProps> = ({ 
     onDrop, 
+    onStart,
     onPress,
-    dropZoneLayout,
+    dropZonesLayouts,
     style,
     isDisabled,
     children,
@@ -53,39 +55,63 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
         });
 
     const panGesture = Gesture.Pan()
-        .enabled(!isDisabled) 
-        .onStart(() => {
-            startOffset.value = { x: translateX.value, y: translateY.value };
-            scheduleOnRN(measureItem);
-        })
-        .onUpdate((event) => {
-            translateX.value = startOffset.value.x + event.translationX;
-            translateY.value = startOffset.value.y + event.translationY;
-        })
-        .onEnd(() => {
-            const dropZone = dropZoneLayout.value;
-            if (!dropZone) {
-                translateX.value = withSpring(0);
-                translateY.value = withSpring(0);
-                return;
-            }
+    .enabled(!isDisabled) 
+    .onStart(() => {
+        startOffset.value = { x: translateX.value, y: translateY.value };
+        scheduleOnRN(measureItem);
+        
+        if (onStart) {
+            scheduleOnRN(onStart);
+        }
+    })
+    .onUpdate((event) => {
+        translateX.value = startOffset.value.x + event.translationX;
+        translateY.value = startOffset.value.y + event.translationY;
+    })
+    .onEnd(() => {
+        'worklet'; 
 
-            const finalX = startPosition.value.x + translateX.value;
-            const finalY = startPosition.value.y + translateY.value;
+        const dropZones = dropZonesLayouts.value;
+        
+        if (!dropZones || dropZones.length === 0) {
+            translateX.value = withSpring(0);
+            translateY.value = withSpring(0);
+            return;
+        }
+        
+        const finalX = startPosition.value.x + translateX.value;
+        const finalY = startPosition.value.y + translateY.value;
+
+        let isOverAnyDropZone = false;
+        let successfulIndex = -1; 
+
+        for (let i = 0; i < dropZones.length; i++) {
+            const dropZone = dropZones[i];
             
-            const isOverDropZone = 
+            if (!dropZone) continue;
+            
+            const isOverThisDropZone = 
                 finalX > dropZone.x &&
                 finalX < dropZone.x + dropZone.width &&
                 finalY > dropZone.y &&
                 finalY < dropZone.y + dropZone.height;
 
-            if (isOverDropZone) {
-                scheduleOnRN(onDrop);
+            if (isOverThisDropZone) {
+                isOverAnyDropZone = true;
+                successfulIndex = i;
+                break;
             }
-            
+        }
+        
+        if (isOverAnyDropZone && onDrop) {
+            runOnJS(onDrop)(successfulIndex);        
+        }
+        
+        if(comeBack || successfulIndex == -1){
             translateX.value = withSpring(0);
             translateY.value = withSpring(0);
-        });
+        }
+    });
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -93,8 +119,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
                 { translateX: translateX.value },
                 { translateY: translateY.value },
             ],
-            // zIndex: (translateX.value !== 0 || translateY.value !== 0) ? 9999 : 1,
-        };
+        } as ViewStyle;
     });
 
     const combinedGesture = Gesture.Race(tapGesture, panGesture);

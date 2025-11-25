@@ -40,8 +40,6 @@ export async function performLogin(credentials: LoginCredentials): Promise<AuthR
     const endpoint = `${BASE_URL}/api/login`; 
     
     try {
-
-        console.log(credentials);
         
         const response = await axios.post<AuthResponse>(
             endpoint, 
