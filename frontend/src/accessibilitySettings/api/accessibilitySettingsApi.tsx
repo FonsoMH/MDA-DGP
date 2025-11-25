@@ -4,12 +4,13 @@ import { AccessibilitySettingsApiData, AccessibilitySettingsFrontend } from "../
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG= {
     backgroundColor: "#F7F8FA",
     foregroundColor: "#000000",
+    numberColor: "#000000",
+    boxColor: "#FFFFFF",
     iconPosition: "izquierda",
-    highContrast: false,
-    showNumbers: true,
+    showNumbersMode: true,
     fontSize: 16,
 };
 
@@ -33,9 +34,10 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
         const mappedConfig: AccessibilitySettingsFrontend = {
             backgroundColor: configData.background_color,
             foregroundColor: configData.foreground_color,
+            numberColor: configData.number_color,
+            boxColor: configData.box_color,
             iconPosition: configData.icon_position,
-            highContrast: configData.high_contrast,
-            showNumbers: configData.show_numbers,
+            showNumbersMode: configData.show_numbers_mode,
             fontSize: configData.font_size,
         };
         
@@ -46,4 +48,12 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
 
         return DEFAULT_CONFIG;
     }
+}
+
+
+export async function updateAccessibilitySettings(studentId: number, payload: AccessibilitySettingsApiData) {
+
+  const url = `${BASE_URL}/api/accessibility/${studentId}`;
+  const res = await axios.put(url, payload);
+  return res.data;
 }

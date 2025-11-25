@@ -58,7 +58,13 @@ export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps)
       <View style={styles.card}>
         {/* Name */}
         <View style={[styles.cell, { flex: 2, justifyContent: 'center', alignItems: 'center' }]}>
-          <Text style={styles.name}>{user.name}</Text>
+        <Text
+          style={styles.name}
+          testID={`user-name-${user.name}`}
+        >
+          {user.name}
+        </Text>
+
         </View>
 
         {/* Email */}

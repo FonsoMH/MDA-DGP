@@ -33,13 +33,13 @@ const GAMES: Game[] = [
         image: require('../../../assets/icons/games_icons/icon_game2.png'),
     },
     {
-        id: 'Game3',
+        id: 'ContainerSort',
         title: 'Reparte el mismo número',
         image: require('../../../assets/icons/games_icons/icon_game3.png'),
     },
     {
         id: 'Game4',
-        title: 'Deja el mismo númeroooooo',
+        title: 'Deja el mismo número',
         image: require('../../../assets/icons/games_icons/icon_game4.png'),
     },
 ];

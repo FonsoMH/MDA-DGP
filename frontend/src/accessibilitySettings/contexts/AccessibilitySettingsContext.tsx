@@ -15,9 +15,10 @@ export const AccessibilitySettingsContext = createContext<AccessibilitySettingsC
 export function AccessibilitySettingsProvider({ children }: AccessibilitySettingsProviderProps) {
     const [backgroundColor, setBackgroundColor] = useState<AccessibilitySettingsFrontend['backgroundColor']>('#F7F8FA');
     const [foregroundColor, setForegroundColor] = useState<AccessibilitySettingsFrontend['foregroundColor']>('#000000');
+    const [numberColor, setNumberColor] = useState<AccessibilitySettingsFrontend['numberColor']>('#000000');
+    const [boxColor, setBoxColor] = useState<AccessibilitySettingsFrontend['boxColor']>('#FFFFFF');
     const [iconPosition, setIconPosition] = useState<AccessibilitySettingsFrontend['iconPosition']>('izquierda');
-    const [highContrast, setHighContrast] = useState<AccessibilitySettingsFrontend['highContrast']>(false);
-    const [showNumbers, setShowNumbers] = useState<AccessibilitySettingsFrontend['showNumbers']>(true);
+    const [showNumbersMode, setShowNumbersMode] = useState<AccessibilitySettingsFrontend['showNumbersMode']>(true);
     const [fontSize, setFontSize] = useState<AccessibilitySettingsFrontend['fontSize']>(16);
 
     async function getSettings(id: number): Promise<void> {
@@ -25,8 +26,7 @@ export function AccessibilitySettingsProvider({ children }: AccessibilitySetting
         setBackgroundColor(settings.backgroundColor);
         setForegroundColor(settings.foregroundColor);
         setIconPosition(settings.iconPosition);
-        setHighContrast(settings.highContrast);
-        setShowNumbers(settings.showNumbers);
+        setShowNumbersMode(settings.showNumbersMode);
         setFontSize(settings.fontSize);
     }
 
@@ -34,10 +34,11 @@ export function AccessibilitySettingsProvider({ children }: AccessibilitySetting
         <AccessibilitySettingsContext.Provider
             value={{
                 backgroundColor,
-                highContrast,
                 foregroundColor,
+                numberColor,
+                boxColor,
+                showNumbersMode,
                 iconPosition,
-                showNumbers,
                 fontSize,
                 getSettings,
             }}

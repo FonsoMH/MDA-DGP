@@ -87,6 +87,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
       console.log("enviamos");
       
       onSubmitFrom(payload); 
+      navigation.goBack();
   };
 
   return (
@@ -113,6 +114,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
                       icon={item.icon} 
                       text={item.name} 
                       onPress={() => togglePasswordIcon(item)}
+                      testID={`pictogram-${item.name}`}
                       height={50}
                       width={50}
                   />
@@ -171,6 +173,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
                   style={[styles.tutorItem, active && styles.tutorItemActive]}
                   accessibilityRole="button"
                   accessibilityLabel={`Seleccionar tutor ${t.name}`}
+                  testID={`tutor-card-${t.id}`}
                 >
                   <View style={[styles.tutorCheck, active && styles.tutorCheckActive]} />
                   <View style={{ flex: 1 }}>
@@ -191,6 +194,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
             style={[styles.btn, styles.btnPrimary, (!isPasswordComplete || isTotalSubmitting) && { opacity: 0.7 }]}
             onPress={handleSubmit(onSubmitRHF)}
             disabled={!isPasswordComplete || isTotalSubmitting}
+            testID='submit-create-student'
           >
             <Text style={styles.btnText}>Crear Estudiante</Text>
           </Pressable>
@@ -209,6 +213,8 @@ const styles = StyleSheet.create({
     maxWidth: 800,
     width: '100%',
     alignSelf: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 20
   },
   title: {
     fontWeight: '700',
