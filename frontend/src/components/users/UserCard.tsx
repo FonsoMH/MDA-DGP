@@ -1,24 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager, Alert } from 'react-native';
-import axios from 'axios';
-
-export type UserRole = "admin" | "teacher" | "student";
-
-export interface User {
-  user_id?: number;
-  name: string;
-  email: string;
-  role: UserRole;
-  studentsCount?: number;
-  assignedStudents?: string[];
-}
-
-const BASE_URL = 'http://localhost:5000';
+import { UserApiData } from '../../types/users';
+import { DeleteUserHook } from './hook/DeleteUserHook';
 
 interface UserCardProps {
-  user: User;
+  user: UserApiData;
   onUserDeleted?: () => void;
-  onEdit?: (user: User) => void;
+  onEdit?: (user: UserApiData) => void;
 }
 
 const roleColors = {
@@ -30,6 +18,8 @@ const roleColors = {
 export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps) {
   const [expanded, setExpanded] = useState(false);
 
+  const { isDeleting, error, deleteUser } = DeleteUserHook();
+
   const roleColor = roleColors[user.role];
   const showStudentCount = user.role === 'teacher' && user.studentsCount !== undefined;
 
@@ -38,56 +28,28 @@ export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps)
     setExpanded(!expanded);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    console.log("1. [UserCard] Botón pulsado. Datos del usuario:", user);
+    //const success = await deleteUser(user);
 
-    const askConfirm = (): Promise<boolean> => {
-      if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
-        // Web fallback
-        return Promise.resolve(window.confirm('¿Seguro que desea eliminar este usuario?'));
-      }
+    if (!user.id) {
+        console.error("⚠️ ERROR: El usuario no tiene ID. No se puede borrar.");
+        return;
+    }
 
-      return new Promise((resolve) => {
-        Alert.alert(
-          'Confirmar eliminación',
-          '¿Seguro que desea eliminar este usuario?',
-          [
-            { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },
-            { text: 'Sí, seguro', style: 'destructive', onPress: () => resolve(true) },
-          ],
-        );
-      });
-    };
+    console.log("2. [UserCard] Llamando a deleteUser...");
 
-    (async () => {
-      try {
-        console.log('UserCard: delete clicked for user', user.user_id);
-        const confirmed = await askConfirm();
-        if (!confirmed) {
-          console.log('UserCard: delete cancelled');
-          return;
-        }
+    const success = await deleteUser(user);
+    //if (success && onUserDeleted) {
+    //  onUserDeleted();
+    //}
 
-        if (!user.user_id) {
-          console.error('UserCard: missing user_id, cannot delete');
-          Alert.alert('Error', 'ID de usuario no disponible.');
-          return;
-        }
+    console.log("5. [UserCard] Resultado de deleteUser:", success);
 
-        const resp = await axios.delete(`${BASE_URL}/users/${user.user_id}`);
-        console.log('UserCard: delete response', resp?.status, resp?.data);
-        Alert.alert('Éxito', 'El usuario ha sido eliminado correctamente');
-        if (onUserDeleted) onUserDeleted();
-      } catch (error: any) {
-        console.error('UserCard: delete error', error);
-        // If backend returned a helpful message, show it
-        const serverMessage = error?.response?.data?.error || error?.response?.data?.message;
-        if (serverMessage) {
-          Alert.alert('Error', String(serverMessage));
-        } else {
-          Alert.alert('Error', 'No se pudo eliminar el usuario.');
-        }
-      }
-    })();
+    if (success && onUserDeleted) {
+      console.log("6. [UserCard] Notificando al padre (onUserDeleted)");
+      onUserDeleted();
+    }
   };
 
   return (
@@ -140,10 +102,10 @@ export default function UserCard({ user, onUserDeleted, onEdit }: UserCardProps)
 
         {/* Buttons */}
         <View style={[styles.cell, { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
-            <TouchableOpacity style={styles.editButton} onPress={() => onEdit && onEdit(user)}>
+            <TouchableOpacity style={styles.editButton} onPress={() => onEdit && onEdit(user)} disabled={isDeleting}>
               <Text style={styles.editText}>Editar</Text>
             </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} disabled={isDeleting}>
             <Text style={styles.deleteText}>Eliminar</Text>
           </TouchableOpacity>
         </View>

@@ -149,16 +149,16 @@ def update_teacher(user_id):
     email = (data.get('email') or '').strip().lower()
     password = (data.get('password') or '').strip()
     password_hash = None
-    assigned_students_ids = data.get('assigned_students_ids') or []
+    #assigned_students_ids = data.get('assigned_students_ids') or []
     
     if password:
         password_hash = generate_password_hash(password)
 
     cur = get_db_cursor()
 
-    if email_in_use(cur, email):
-        cur.close()
-        return jsonify({'error': 'Email already in use.'}), 400
+    #if email_in_use(cur, email):
+    #   cur.close()
+    #    return jsonify({'error': 'Email already in use.'}), 400
     
     try:
         user = get_user_by_id(cur, user_id)
@@ -177,12 +177,17 @@ def update_teacher(user_id):
             values.append(user_id)
             cur.execute(query, tuple(values))
 
-        if assigned_students_ids:
+        if 'assigned_students_ids' in data:
+            assigned_ids = data['assigned_students_ids'] or []
             cur.execute("""
-                UPDATE users SET assigned_teacher_id = %s
-                WHERE user_id = ANY(%s)
-            """, (user_id, assigned_students_ids))
-
+                UPDATE users SET assigned_teacher_id = NULL
+                WHERE assigned_teacher_id = %s
+            """, (user_id,))
+            if assigned_ids:
+                cur.execute("""
+                    UPDATE users SET assigned_teacher_id = %s
+                    WHERE user_id = ANY(%s)
+                """, (user_id, assigned_ids))
         commit_or_rollback(cur, True)
         return jsonify({'message': 'Teacher updated successfully.'}), 200
 
