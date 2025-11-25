@@ -47,6 +47,7 @@ const GAMES: Game[] = [
 export default function GameMenuScreen({ navigation }: Props) {
     
     const accessibilitySettings = useAccessibilitySettings();   
+
     
     const styles = StyleSheet.create({
         safe: {
@@ -70,7 +71,8 @@ export default function GameMenuScreen({ navigation }: Props) {
         card: {
             width: '48%', 
             height: '50%',
-            backgroundColor: '#FFFFFF',
+            // backgroundColor: '#FFFFFF',
+            backgroundColor: accessibilitySettings.containerColor,
             borderRadius: 16,
             padding: 16,
             alignItems: 'center',

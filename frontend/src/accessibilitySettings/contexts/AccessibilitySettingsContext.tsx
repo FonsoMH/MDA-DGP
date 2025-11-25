@@ -15,6 +15,7 @@ export const AccessibilitySettingsContext = createContext<AccessibilitySettingsC
 export function AccessibilitySettingsProvider({ children }: AccessibilitySettingsProviderProps) {
     const [backgroundColor, setBackgroundColor] = useState<AccessibilitySettingsFrontend['backgroundColor']>('#F7F8FA');
     const [foregroundColor, setForegroundColor] = useState<AccessibilitySettingsFrontend['foregroundColor']>('#000000');
+    const [containerColor, setContainerColor] = useState<AccessibilitySettingsFrontend['containerColor']>('#FFFFFF');
     const [numberColor, setNumberColor] = useState<AccessibilitySettingsFrontend['numberColor']>('#000000');
     const [boxColor, setBoxColor] = useState<AccessibilitySettingsFrontend['boxColor']>('#FFFFFF');
     const [iconPosition, setIconPosition] = useState<AccessibilitySettingsFrontend['iconPosition']>('izquierda');
@@ -25,6 +26,7 @@ export function AccessibilitySettingsProvider({ children }: AccessibilitySetting
         const settings = await fetchAccessibilitySettings(id);
         setBackgroundColor(settings.backgroundColor);
         setForegroundColor(settings.foregroundColor);
+        setContainerColor(settings.containerColor);
         setIconPosition(settings.iconPosition);
         setShowNumbersMode(settings.showNumbersMode);
         setFontSize(settings.fontSize);
@@ -37,6 +39,7 @@ export function AccessibilitySettingsProvider({ children }: AccessibilitySetting
             value={{
                 backgroundColor,
                 foregroundColor,
+                containerColor,
                 numberColor,
                 boxColor,
                 showNumbersMode,

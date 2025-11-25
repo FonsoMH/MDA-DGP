@@ -23,8 +23,7 @@ function ContainerSort() {
 
     const accessibilitySettings = useAccessibilitySettings();
     const roundMessage = useRoundMessage();
-    
-    
+       
 
     const styles = StyleSheet.create({
         screenContainer: {
@@ -42,7 +41,7 @@ function ContainerSort() {
 
         titleText: {
             fontSize: accessibilitySettings.fontSize * 1.5,         
-            color: '#101828',
+            color: accessibilitySettings.foregroundColor,
             marginBottom: 5,
             textAlign: 'center',
             
@@ -50,7 +49,7 @@ function ContainerSort() {
 
         instructionText: {
             fontSize: accessibilitySettings.fontSize,
-            color: '#101828',
+            color: accessibilitySettings.foregroundColor,
             marginBottom: 20, 
             textAlign: 'center',
         },
@@ -278,7 +277,7 @@ function ContainerSort() {
                 
 
             <View
-                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.foregroundColor}]}
+                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -307,6 +306,7 @@ function ContainerSort() {
                             <NumberDisplay
                                 numberProp={option.value} 
                                 size={100}
+                                numberColor={accessibilitySettings.numberColor}
                                 style={{backgroundColor: displayColor}} 
                             />
                         </DraggableItem>
@@ -326,7 +326,7 @@ function ContainerSort() {
                     containerIndex={index}
                     onLayoutMeasured={handleContainerLayout}
                     aria-label={`Container-Area-${index}`}
-                    style={{backgroundColor: accessibilitySettings.foregroundColor}}
+                    accessibilitySettings={accessibilitySettings}
                     />
                 ))}
             </View>

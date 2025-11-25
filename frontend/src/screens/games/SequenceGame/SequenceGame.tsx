@@ -56,13 +56,13 @@ function SequenceGame() {
         title: {
             fontSize: accessibilitySettings.fontSize + 10,
             fontWeight: '900',
-            color: '#101828',
+            color: accessibilitySettings.foregroundColor,
             marginBottom: 10,
             textAlign: 'center',
         },
         messageText: {
             fontSize: accessibilitySettings.fontSize,
-            color: '#333',
+            color: accessibilitySettings.foregroundColor,
             fontWeight: '500',
         },
 
@@ -97,7 +97,7 @@ function SequenceGame() {
         },
         bar: {
             width: 15,
-            backgroundColor: '#101828',
+            backgroundColor: accessibilitySettings.foregroundColor,
             marginHorizontal: 3,
             borderRadius: 4,
         },
@@ -247,7 +247,7 @@ function SequenceGame() {
                 {visualIcon}
             </View>
             <View
-                style={[styles.gridContainer, { height: '40%' },{backgroundColor: accessibilitySettings.foregroundColor}]}
+                style={[styles.gridContainer, { height: '40%' },{backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -269,13 +269,14 @@ function SequenceGame() {
                             <NumberDisplay
                                 numberProp={num} 
                                 size={120}
+                                numberColor={accessibilitySettings.numberColor}
                                 style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
                             />
                         </DraggableItem>
                     ))}
             </View>
             <View
-                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.foregroundColor}]}
+                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.containerColor}]}
                 ref={bottomZoneRef}
                 onLayout={() => {
                     bottomZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -305,6 +306,7 @@ function SequenceGame() {
                                     <NumberDisplay
                                         numberProp={target.value} 
                                         size={100}
+                                        numberColor={accessibilitySettings.numberColor}
                                         style={{backgroundColor: feedbackColor}} 
                                     />
                                 </DraggableItem>

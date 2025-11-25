@@ -35,7 +35,7 @@ export const useAccessibilitySettings = (studentId: number): UseAccessibilitySet
 
   const resetToDefaults = () => {
     if (!defaultValue) {
-      console.log("Valores por defecto no cargados aún");
+      console.error("Valores por defecto no cargados aún");
       return;
     }
     setSettings(defaultValue);

@@ -7,6 +7,7 @@ const API_TIMEOUT = process.env.API_TIMEOUT;
 export const DEFAULT_CONFIG= {
     backgroundColor: "#F7F8FA",
     foregroundColor: "#000000",
+    containerColor: "#FFFFFF",
     numberColor: "#000000",
     boxColor: "#FFFFFF",
     iconPosition: "izquierda",
@@ -34,6 +35,7 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
         const mappedConfig: AccessibilitySettingsFrontend = {
             backgroundColor: configData.background_color,
             foregroundColor: configData.foreground_color,
+            containerColor: configData.container_color,
             numberColor: configData.number_color,
             boxColor: configData.box_color,
             iconPosition: configData.icon_position,
