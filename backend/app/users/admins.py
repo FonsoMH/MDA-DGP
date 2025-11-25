@@ -68,6 +68,7 @@ def update_admin(user_id):
     email = (data.get('email') or '').strip().lower()
     password = (data.get('password') or '').strip()
     password_hash = None
+    new_role_id = data.get('role_id')
 
     if password:
         password_hash = generate_password_hash(password)
@@ -89,6 +90,10 @@ def update_admin(user_id):
             query = f"UPDATE users SET {', '.join(fields)} WHERE user_id = %s"
             values.append(user_id)
             cur.execute(query, tuple(values))
+
+        if new_role_id:
+            fields.append("role_id = %s")
+            values.append(new_role_id)
 
         commit_or_rollback(cur, True)
         return jsonify({'message': 'Admin updated successfully.'}), 200

@@ -22,7 +22,8 @@ export interface UpdateUserPayload {
   name?: string;
   email?: string;
   password?: string;
-  assigned_teacher_id?: number | null;    
+  assigned_teacher_id?: number | null; 
+  role_id?: number;   
 }
 
 export interface BaseCredentialsPayload {

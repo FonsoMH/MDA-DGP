@@ -125,3 +125,18 @@ export async function createStudentApi(payload: CreateStudentPayload): Promise<v
 
   }
 }
+
+export interface Role {
+  id: number;
+  name: string;
+}
+
+export async function fetchRoles(): Promise<Role[]> {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/roles`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    return [];
+  }
+}

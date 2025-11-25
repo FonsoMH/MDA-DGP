@@ -3,11 +3,14 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView,
 import { EditUserHook } from './hook/EditUserHook';
 import { UserApiData, UpdateUserPayload } from '../../types/users';
 import { useUsers } from '../../screens/admin/hook/useUserList';
+import { fetchRoles, Role } from '../../screens/admin/api/userApi';
 
 import { usePictogramPassword } from '../../utils/usePictogramPassword';
 import PasswordItem from '../../screens/auth/components/PasswordItem';
 import trashCanIcon from '../../../assets/trash_can.png';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { use } from 'chai';
+import { set } from 'react-hook-form';
 
 interface EditUserFormProps {
   user: UserApiData,
@@ -26,9 +29,14 @@ export default function EditUserForm({ user, teachers, onClose, onSaved, visible
     (user as any).assignedTeacherId ?? null
   );
 
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
+  const [currentRoleName, setCurrentRoleName] = useState<string>(user.role);
+
   const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
   const { isSaving, error, saveUser, clearError } = EditUserHook();
   const { users } = useUsers();
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
 
   const availableStudentsList = users.filter(u => u.role === 'student');
   const availableTeachersList = users.filter(u => u.role === 'teacher');
@@ -42,22 +50,39 @@ export default function EditUserForm({ user, teachers, onClose, onSaved, visible
     maxPasswordLength
   } = usePictogramPassword();
 
-  /*
   useEffect(() => {
-    if (user.role === 'student') {
+    const loadRoles = async () => {
+      const data = await fetchRoles();
+      setRoles(data);
+      const myRole = data.find(r => r.name === user.role);
+      if (myRole) setSelectedRoleId(myRole.id);
+    };
+    loadRoles();
+  }, []);
+
+  useEffect(() => {
+    const roleObj = roles.find(r => r.id === selectedRoleId);
+    if (roleObj) {
+      setCurrentRoleName(roleObj.name);
+    }
+  }, [selectedRoleId, roles]);
+
+  useEffect(() => {
+    if (currentRoleName === 'student') {
       const sequence = getPasswordSequence();
       setPassword(sequence);
     }
-  }, [pictogramList, user.role]);
-  */
+  }, [pictogramList, currentRoleName]);
 
   useEffect(() => {
     setName(user.name || '');
     setEmail(user.email || '');
     setPassword('');
     setAssignedTeacherId((user as any).assignedTeacherId ?? null);
+    setCurrentRoleName(user.role);
 
     clearPassword();
+
 
     if (user.role === 'teacher' && user.assignedStudents && availableStudentsList.length > 0) {
       const assignedNamesLower = user.assignedStudents.map(name => String(name).toLowerCase().trim());
@@ -99,7 +124,7 @@ export default function EditUserForm({ user, teachers, onClose, onSaved, visible
       return;
     }
 
-    if (user.role === 'student' && password && pictogramList.length < maxPasswordLength) {
+    if (currentRoleName === 'student' && /*password*/ pictogramList.length > 0 && pictogramList.length < maxPasswordLength) {
       Alert.alert('Error', `La contraseña pictográfica debe tener ${maxPasswordLength} pictogramas.`);
       return;
     }
@@ -108,30 +133,12 @@ export default function EditUserForm({ user, teachers, onClose, onSaved, visible
       name,
       email,
       assigned_teacher_id: assignedTeacherId,
+      role_id: selectedRoleId ?? undefined,
     };
-    
-    // --- LÓGICA DE CONTRASEÑA ---
-    if (user.role === 'student') {
-        // Para Estudiantes: Solo actualizamos si ha tocado los pictogramas
-        if (pictogramList.length > 0) {
-            // Validación de longitud
-            if (pictogramList.length < maxPasswordLength) {
-                Alert.alert('Error', `La contraseña pictográfica debe tener ${maxPasswordLength} pictogramas.`);
-                return;
-            }
-            // Obtenemos la secuencia ("API 1,API 2...") y la asignamos
-            dataToUpdate.password = getPasswordSequence();
-        }
-        // Si pictogramList.length === 0, NO enviamos el campo password, 
-        // así el backend mantiene la antigua.
-    } else {
-        // Para Admins/Teachers: Usamos el campo de texto normal
-        if (password) {
-            dataToUpdate.password = password;
-        }
-    }
 
-    if (user.role === 'teacher') {
+    if (password) dataToUpdate.password = password;
+
+    if (currentRoleName === 'teacher') {
       (dataToUpdate as any).assigned_students_ids = selectedStudentIds;
     }
 
@@ -156,12 +163,53 @@ export default function EditUserForm({ user, teachers, onClose, onSaved, visible
             <Text style={styles.label}>Email</Text>
             <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
-            {/*<Text style={styles.label}>Contraseña</Text>
-            <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
-            */}
+            {/* --- DROPDOWN --- */}
+            <Text style={styles.label}>Rol</Text>
             
-            {user.role === 'student' ? (
-              // === PICTOGRAM UI FOR STUDENTS ===
+            {/* The main box of the dropdown (Selected Value) */}
+            <TouchableOpacity 
+              style={styles.dropdownButton} 
+              onPress={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+            >
+              <Text style={styles.dropdownButtonText}>
+                {/* Show the selected name, or "Select Role" */}
+                {roles.find(r => r.id === selectedRoleId)?.name || "Seleccionar rol"}
+              </Text>
+              {/* Arrow Icon (Visual) */}
+              <Text style={{fontSize: 12, color: '#666'}}>
+                {isRoleDropdownOpen ? '▲' : '▼'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* The Options List (Only visible if Open) */}
+            {isRoleDropdownOpen && (
+              <View style={styles.dropdownOptionsContainer}>
+                {roles.map((role) => (
+                  <TouchableOpacity 
+                    key={role.id} 
+                    style={[
+                      styles.dropdownOption,
+                      selectedRoleId === role.id && styles.dropdownOptionSelected
+                    ]}
+                    onPress={() => {
+                      setSelectedRoleId(role.id);
+                      setIsRoleDropdownOpen(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.dropdownOptionText,
+                      selectedRoleId === role.id && styles.dropdownOptionTextSelected
+                    ]}>
+                      {role.name}
+                    </Text>
+                    {selectedRoleId === role.id && <Text style={{color: '#2563EB'}}>✓</Text>}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {currentRoleName === 'student' ? (
+              // === PICTOGRAM FOR STUDENTS ===
               <View style={{marginTop: 10}}>
                 <Text style={styles.label}>Contraseña</Text>
                 <View style={styles.pictogramContainer}>
@@ -224,7 +272,7 @@ export default function EditUserForm({ user, teachers, onClose, onSaved, visible
             )}
 
           {/* For students */}
-          {user.role === 'student' && (
+          {currentRoleName === 'student' && (
             <View style={{ marginTop: 12 }}>
                 <Text style={[styles.label, { marginBottom: 8 }]}>Asignar Tutor (Solo uno)</Text>
                 <View style={styles.studentListContainer}>
@@ -257,7 +305,7 @@ export default function EditUserForm({ user, teachers, onClose, onSaved, visible
           )}
 
           {/* For teachers */}
-          {user.role === 'teacher' && (
+          {currentRoleName === 'teacher' && (
             <View style={{ marginTop: 12 }}>
               <Text style={[styles.label, { marginBottom: 8 }]}>Asignar estudiantes</Text>
 
@@ -442,5 +490,79 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
+  },
+  roleContainer: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 10,
+      marginTop: 5,
+  },
+  roleBadge: {
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: '#E5E5E5',
+      backgroundColor: '#F9FAFB',
+  },
+  roleBadgeSelected: {
+      backgroundColor: '#EFF6FF',
+      borderColor: '#3B82F6',
+  },
+  roleText: {
+      color: '#6B7280',
+      fontSize: 14,
+      fontWeight: '500',
+      textTransform: 'capitalize',
+  },
+  roleTextSelected: {
+      color: '#2563EB',
+      fontWeight: '700',
+  },
+  // --- DROPDOWN STYLES ---
+  dropdownButton: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#E5E5E5',
+      borderRadius: 6,
+      padding: 10,
+      backgroundColor: '#fff',
+      marginTop: 4,
+  },
+  dropdownButtonText: {
+      fontSize: 14,
+      color: '#333',
+      textTransform: 'capitalize',
+  },
+  dropdownOptionsContainer: {
+      borderWidth: 1,
+      borderColor: '#E5E5E5',
+      borderTopWidth: 0,
+      borderBottomLeftRadius: 6,
+      borderBottomRightRadius: 6,
+      backgroundColor: '#fff',
+      overflow: 'hidden',
+  },
+  dropdownOption: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      paddingHorizontal: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: '#F3F4F6',
+  },
+  dropdownOptionSelected: {
+      backgroundColor: '#EFF6FF',
+  },
+  dropdownOptionText: {
+      fontSize: 14,
+      color: '#333',
+      textTransform: 'capitalize',
+  },
+  dropdownOptionTextSelected: {
+      color: '#2563EB',
+      fontWeight: '600',
   },
 });

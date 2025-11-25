@@ -4,6 +4,21 @@ from ..db import get_db_cursor
 
 users_bp = Blueprint('users', __name__, url_prefix='/api')
 
+@users_bp.route('/roles', methods=['GET'])
+def get_roles():
+    cur = get_db_cursor()
+    try:
+        cur.execute("SELECT role_id, role_name FROM roles ORDER BY role_id")
+        rows = cur.fetchall()
+        
+        roles = [{'id': row['role_id'], 'name': row['role_name']} for row in rows]
+        return jsonify(roles), 200
+    except Exception as e:
+        current_app.logger.error(f"Error fetching roles: {e}")
+        return jsonify({'error': 'Error al obtener roles'}), 500
+    finally:
+        cur.close()
+
 @users_bp.route('/users', methods=['GET'])
 def get_users():
     # filter by role

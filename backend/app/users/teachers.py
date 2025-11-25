@@ -150,6 +150,7 @@ def update_teacher(user_id):
     password = (data.get('password') or '').strip()
     password_hash = None
     #assigned_students_ids = data.get('assigned_students_ids') or []
+    new_role_id = data.get('role_id')
     
     if password:
         password_hash = generate_password_hash(password)
@@ -188,6 +189,11 @@ def update_teacher(user_id):
                     UPDATE users SET assigned_teacher_id = %s
                     WHERE user_id = ANY(%s)
                 """, (user_id, assigned_ids))
+
+        if new_role_id:
+            fields.append("role_id = %s")
+            values.append(new_role_id)
+
         commit_or_rollback(cur, True)
         return jsonify({'message': 'Teacher updated successfully.'}), 200
 
