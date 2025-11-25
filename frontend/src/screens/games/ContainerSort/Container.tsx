@@ -5,6 +5,8 @@ import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option } from "../../../types/
 import OperacionDisplay from "./OperationDisplay";
 import DraggableItem from "../SequenceGame/DraggableItem";
 import { SharedValue, useAnimatedRef } from "react-native-reanimated";
+import { useAccessibilitySettings } from "../../teacher/hooks/useAccessibilitySettings";
+import { AccessibilitySettingsFrontend } from "../../../types/accessibility";
 
 type Layout = { x: number; y: number; width: number; height: number; };
 
@@ -19,7 +21,7 @@ interface ContainerProps{
 
     containerIndex: number;
     onLayoutMeasured?: (layout: Layout, index: number) => void;
-    style?: StyleProp<ViewStyle>;
+    accessibilitySettings: AccessibilitySettingsFrontend;
     
 }
 
@@ -33,7 +35,7 @@ function Container({
     topZoneLayout,
     containerIndex,
     onLayoutMeasured,
-    style
+    accessibilitySettings,
 }: ContainerProps) {
 
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
@@ -102,7 +104,7 @@ function Container({
         >
 
         <TouchableOpacity 
-        style={[styles.container, {borderColor: borderColor}, style]} 
+        style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
         onPress={handleContainerClick}>
             {items.map((option, index) => (
                 <DraggableItem
@@ -117,6 +119,8 @@ function Container({
                     <NumberDisplay
                         numberProp={option.value} 
                         size={80}
+                        numberColor={accessibilitySettings.numberColor}
+                        style={{backgroundColor: accessibilitySettings.boxColor}}
                     ></NumberDisplay>
                 </DraggableItem>
             ))}

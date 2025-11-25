@@ -27,6 +27,7 @@ export const useSubmitAccessibilityChanges = ({ studentId, settings }: UseSubmit
       const payload: AccessibilitySettingsApiData = {
           background_color: settings.backgroundColor,
           foreground_color: settings.foregroundColor,
+          container_color: settings.containerColor,
           number_color: settings.numberColor,
           box_color: settings.boxColor,
           icon_position: settings.iconPosition,
