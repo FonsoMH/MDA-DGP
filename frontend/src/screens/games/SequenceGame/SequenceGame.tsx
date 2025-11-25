@@ -259,6 +259,7 @@ function SequenceGame() {
                     {options.map((num, index) => (
                         <DraggableItem
                             key={`option-${num}-${index}`}
+                            testID={`sequence-item-${num}`}
                             onPress={() => handleSelection(num)} 
                             onDrop={() => handleSelection(num)}
                             dropZonesLayouts={bottomZoneLayout} 
