@@ -31,9 +31,9 @@ export default function StudentStatisticsScreen({route}: Props) {
         error
     } = useStatistics(studentId, selectedGameId, initialDate, finalDate);
 
-    // --- PANEL DESPLEGABLE ---
+    
     const [isOpen, setIsOpen] = React.useState(false);
-    const slideAnim = React.useRef(new Animated.Value(-300)).current; // oculto a la izquierda
+    const slideAnim = React.useRef(new Animated.Value(-300)).current;
 
     const toggleFilters = () => {
         setIsOpen(!isOpen);
@@ -44,8 +44,6 @@ export default function StudentStatisticsScreen({route}: Props) {
         }).start();
     };
 
-  
-    console.log("Statistics data:", statistics);
     
     const pieData = statistics ? [
         { label: 'Éxitos', value: statistics.successfulPlays, color: '#4CAF51' },

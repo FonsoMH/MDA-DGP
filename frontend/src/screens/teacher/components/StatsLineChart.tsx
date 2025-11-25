@@ -2,24 +2,6 @@ import React from 'react';
 import { View, StyleSheet, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
-// --- 1. FUNCIÓN PARA GENERAR DATOS DE PRUEBA (SIMULACIÓN DE 100 DÍAS) ---
-const generarDatosSimulados = (diasTotales) => {
-  const datos = [];
-  let tiempoBase = 0; // Empezamos en 25 minutos
-
-  for (let i = 0; i <= diasTotales; i++) {
-    // Simula una tendencia decreciente con ruido
-    tiempoBase = Math.max(5, tiempoBase - 0.2 - (Math.random() * 0.5));
-    const tiempoFinal = Math.round(tiempoBase + (Math.random() * 10) - 5); // Ruido de +/- 1 minuto
-
-    datos.push({
-      value: tiempoFinal,
-      date: `${(i) % 30 + 1}/${Math.ceil(i/30)}/2025`, // Formato día/mes aproximado
-      label: `${(i) % 30 + 1}/${Math.ceil(i/30)}`
-    });
-  }
-  return datos;
-};
 
 const reduceDataAmount = (data : any[], factor : number)=> {
   if(factor < data.length && factor <= 1) return data;
@@ -46,38 +28,37 @@ const reduceDataAmount = (data : any[], factor : number)=> {
   }));
 }
 
-// --- 3. EL COMPONENTE PRINCIPAL ---
 export default function StatsLineChart({ data }: { data: { value: number; date: string; label: string }[] }) {
-    const totalDataPoints = 1000;
-    const dots = 20;
-  // Generamos un gran conjunto de datos (por ejemplo, 100 días)
-    const chartData = reduceDataAmount(data, data.length / dots); 
-    console.log("Line chart data:", chartData);
+
+    const maxDots = 20;
+
+    const chartData = reduceDataAmount(data, data.length / maxDots); 
+    
         return (
             <View style={styles.contenedorFijo}>
                 <LineChart
-                // --- DATOS ---
+
                 areaChart
                 color="#1E90FF"
                 startFillColor="#87CEFA"
                 endFillColor="white"
                 data={chartData}
-                spacing={500*1/dots}
-                width={Dimensions.get('window').width * 0.45} // 70% del ancho de la pantalla
+                spacing={500*1/maxDots}
+                width={Dimensions.get('window').width * 0.45}
                 
-                // --- CONFIGURACIÓN DE LÍNEA Y PUNTOS ---
+                
                 curved
                 dataPointsRadius={5}
                 dataPointsColor="#1E90FF"
                 
-                // --- EJE X (DÍAS MUESTREADOS) ---
+                
                 initialSpacing={0}
                 xAxisLabelTextStyle={styles.etiquetaEjeX}
                 xAxisColor="#D3D3D3"
                 
-                // --- EJE Y (TIEMPO EN MINUTOS) ---
+                
                 noOfSections={5}
-                //   maxValue={Math.ceil(maxValue / 5) * 5} // Redondea al múltiplo de 5 superior
+
                 yAxisLabelSuffix={' min'} 
                 yAxisTextStyle={styles.etiquetaEjeY}
                 yAxisColor="#D3D3D3"
@@ -109,16 +90,12 @@ export default function StatsLineChart({ data }: { data: { value: number; date: 
                         )
                     }
                 }}
-
-                
-                // --- ESTILOS ---
-                
                 />
             </View>
     );
 };
 
-// --- 4. ESTILOS ---
+
 const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
@@ -127,7 +104,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // EL CONTENEDOR DE TAMAÑO FIJO CLAVE
+  
   contenedorFijo: {
     
     padding: 20,

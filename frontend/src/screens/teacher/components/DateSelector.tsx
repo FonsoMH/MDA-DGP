@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, Modal, Pressable, StyleSheet } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 
-// --- Función de utilidad para obtener las fechas marcadas (sin cambios, se mantiene para la funcionalidad) ---
+
 const getMarkedDates = (initialDate: Date | null, finalDate: Date | null) => {
-    // ... (El código de getMarkedDates es el mismo que el anterior)
+    
     if (!initialDate && !finalDate) return {};
 
     const start = initialDate && finalDate ? (initialDate < finalDate ? initialDate : finalDate) : initialDate;
@@ -29,7 +29,7 @@ const getMarkedDates = (initialDate: Date | null, finalDate: Date | null) => {
             ...((!isStart && !isEnd) && { period: true }),
         };
 
-        // Si solo hay fecha inicial, salimos del bucle después de marcarla
+
         if (!end) break;
         
         currentDay.setDate(currentDay.getDate() + 1);
@@ -38,7 +38,7 @@ const getMarkedDates = (initialDate: Date | null, finalDate: Date | null) => {
     return markedDates;
 };
 
-// --- Componente DateSelector corregido ---
+
 
 export default function DateSelector({ 
     initialDate, 
@@ -74,7 +74,7 @@ export default function DateSelector({
             setSelectingInitialDate(false);
         } else {
             if (temporalInitialDate && selectedDate < temporalInitialDate) {
-                // Si la fecha final es anterior a la inicial, la nueva fecha pasa a ser la inicial
+                
                 setTemporalInitialDate(selectedDate);
                 onFinalDateChange(null);
                 setSelectingInitialDate(false); 
@@ -124,7 +124,7 @@ export default function DateSelector({
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={isVisible} // Solo se renderiza cuando isVisible es true
+                visible={isVisible}
                 onRequestClose={() => setIsVisible(false)}
             >
                 <View style={styles.centeredView}>
@@ -172,7 +172,7 @@ export default function DateSelector({
     );
 }
 
-// --- Estilos para el componente (sin cambios) ---
+
 const styles = StyleSheet.create({
     container: {
         padding: 10,

@@ -12,9 +12,6 @@ export default function StatsPieChart({data }: {data: { label: string; value: nu
     </View>
   );
 
-  console.log("Pie chart data:", data);
-
-
   return (
     <View style={styles.container}>
       <PieChart
