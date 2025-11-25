@@ -28,6 +28,8 @@ export function AccessibilitySettingsProvider({ children }: AccessibilitySetting
         setIconPosition(settings.iconPosition);
         setShowNumbersMode(settings.showNumbersMode);
         setFontSize(settings.fontSize);
+        setBoxColor(settings.boxColor);
+        setNumberColor(settings.numberColor)
     }
 
     return (
