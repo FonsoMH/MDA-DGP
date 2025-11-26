@@ -136,7 +136,7 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     let override: SessionStats = { ...stats, abandoned: true };
     const inProgress = !!roundStateRef.current.startedAt && !roundStateRef.current.resolved;
     if (inProgress && roundStateRef.current.hasError) {
-      // Si hay una ronda iniciada con error sin resolver, NO la contamos como fallo para evitar inflar métricas.
+      // Si hay una ronda iniciada con error sin resolver no la contamos como fallo para evitar inflar métricas.
       // si queremos contarla descomentar abajo, puede dar problemas con juego 2
       // override = { ...override, failedPlays: override.failedPlays + 1 };
     }

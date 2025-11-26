@@ -12,6 +12,7 @@ import { useAnimatedRef, useDerivedValue, useSharedValue } from "react-native-re
 import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
+import { useGameSession } from "../hooks/useGameSession";
 
 const GAME_ID = 3; 
 
@@ -136,6 +137,7 @@ function ContainerSort() {
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
+    const session = useGameSession({ gameId: GAME_ID });
 
 
     const clearSelectedNumber = () => {
@@ -148,6 +150,7 @@ function ContainerSort() {
     };
 
     const handleNumberSelect = (numberValue: Option) => {
+        session.startRound();
         setSelectedNumber(numberValue);
     };
 
@@ -165,34 +168,43 @@ function ContainerSort() {
     };
 
     useEffect(() => {
-        if(!containerStatuses){
+        if(!containerStatuses || resetSignal){
             return;
         }
 
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
-
-        if (allGreen && options.length == 0) {
-
-            const handleRoundComplete = async () => {
-                setResetSignal(true);
+        // containerStatuses.forEach(status => console.log(status === CORRECT_COLOR? "verde":"no verde"));
+        // console.log(options.length);
+        if (options.length == 0) {
+            // console.log(allGreen);  
+            if (allGreen) {
+                const handleRoundComplete = async () => {
+                    setResetSignal(true);
+                    
+                    await roundMessage.show(
+                        "¡Excelente! Has superado la ronda con éxito.", 
+                        1000,
+                        "success"
+                    );
+                    session.resolveRound();
+                    // console.log("Ronda completada con éxito");
+                    manager.advanceGame();
+                    return;
+                };
+                handleRoundComplete();
+            }else{
+                if (!session.hasErrorThisRound) {
+                    session.registerError();
+                }
+                // console.log("Fallo registrado");
+            }
                 
-                await roundMessage.show(
-                    "¡Excelente! Has superado la ronda con éxito.", 
-                    1000,
-                    "success"
-                );
-                
-                manager.advanceGame();
-                return;
-            };
-
-            handleRoundComplete();
             
         }
 
 
 
-    }, [containerStatuses]);
+    }, [containerStatuses, resetSignal]);
 
     const handlePlayAgain = () => {
         setResetSignal(true);

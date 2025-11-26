@@ -6,8 +6,7 @@ import {
     useAnimatedRef,
 } from 'react-native-reanimated';
 import { useAccessibilitySettings } from '../../../accessibilitySettings/hooks/useAccessibilitySettings';
-// Sustituimos BackButton por GameBackButton que registra abandono de la sesión
-import GameBackButton from '../components/GameBackButton';
+import GameBackButton from '../components/GameBackButton'; //al cambiar el boton habra porblemas con los test<----revisar
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
 import FeedbackScreen from '../../../components/FeedBack/Feedback';
