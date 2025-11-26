@@ -3,7 +3,7 @@ import { useGameManager } from "../utils/gameManager";
 import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions } from "../utils/gameUtils";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
-import BackButton from "../../../components/common/BackButton/BackButton";
+import GameBackButton from "../components/GameBackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import Container from "./Container";
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
@@ -256,11 +256,14 @@ function ContainerSort() {
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
-            <BackButton width={215} 
-            height={76}
-            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
-
-            </BackButton>
+                        <GameBackButton 
+                            width={215}
+                            height={76}
+                            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
+                            session={session}
+                            // En ContainerSort queremos contar el error ya marcado en la ronda actual como fallo al abandonar.
+                            countInProgressErrorAsFailure={true}
+                        />
             <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
             <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
             </View>

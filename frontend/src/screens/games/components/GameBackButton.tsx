@@ -8,13 +8,16 @@ interface GameBackButtonProps {
   height: number;
   alignSelf?: FlexAlignType;
   session: ReturnType<typeof useGameSession>;
+  // Cuando es true, si hay un error ya marcado en la ronda en curso,
+  // contamos esa ronda como fallo al abandonar.
+  countInProgressErrorAsFailure?: boolean;
 }
 
 const BASE_ICON_SIZE = 28;
 const BASE_FONT_SIZE = 18;
 const BASE_BUTTON_HEIGHT = 48;
 
-export const GameBackButton: React.FC<GameBackButtonProps> = ({ width, height, alignSelf = 'flex-start', session }) => {
+export const GameBackButton: React.FC<GameBackButtonProps> = ({ width, height, alignSelf = 'flex-start', session, countInProgressErrorAsFailure = false }) => {
   const navigation = useNavigation();
 
   const scaleFactor = height / BASE_BUTTON_HEIGHT;
@@ -24,10 +27,23 @@ export const GameBackButton: React.FC<GameBackButtonProps> = ({ width, height, a
   const newPaddingHorizontal = 25 * scaleFactor;
 
   const handlePress = useCallback(async () => {
-    // Marcar abandono sólo si la sesión no ha sido enviada aún y no se completó.
-    await session.abandonSession();
+    // Si no hay rondas resueltas y no hay error en la ronda actual, no enviamos resultados.
+    const resolvedRounds = session.stats.successfulPlays + session.stats.failedPlays;
+
+    if (countInProgressErrorAsFailure && session.hasErrorThisRound) {
+      // Contar la ronda en curso con error como fallo al abandonar.
+      const override = {
+        ...session.stats,
+        abandoned: true,
+        failedPlays: session.stats.failedPlays + 1,
+      };
+      await session.completeSession(override);
+    } else {
+      // Comportamiento por defecto: el hook ya evita POST si resolvedRounds === 0
+      await session.abandonSession();
+    }
     navigation.goBack();
-  }, [session, navigation]);
+  }, [session, navigation, countInProgressErrorAsFailure]);
 
   return (
     <TouchableOpacity
