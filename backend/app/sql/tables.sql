@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS accessibility_settings (
     student_id INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     background_color VARCHAR(9) DEFAULT '#F7F8FA',
     foreground_color VARCHAR(9) DEFAULT '#000000',
+    container_color VARCHAR(9) DEFAULT '#FFFFFF',
     number_color VARCHAR(9) DEFAULT '#000000', 
     box_color VARCHAR(9) DEFAULT '#D9D9D9', 
     icon_position VARCHAR(10) DEFAULT 'izquierda' CHECK (icon_position IN ('izquierda', 'derecha')),

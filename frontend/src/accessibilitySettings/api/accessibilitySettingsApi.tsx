@@ -32,6 +32,9 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
         });
         const configData = response.data;
 
+        console.log(configData);
+        
+
         const mappedConfig: AccessibilitySettingsFrontend = {
             backgroundColor: configData.background_color,
             foregroundColor: configData.foreground_color,
@@ -42,6 +45,9 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
             showNumbersMode: configData.show_numbers_mode,
             fontSize: configData.font_size,
         };
+
+        console.log(mappedConfig);
+        
         
         
         return mappedConfig;
