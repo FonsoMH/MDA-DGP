@@ -17,6 +17,7 @@ export const CONFIG_COMPONENTS_JSX: {
           onChangeText={(text) => handleChange(slug, 'min_value', text)}
           value={String(info.settings.min_value ?? '')}
           accessibilityLabel="Valor Mínimo"
+          testID="min_value-input"
         />
       </View>
     ),
@@ -31,7 +32,8 @@ export const CONFIG_COMPONENTS_JSX: {
           keyboardType="numeric"
           onChangeText={(text) => handleChange(slug, 'max_value', text)}
           value={String(info.settings.max_value ?? '')}
-          accessibilityLabel="Valor Mínimo"
+          accessibilityLabel="Valor Máximo"
+          testID="max_value-input"
         />
       </View>
     ),
@@ -46,7 +48,8 @@ export const CONFIG_COMPONENTS_JSX: {
           keyboardType="numeric"
           onChangeText={(text) => handleChange(slug, 'num_elements', text)}
           value={String(info.settings.num_elements ?? '')}
-          accessibilityLabel="Valor Mínimo"
+          accessibilityLabel="Elementos"
+          testID="num_elements-input"
         />
       </View>
     ),
@@ -61,7 +64,8 @@ export const CONFIG_COMPONENTS_JSX: {
           keyboardType="numeric"
           onChangeText={(text) => handleChange(slug, 'num_containers', text)}
           value={String(info.settings.num_containers ?? '')}
-          accessibilityLabel="Valor Mínimo"
+          accessibilityLabel="Contenedores"
+          testID="num_containers-input"
         />
       </View>
     ),
@@ -71,7 +75,7 @@ export const CONFIG_COMPONENTS_JSX: {
     render: ({ slug, info, handleToggle }) => (
       <View style={styles.row}>
         <Text style={styles.label}>Ascendente</Text>
-        <Switch value={!!info.settings.upward} onValueChange={() => handleToggle(slug, 'upward')} />
+        <Switch value={!!info.settings.upward} onValueChange={() => handleToggle(slug, 'upward')} testID="upward-switch" />
       </View>
     ),
   },
@@ -80,7 +84,7 @@ export const CONFIG_COMPONENTS_JSX: {
     render: ({ slug, info, handleToggle }) => (
       <View style={styles.row}>
         <Text style={styles.label}>Usa suma</Text>
-        <Switch value={!!info.settings.sum} onValueChange={() => handleToggle(slug, 'sum')} />
+        <Switch value={!!info.settings.sum} onValueChange={() => handleToggle(slug, 'sum')} testID="sum-switch" />
       </View>
     ),
   },

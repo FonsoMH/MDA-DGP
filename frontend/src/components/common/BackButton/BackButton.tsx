@@ -57,7 +57,8 @@ function BackButton({ width, height, alignSelf = 'flex-start' }: BackProps){
   };
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
+    testID="back-button"
       onPress={handlePress}
       style={[
         styles.button,

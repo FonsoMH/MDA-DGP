@@ -179,9 +179,9 @@ function TapNumberGame() {
                     return (
                         <TouchableOpacity 
                             key={index} 
-                            testID={`option-${num}`}
                             onPress={() => handleSelection(num)}
                             style={styles.optionWrapper}
+                            testID='option-box'
                         >
                             <NumberDisplay 
                                 key={index}

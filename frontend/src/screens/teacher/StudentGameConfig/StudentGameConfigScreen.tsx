@@ -92,7 +92,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
           const renderProps = { slug, info, handleChange, handleToggle};
 
           return (
-            <View key={slug} style={styles.card}>
+            <View key={slug} style={styles.card}   testID={`game-card-${slug}`}>
               <Text style={styles.cardTitle}>{info.name || slug}</Text>
 
               {requiredKeys.map((key) => {
@@ -111,6 +111,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
               <View style={[styles.actions, { marginTop: 'auto' }]}>
                 <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => saveOne(slug)} disabled={saving}
                   accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name || slug}`}
+                  testID={`save-config-${slug}`}
                 >
                   <Text style={styles.btnText}>{saving ? 'Guardando…' : 'Guardar'}</Text>
                 </Pressable>

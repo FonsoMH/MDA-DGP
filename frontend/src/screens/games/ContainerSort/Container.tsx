@@ -105,7 +105,9 @@ function Container({
 
         <TouchableOpacity 
         style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
-        onPress={handleContainerClick}>
+        onPress={handleContainerClick}
+        testID={`container-item`}
+        >
             {items.map((option, index) => (
                 <DraggableItem
                 onPress={() => handleNumberCLick(option)}

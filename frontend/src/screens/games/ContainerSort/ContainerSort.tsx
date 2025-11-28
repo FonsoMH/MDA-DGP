@@ -294,6 +294,7 @@ function ContainerSort() {
 
                         return( 
                         <DraggableItem
+                            testID={`option-item`}
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
                             isDisabled={false} 
