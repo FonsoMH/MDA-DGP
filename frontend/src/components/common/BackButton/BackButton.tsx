@@ -7,6 +7,7 @@ interface BackProps {
     width: number
     height: number
     alignSelf?: FlexAlignType
+  testID?: string
 }
 
 const BASE_ICON_SIZE = 28;
@@ -16,7 +17,7 @@ const BASE_BUTTON_HEIGHT = 48;
 //TODO nombre de la main de profe
 const HOME_SCREENS = ['GameMenu', 'UserList', 'TeacherStudentList'];
 
-function BackButton({ width, height, alignSelf = 'flex-start' }: BackProps){
+function BackButton({ width, height, alignSelf = 'flex-start', testID }: BackProps){
   const navigation = useNavigation();
 
   const route = useRoute();
@@ -69,7 +70,8 @@ function BackButton({ width, height, alignSelf = 'flex-start' }: BackProps){
           paddingVertical: newPaddingVertical,
           paddingHorizontal: newPaddingHorizontal,
         }
-      ]} 
+      ]}
+      testID={testID}
     >
       <Text style={[styles.text, { fontSize: newFontSize }]}>Volver</Text>
       
