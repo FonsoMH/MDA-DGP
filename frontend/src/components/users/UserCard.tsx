@@ -123,10 +123,20 @@ export default function UserCard({ user, onUserDeleted, onEdit, navigation, admi
 
         {/* Buttons */}
         <View style={[styles.cell, { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
-            <TouchableOpacity style={styles.editButton} onPress={() => handleEditClick()} disabled={isDeleting}>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => handleEditClick()}
+              disabled={isDeleting}
+              testID={`edit-user-${user.id}`}
+            >
               <Text style={styles.editText}>Editar</Text>
             </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} disabled={isDeleting}>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDelete}
+            disabled={isDeleting}
+            testID={`delete-user-${user.id}`}//id pal testing
+          >
             <Text style={styles.deleteText}>Eliminar</Text>
           </TouchableOpacity>
         </View>
