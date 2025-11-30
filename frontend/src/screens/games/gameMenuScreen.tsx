@@ -100,7 +100,12 @@ export default function GameMenuScreen({ navigation }: Props) {
 
     return (
         <View style={styles.safe}>
-			<BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}/>
+			<BackButton
+                width={215}
+                height={76}
+                alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
+                testID="back-button"
+            />
                 <View style={styles.gridContainer}>
                     {GAMES.map((item) => (
                         <Pressable
