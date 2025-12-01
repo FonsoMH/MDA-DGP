@@ -70,7 +70,7 @@ export default function StudentCreateScreen({ navigation, route }: Props) {
 
   const { isSaving , saveUser } = EditUserHook();
     
-  const onSubmitRHF = (data: CredentialsData) => {
+  const onSubmitRHF = async (data: CredentialsData) => {
       const pictogramPassword = getPasswordSequence();
 
       const payload = {
@@ -80,9 +80,17 @@ export default function StudentCreateScreen({ navigation, route }: Props) {
           assigned_teacher: selectedTutorId!,
       };
 
-      studentToEdit ? saveUser(studentToEdit, payload) : onSubmitFrom(payload); 
+      let ok = false;
+      if (studentToEdit) {
+        ok = await saveUser(studentToEdit, payload);
+      } else {
+        ok = await onSubmitFrom(payload);
+      }
 
-      navigation.goBack();
+      if (ok) {
+        // Volver una pantalla (UserList recupera el foco y hace refetch por useFocusEffect)
+        navigation.goBack();
+      }
   };
 
   return (

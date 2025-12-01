@@ -135,10 +135,15 @@ export default function UserListScreen({ navigation }: UserListProps) {
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }}>
               <Text style={styles.menuText}>Crear Administrador</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate'); }} testID='create-teacher-button'>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate');
+                                                                      refetch();
+           }} testID='create-teacher-button'>
+
               <Text style={styles.menuText}>Crear Tutor</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); }} testID='create-student-button'>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); 
+                                                                      refetch();
+          }} testID='create-student-button'>
               <Text style={styles.menuText}>Crear Estudiante</Text>
           </TouchableOpacity>
       </View>
