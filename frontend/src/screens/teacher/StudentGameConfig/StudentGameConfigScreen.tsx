@@ -6,15 +6,16 @@ import BackButton from '../../../components/common/BackButton/BackButton';
 import { CONFIG_COMPONENTS_JSX } from './ConfigGameComponent';
 import { useSaveStudentConfig } from '../hooks/useSaveStudentConfig';
 import { useStudentConfigs } from '../hooks/useStudentConfig';
+import { number } from 'yup';
 
 // Add route type in navigation types: StudentGameConfig: { studentId: number }
 type Props = NativeStackScreenProps<TeacherStackParamList, 'StudentGameConfig'>;
 
 const CONFIG_MAP = {
-  'toca-numero': ['min_value', 'max_value', 'num_elements'],
-  'ordena-secuencia': ['min_value', 'max_value', 'num_elements', 'upward'], 
-  'deja-igual': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
-  'reparte-igual': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
+  '1': ['min_value', 'max_value', 'num_elements'],
+  '2': ['min_value', 'max_value', 'num_elements', 'upward'], 
+  '4': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
+  '3': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
 };
 
 export default function StudentGameConfigScreen({ route }: Props) {
@@ -28,7 +29,9 @@ export default function StudentGameConfigScreen({ route }: Props) {
 
   const { configs, loading, error, setConfigs } = useStudentConfigs(studentId);
 
-  const handleChange = React.useCallback((slug: string, key: string, value: string) => {
+  //TODO hacer esto sin el slug
+
+  const handleChange = React.useCallback((gameId: number, key: string, value: string) => {
     
     const rawValue = value.trim() === '' ? '0' : value;
 
@@ -36,20 +39,20 @@ export default function StudentGameConfigScreen({ route }: Props) {
 
     setConfigs((prev: any) => ({ 
         ...prev, 
-        [slug]: { 
-            ...prev[slug], 
+        [gameId]: { 
+            ...prev[gameId], 
             settings: { 
-                ...prev[slug].settings, 
+                ...prev[gameId].settings, 
                 [key]: numericValue 
             } 
         } 
     }));
   }, []);
 
-  const handleToggle = (slug: string, key: string) => {
+  const handleToggle = (gameId: number, key: string) => {
     setConfigs((prev: any) => {
-      const cur = Boolean(prev[slug]?.settings?.[key]);
-      return { ...prev, [slug]: { ...prev[slug], settings: { ...prev[slug].settings, [key]: !cur } } };
+      const cur = Boolean(prev[gameId]?.settings?.[key]);
+      return { ...prev, [gameId]: { ...prev[gameId], settings: { ...prev[gameId].settings, [key]: !cur } } };
     });
   };
 
@@ -84,17 +87,16 @@ export default function StudentGameConfigScreen({ route }: Props) {
       <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
 
       <View style={[styles.gridContainer, { gap: GAP }]}>
-        {entries.map(([slug, info]) => {
+        {entries.map(([gameId, info]) => {
           
-          const requiredKeys = CONFIG_MAP[slug as keyof typeof CONFIG_MAP] || []; 
+          const requiredKeys = CONFIG_MAP[gameId as keyof typeof CONFIG_MAP] || []; 
           
           
-          const renderProps = { slug, info, handleChange, handleToggle};
+          const renderProps = { gameId: Number(gameId), info, handleChange, handleToggle};
 
           return (
-            <View key={slug} style={styles.card}   testID={`game-card-${slug}`}>
-              <Text style={styles.cardTitle}>{info.name || slug}</Text>
-
+            <View key={gameId} style={styles.card}   testID={`game-card-${gameId}`}>
+              <Text style={styles.cardTitle}>{info.name || gameId}</Text>
               {requiredKeys.map((key) => {
                 const componentEntry = CONFIG_COMPONENTS_JSX[key];
                 if (!componentEntry) return null; 
@@ -109,9 +111,9 @@ export default function StudentGameConfigScreen({ route }: Props) {
               })}
 
               <View style={[styles.actions, { marginTop: 'auto' }]}>
-                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => saveOne(slug)} disabled={saving}
-                  accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name || slug}`}
-                  testID={`save-config-${slug}`}
+                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => saveOne(Number(gameId))} disabled={saving}
+                  accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name }`}
+                  testID={`save-config-${gameId}`}
                 >
                   <Text style={styles.btnText}>{saving ? 'Guardando…' : 'Guardar'}</Text>
                 </Pressable>
