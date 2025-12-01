@@ -5,7 +5,8 @@ const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
 export const DEFAULT_CONFIG = {
-    ranges: 10,
+    minValue: 0,
+    maxValue: 10,
     numElements: 5,
     numContainers: 2,
     upward: true,
@@ -34,7 +35,8 @@ export async function fetchGameConfiguration( studentId: number, gameId: number 
         const configData = response.data;
         
         const mappedConfig: GameConfigFrontend = {
-            ranges: configData.ranges,
+            minValue: configData.min_value,
+            maxValue: configData.max_value,
             numElements: configData.num_elements,
             numContainers: configData.num_containers,
             upward: configData.upward,

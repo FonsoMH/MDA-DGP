@@ -5,7 +5,7 @@ from app.db import get_db_cursor
 def get_config_from_db(student_id, game_id):
     cur = get_db_cursor()
     cur.execute(
-        """SELECT ranges, num_elements, num_containers, upward, sum
+        """SELECT min_value, max_value, num_elements, num_containers, upward, sum
         FROM student_game_configuration 
         WHERE student_id = %s AND game_id = %s;""", (student_id, game_id)
     )
@@ -26,15 +26,25 @@ def _validate_and_normalize(payload: dict):
     data = {}
     errors = {}
 
-    if 'ranges' in payload:
+    if 'min_value' in payload:
         try:
-            v = int(payload['ranges'])
-            if v < 1 or v > 1000:
-                errors['ranges'] = 'Debe estar entre 1 y 1000'
+            v = int(payload['min_value'])
+            if v < 0 or v > 1000:
+                errors['min_value'] = 'Debe estar entre 0 y 1000'
             else:
-                data['ranges'] = v
+                data['min_value'] = v
         except Exception:
-            errors['ranges'] = 'Debe ser un entero'
+            errors['min_value'] = 'Debe ser un entero'
+
+    if 'max_value' in payload:
+        try:
+            v = int(payload['max_value'])
+            if v < 0 or v > 1000:
+                errors['max_value'] = 'Debe estar entre 0 y 1000'
+            else:
+                data['max_value'] = v
+        except Exception:
+            errors['max_value'] = 'Debe ser un entero'
 
     if 'num_elements' in payload:
         try:

@@ -18,6 +18,14 @@ export async function fetchUsers(): Promise<UserFrontend[]> {
   try {
     const response = await axios.get<UserApiData[]>(endpoint, {
       timeout: API_TIMEOUT,
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+      params: {
+        t: Date.now(),
+      }
     });
     const apiData = response.data;
 
@@ -28,6 +36,7 @@ export async function fetchUsers(): Promise<UserFrontend[]> {
       role: u.role,
       assignedStudents: u.assignedStudents ?? [],
       studentsCount: u.studentsCount ?? 0,
+      assignedTeacherId: u.assignedTeacherId ?? null,
     }));
 
     return mappedUsers;
