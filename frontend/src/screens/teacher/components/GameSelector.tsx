@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 
+const ALL_GAMES_ID = -1;
+
 export default function GameSelector({ 
     selectedGameId, 
     onGameChange 
@@ -31,8 +33,8 @@ export default function GameSelector({
                     <Image source={require('../../../../assets/icons/games_icons/icon_game4.png')} style={styles.icon} />
                 </Pressable>
             </View>
-            <View style={[styles.pickerContainer, selectedGameId === -1 && styles.selected]}>
-                <Pressable onPress={() => onGameChange(-1)} style={styles.pressable}>
+            <View style={[styles.pickerContainer, selectedGameId === ALL_GAMES_ID && styles.selected]}>
+                <Pressable onPress={() => onGameChange(ALL_GAMES_ID)} style={styles.pressable}>
                     <Text style={styles.text}>Todos</Text>    
                 </Pressable>
             </View>

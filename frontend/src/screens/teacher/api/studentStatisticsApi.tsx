@@ -4,6 +4,8 @@ import { StudentStatisticsApiData, StudentStatisticsFrontend } from "../../../ty
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
+const ALL_GAMES_ID = -1;
+
 
 export async function fetchStudentStatistics(studentId: number, gameId: number, initialDate: Date | null, finalDate: Date | null): Promise<StudentStatisticsFrontend> {
     if (!studentId) {
@@ -13,7 +15,7 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
 
     console.log("Fetching statistics for studentId:", studentId, "gameId:", gameId, "initialDate:", initialDate, "finalDate:", finalDate);
 
-    const endpoint = `${BASE_URL}/api/statistics/${studentId}/${gameId}/`;
+    const endpoint = `${BASE_URL}/api/statistics/${studentId}${gameId === ALL_GAMES_ID ? '' : `/${gameId}`}`;
     let urlWithParams = endpoint;
 
     const params = new URLSearchParams();
