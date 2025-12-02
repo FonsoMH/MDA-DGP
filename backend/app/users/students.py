@@ -76,7 +76,9 @@ def get_students():
     """
     
     try:
-        cur = get_db_cursor()
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 10))
+        offset = (page - 1) * page_size
 
         cur = get_db_cursor()
         
@@ -89,7 +91,10 @@ def get_students():
             
         STUDENT_ROLE_ID = role_record['role_id']
         
-       
+        cur.execute("SELECT COUNT(*) AS count FROM users WHERE role_id = %s;", (STUDENT_ROLE_ID,))
+        total_record = cur.fetchone()
+        total_count = total_record['count'] if total_record else 0
+        
         query = """
         SELECT 
             user_id AS id, 
@@ -97,18 +102,35 @@ def get_students():
             email,
             role_id as role
         FROM users 
-        WHERE role_id = %s;
+        WHERE role_id = %s
+        ORDER BY name ASC
+        LIMIT %s OFFSET %s;
         """
         
-        cur.execute(query, (STUDENT_ROLE_ID,)) 
         
-
+        cur.execute(query, (STUDENT_ROLE_ID, page_size, offset)) 
         student_records = cur.fetchall()
         
-        
+        students = [
+            {
+                'id': row['id'],
+                'name': row['name'],
+                'email': row['email'],
+                'role': row['role']
+            }
+            for row in student_records
+        ]
+
+        total_pages = (total_count + page_size - 1) // page_size if total_count else 0
+
         cur.close()
         
-        return jsonify(student_records), 200
+        return jsonify({
+            'items': students,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'current_page': page
+        }), 200
 
     except Exception as e:
         print(f"Error al listar estudiantes: {e}")
@@ -211,7 +233,6 @@ def get_students_without_teacher():
 
         rows = cur.fetchall()
 
-        
         students = [
             {
                 'id': row['user_id'],
