@@ -21,7 +21,8 @@ interface DraggableItemProps {
     style?: StyleProp<ViewStyle>;
     isDisabled: boolean;
     children: React.ReactNode;
-    comeBack: boolean
+    testID: string;
+    comeBack: boolean;
 }
 
 const DraggableItem: React.FC<DraggableItemProps> = ({ 
@@ -32,6 +33,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
     style,
     isDisabled,
     children,
+    testID, 
     comeBack
 }) => {
     const translateX = useSharedValue(0);
@@ -128,6 +130,7 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
         <GestureDetector gesture={combinedGesture}>
             <Animated.View ref={itemRef as any} onLayout={measureItem} 
             style={[style, animatedStyle]}
+            testID={testID}
             >
                 {children}
             </Animated.View>

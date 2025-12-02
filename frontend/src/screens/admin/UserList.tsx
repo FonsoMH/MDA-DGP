@@ -4,23 +4,45 @@ import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity } from 'rea
 import BackButton from '../../components/common/BackButton/BackButton';
 import StateCard from '../../components/users/StateCard';
 import FilterButtons, { FilterOption } from '../../components/users/FilterButtons';
-import UserCard, { User } from '../../components/users/UserCard';
-
-
-import { UserFrontend } from '../../types/users';
+import UserCard from '../../components/users/UserCard';
+import { UserFrontend, UserApiData } from '../../types/users';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { useUsers } from './hook/useUserList';
+import { set } from 'react-hook-form';
+import { useUser } from '../../hooks/useUser';
 
 type UserListProps = NativeStackScreenProps<any, 'UserList'>;
 
 export default function UserListScreen({ navigation }: UserListProps) { 
-  const { users, isLoading } = useUsers();
+  const {user} = useUser();
+  const { users, isLoading, refetch } = useUsers();
   const [filteredUsers, setFilteredUsers] = useState<UserFrontend[]>([]);
   const [filter, setFilter] = useState<FilterOption>('todos');
 
   const [showMenu, setShowMenu] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState<UserApiData | null>(null);
+
+  
+
+  const handleOpenEditModal = (user: UserApiData) => {
+    setSelectedUserForEdit(user);
+    setIsEditModalVisible(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setSelectedUserForEdit(null);
+    setIsEditModalVisible(false);
+  };
+
+  const handleSavedUser = () => {
+    setIsEditModalVisible(false);
+    setSelectedUserForEdit(null);
+    // refresh user list
+    refetch();
+  };
 
   const handleNavigation = (screen: keyof AdminStackParamList) => {
     navigation.navigate('Admin', {
@@ -74,33 +96,53 @@ export default function UserListScreen({ navigation }: UserListProps) {
         <Text style={[styles.listHeaderText, { flex: 1 }]}></Text>
       </View>
 
+      
       {isLoading ? (
         <ActivityIndicator size="large" color="#333" style={{ marginTop: 20 }} />
       ) : (
-        filteredUsers.map((u, index) => (
-          <UserCard
-            key={u.userId || index}
-            user={{
-              user_id: u.userId,
+        filteredUsers.map((u, index) => {
+          
+          // if (index === 0) console.log("🔍 DATOS CRUDOS DEL PRIMER USUARIO:", JSON.stringify(u, null, 2));
+
+          const userApiData: UserApiData = {
+              id: u.userId || (u as any).id || (u as any).user_id,
               name: u.name,
               email: u.email,
               role: u.role,
-              studentsCount: u.studentsCount ?? 0,
-              assignedStudents: u.assignedStudents ?? [],
-            } as User}
-          />
-        ))
+              studentsCount: u.studentsCount,
+              assignedStudents: u.assignedStudents,
+              assignedTeacherId: u.assignedTeacherId,
+          };
+
+          return (
+              <UserCard
+                  key={u.userId || index}
+                  user={userApiData}
+                  onEdit={handleOpenEditModal}
+                  onUserDeleted={() => {
+                    refetch();
+                  }}
+                  navigation={navigation}
+                  adminId={user.id}
+              />
+          );
+        })
       )}
+      
 
       {showMenu && (
           <View style={styles.menuContainer}>
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }}>
               <Text style={styles.menuText}>Crear Administrador</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate'); }}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate');
+                                                                     refetch();
+           }}>
               <Text style={styles.menuText}>Crear Tutor</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); }} testID='create-student-button'>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); 
+                                                                      refetch();
+          }} testID='create-student-button'>
               <Text style={styles.menuText}>Crear Estudiante</Text>
           </TouchableOpacity>
       </View>
@@ -113,6 +155,16 @@ export default function UserListScreen({ navigation }: UserListProps) {
       >
           <Text style={styles.fabText}>{showMenu ? '✕' : '+'}</Text>
       </TouchableOpacity>
+
+      {/* {selectedUserForEdit && (
+          <EditUserForm
+              user={selectedUserForEdit}
+              visible={isEditModalVisible}
+              teachers={[]}
+              onClose={handleCloseEditModal}
+              onSaved={handleSavedUser}
+          />
+      )} */}
     </View>
     
   );
