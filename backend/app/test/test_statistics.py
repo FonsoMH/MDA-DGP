@@ -231,13 +231,13 @@ def test_store_game_result_invalid_types(client, temp_student, slug):
 
 @pytest.mark.parametrize("slug", ["toca-numero"])  # juego existente
 def test_store_game_result_student_not_found(client, slug):
-    game_id = _get_game_id_by_slug(slug)
-    if not game_id:
-        pytest.skip(f"Juego '{slug}' no está disponible en esta BD de pruebas")
+    # game_id = _get_game_id_by_slug(slug)
+    # if not game_id:
+    #     pytest.skip(f"Juego '{slug}' no está disponible en esta BD de pruebas")
 
     payload = {
         "student_id": 99999999,  # inexistente
-        "game_id": game_id,
+        "game_id": 1, # he usado el id 1 directamente porque el _get_game_id_by_slug no funciona fuera del contexto de app
         "successful_plays": 1,
         "failed_plays": 1,
         "abandoned": False,
