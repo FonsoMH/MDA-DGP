@@ -78,7 +78,15 @@ def get_students():
     try:
         page = int(request.args.get('page', 1))
         page_size = int(request.args.get('page_size', 10))
-        offset = (page - 1) * page_size
+        offset = int(request.args.get('offset', default=0))
+
+        if per_page < 1: per_page = 10
+        if page < 1: page = 1
+
+        if offset is not None:
+            offset = max(0, int(offset))
+        else:
+            offset = (page - 1) * page_size
 
         cur = get_db_cursor()
         
@@ -209,7 +217,15 @@ def get_students_without_teacher():
     try:
         page = int(request.args.get('page', 1))
         page_size = int(request.args.get('page_size', 10))
-        offset = (page - 1) * page_size
+        offset = int(request.args.get('offset', default=0))
+
+        if per_page < 1: per_page = 10
+        if page < 1: page = 1
+
+        if offset is not None:
+            offset = max(0, int(offset))
+        else:
+            offset = (page - 1) * page_size
 
         cur = get_db_cursor()
 
