@@ -49,11 +49,32 @@ def create_admin():
 def get_admins():
     cur = get_db_cursor()
     try:
-        cur.execute("SELECT user_id, name, email FROM users WHERE role = %s", ('admin',))
-        admins = cur.fetchall()
-        admin_list = [{'id': admin['user_id'], 'name': admin['name'], 'email': admin['email']} for admin in admins]
-        return jsonify(admin_list), 200
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 10))
+        offset = (page - 1) * page_size
 
+        cur.execute("SELECT COUNT(*) AS count FROM users WHERE role = %s", ('admin',))
+        total_row = cur.fetchone()
+        total_count = total_row['count'] if total_row else 0
+
+        cur.execute("SELECT user_id, name, email FROM users WHERE role = %s ORDER BY name ASC LIMIT %s OFFSET %s", ('admin', page_size, offset))
+        admins = cur.fetchall()
+        admin_list = [{
+            'id': admin['user_id'], 
+            'name': admin['name'], 
+            'email': admin['email'
+            ]} for admin in admins
+        ]
+
+        total_pages = (total_count + page_size - 1) // page_size if total_count else 0
+        
+        return jsonify({
+            'items': admin_list,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'current_page': page
+        }), 200
+    
     except Exception as e:
         current_app.logger.error(f"Error fetching admins: {e}")
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
