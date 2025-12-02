@@ -146,6 +146,7 @@ function SequenceGame() {
     
     const handlePlayAgain = () => {
         manager.resetGame();
+        session.resetSession();
     };
 
     const handleSelection = async (numberSelected: number) => {

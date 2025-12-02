@@ -209,6 +209,7 @@ function ContainerSort() {
     const handlePlayAgain = () => {
         setResetSignal(true);
         manager.resetGame();
+        session.resetSession();
     };
 
     const topZoneRef = useAnimatedRef<View>();
