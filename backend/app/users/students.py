@@ -66,13 +66,13 @@ def create_student():
         return jsonify({'error': 'internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()
-
+  
 # Get all students
 @students_bp.route('/students', methods=['GET'])
 def get_students():
     """
     Endpoint que devuelve todos los usuarios con role_id = 1 (estudiantes).
-    Ruta: GET /users/students
+    Ruta: GET /api/students
     """
     
     try:
@@ -80,7 +80,7 @@ def get_students():
         page_size = int(request.args.get('page_size', 10))
         offset = int(request.args.get('offset', default=0))
 
-        if per_page < 1: per_page = 10
+        if page_size < 1: page_size = 10
         if page < 1: page = 1
 
         if offset is not None:
@@ -114,7 +114,6 @@ def get_students():
         ORDER BY name ASC
         LIMIT %s OFFSET %s;
         """
-        
         
         cur.execute(query, (STUDENT_ROLE_ID, page_size, offset)) 
         student_records = cur.fetchall()
