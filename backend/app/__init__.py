@@ -32,10 +32,6 @@ def create_app():
         app.config['RESOURCES_ROOT'] = resources_root
         app.config['RESOURCE_TYPE_FOLDERS'] = resource_type_folders
         app.config['STUDENTS_ROOT'] = students_root
-        print("Drive structure initialized:")
-        print("Resources root:", resources_root)
-        print("Resource type folders:", resource_type_folders)
-        print("Students root:", students_root)
     except Exception as e:
         print("Error initializing Drive structure:", e)
     

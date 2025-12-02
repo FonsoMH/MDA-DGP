@@ -20,7 +20,7 @@ def get_resources():
 
     try:
         cur.execute("""
-        SELECT DISTINCT r.resource_id, r.name, r.description, r.storage_url,
+        SELECT DISTINCT r.type_id, r.resource_id, r.name, r.description, r.storage_url,
                             r.file_format, r.file_size, r.mime_type,
                             rt.type_name,
                             r.created_at, r.updated_at
@@ -47,9 +47,9 @@ def get_resources():
                     SELECT rtag.resource_id
                     FROM resource_tags rtag
                     JOIN tags t ON rtag.tag_id = t.tag_id
-                    WHERE t.tag_name IN ({tag_placeholders})
+                    WHERE t.name IN ({tag_placeholders})
                     GROUP BY rtag.resource_id
-                    HAVING COUNT(DISTINCT t.tag_name) = %s
+                    HAVING COUNT(DISTINCT t.name) = %s
                 )
             """, (*tags, len(tags)))
             params.extend(tags)
@@ -158,10 +158,10 @@ def update_resource(resource_id):
         if tags_array:
             cur.execute("DELETE FROM resource_tags WHERE resource_id = %s", (resource_id,))
             for tag_name in tags_array:
-                cur.execute("SELECT tag_id FROM tags WHERE tag_name = %s", (tag_name,))
+                cur.execute("SELECT tag_id FROM tags WHERE name = %s", (tag_name,))
                 tag = cur.fetchone()
                 if not tag:
-                    cur.execute("INSERT INTO tags (tag_name) VALUES (%s) RETURNING tag_id", (tag_name,))
+                    cur.execute("INSERT INTO tags (name) VALUES (%s) RETURNING tag_id", (tag_name,))
                     tag_id = cur.fetchone()['tag_id']
                 else:
                     tag_id = tag['tag_id']
