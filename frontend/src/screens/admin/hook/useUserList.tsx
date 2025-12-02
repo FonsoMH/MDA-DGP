@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchUsers } from "../api/userApi";
 import { useFocusEffect } from "@react-navigation/native";
-import { UserFrontend } from "../../../types/users";
+import { UserFrontend, PaginatedUsersResponse } from "../../../types/users";
 
 /**
  * Custom Hook para cargar y manejar la lista de usuarios.
  * @returns {{ users: UserFrontend[]; isLoading: boolean }}
  */
 export function useUsers() {
-  const [users, setUsers] = useState<UserFrontend[]>([]);
+  const [users, setUsers] = useState<PaginatedUsersResponse>({ items: [], total_count: 0, total_pages: 0, current_page: 0 });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // useEffect(() => {

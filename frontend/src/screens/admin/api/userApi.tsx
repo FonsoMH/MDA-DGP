@@ -1,5 +1,5 @@
 import axios from "axios";
-import { UserFrontend, UserApiData, CreateTeacherPayload, Student, PaginatedResponse, Teacher, CreateStudentPayload } from "../../../types/users";
+import { UserFrontend, UserApiData, CreateTeacherPayload, Student, PaginatedResponse, Teacher, CreateStudentPayload, PaginatedUsersResponse } from "../../../types/users";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
@@ -10,13 +10,13 @@ const sleep = (ms: number) => {
 
 /**
  * Obtiene todos los usuarios y los mapea al formato frontend.
- * @returns {Promise<UserFrontend[]>} Lista de usuarios adaptados.
+ * @returns {Promise<PaginatedUsersResponse>} Lista de usuarios adaptados.
  */
-export async function fetchUsers(): Promise<UserFrontend[]> {
+export async function fetchUsers(): Promise<PaginatedUsersResponse> {
   const endpoint = `${BASE_URL}/api/users`;
 
   try {
-    const response = await axios.get<UserApiData[]>(endpoint, {
+    const response = await axios.get<PaginatedUsersResponse>(endpoint, {
       timeout: API_TIMEOUT,
       headers: {
         "Cache-Control": "no-cache",
@@ -29,8 +29,8 @@ export async function fetchUsers(): Promise<UserFrontend[]> {
     });
     const apiData = response.data;
 
-    const mappedUsers: UserFrontend[] = apiData.map((u) => ({
-      userId: u.id,
+    const mappedUsers: UserFrontend[] = apiData.items.map((u) => ({
+      userId: u.userId,
       name: u.name,
       email: u.email,
       role: u.role,
@@ -39,10 +39,21 @@ export async function fetchUsers(): Promise<UserFrontend[]> {
       assignedTeacherId: u.assignedTeacherId ?? null,
     }));
 
-    return mappedUsers;
+    return {
+      items: mappedUsers,
+      total_count: apiData.total_count,
+      total_pages: apiData.total_pages,
+      current_page: apiData.current_page,
+      page_size: apiData.page_size
+    }
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
-    return [];
+    return {
+      items: [],
+      total_count: 0,
+      total_pages: 0,
+      current_page: 0
+    };
   }
 }
 
