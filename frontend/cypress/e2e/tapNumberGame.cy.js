@@ -19,7 +19,7 @@ function playRound() {
 
 describe('E2E TapNumberGame flujo completo', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:8081'); // tu baseUrl
+    cy.visit('http://localhost:8081'); 
   });
 
   it('flujo completo: Inicio --> Soy estudiante --> Eva Student --> contraseña --> juego --> feedback', () => {

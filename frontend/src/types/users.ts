@@ -5,6 +5,7 @@ export interface UserApiData {
   role: string;
   assignedStudents?: string[];
   studentsCount?: number;
+  assignedTeacherId?: number | null;
 }
 
 export interface UserFrontend {
@@ -13,9 +14,17 @@ export interface UserFrontend {
   email: string;
   role: string;
   assignedStudents?: string[];     
-  studentsCount?: number;          
+  studentsCount?: number;
+  assignedTeacherId?: number | null;  
 }
 
+export interface UpdateUserPayload {
+  name?: string;
+  email?: string;
+  password?: string;
+  assigned_teacher_id?: number | null;    
+  assigned_students_ids?: number[];
+}
 
 export interface BaseCredentialsPayload {
   name: string;

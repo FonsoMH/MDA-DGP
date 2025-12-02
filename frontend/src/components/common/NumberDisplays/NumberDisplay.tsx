@@ -4,15 +4,16 @@ import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 interface ChildProps {
   numberProp: number;
   size?: number; 
+  numberColor?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-function NumberDisplay({ numberProp, size = 100, style }: ChildProps) {
+function NumberDisplay({ numberProp, size = 100, numberColor, style}: ChildProps) {
     const dynamicFontSize = size * 0.3;
 
     return (
         <View style={[styles.container, { width: size, height: size }, style]}>        
-        <Text style={[styles.numberText, { fontSize: dynamicFontSize }]}>
+        <Text style={[styles.numberText, { fontSize: dynamicFontSize, color: numberColor }]}>
             {numberProp}
         </Text>
         </View>
@@ -32,15 +33,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
 
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        boxShadow: [
+            {
+            offsetX: 0,
+            offsetY: 8,
+            blurRadius: 8,
+            color: 'rgba(0,0,0,0.15)',
+            }
+        ],
         elevation: 5,
     },
     numberText: {
         fontWeight: 'bold',
-        color: '#101828',
     }
 }); 
 

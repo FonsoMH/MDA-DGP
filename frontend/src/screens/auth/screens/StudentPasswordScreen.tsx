@@ -76,7 +76,25 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>¡Selecciona tu contraseña {userParam.name}!</Text>
                 <Text style={{ fontSize: 16, color: '#666' }}>Elige {maxPasswordLength} pictogramas en orden</Text>
             </View>
-
+            
+            <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
+                <View style={styles.passwordElements}>
+                    {
+                        availableIcons.map((item, index) => {
+                            return <PasswordItem 
+                            key={index} 
+                            icon={item.icon} 
+                            text={item.name} 
+                            testID={`pictogram-${item.name}`}
+                            onPress={() => addPictogram(item)}
+                            height={130}
+                            width={175}
+                            />
+                        })
+                    }
+                </View>
+            </ScrollView>
+            
             <View style={styles.passwordBox}>
                 <Text style={styles.passwordHeader}>
                     Tu Contraseña:
@@ -99,7 +117,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             
                         </View>
                         {failedPassword ? 
-                            <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 , color: 'red' }}>Inténtalo de nuevo</Text>
+                            <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 , color: 'red', margin: 10 }}>Inténtalo de nuevo</Text>
                         : null}
                     </View>
                     <View style={styles.passwordOptions}>
@@ -119,24 +137,6 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                 </View>
 
             </View>
-            
-            <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
-                <View style={styles.passwordElements}>
-                    {
-                        availableIcons.map((item, index) => {
-                            return <PasswordItem 
-                            key={index} 
-                            icon={item.icon} 
-                            text={item.name} 
-                            testID={`pictogram-${item.name}`}
-                            onPress={() => addPictogram(item)}
-                            height={130}
-                            width={175}
-                            />
-                        })
-                    }
-                </View>
-            </ScrollView>
 
         </View>
     )

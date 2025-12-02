@@ -5,6 +5,9 @@ import SequenceGame from '../SequenceGame/SequenceGame';
 import { generateRandomOptions } from '../utils/gameUtils';
 import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
 import { TouchableOpacity } from 'react-native';
+import ContainerSort from '../ContainerSort/ContainerSort';
+import Container from '../ContainerSort/Container';
+import { CORRECT_COLOR } from '../../../types/games';
 
 
 
@@ -42,13 +45,55 @@ jest.mock('../SequenceGame/DraggableItem', () => {
     };
 });
 
-const MOCK_TARGET_NUMBER = 5;
-const MOCK_OPTIONS = [1, 5, 8, 3];
-jest.mock('../utils/gameUtils', () => ({
+interface ContainerProps {
+    'aria-label': string;
+    onContainerClick: () => void;
 
-    getRandomNumber: jest.fn(() => MOCK_TARGET_NUMBER), 
+    onUniformityChange: (color: string) => void; 
+    items: any[];
+}
 
-    generateRandomOptions: jest.fn(target => MOCK_OPTIONS), 
+const CORRECT_COLOR_MOCK = '#00C950';
+
+jest.mock('../ContainerSort/Container', () => {
+    const React = require('react');
+    const { TouchableOpacity } = require('react-native');
+
+    return (props: ContainerProps) => {
+
+        React.useEffect(() => {
+            if (props.items.length > 0) {
+                props.onUniformityChange(CORRECT_COLOR_MOCK); 
+            }
+        }, [props.items]);
+
+        return (
+
+        <TouchableOpacity
+            onPress={props.onContainerClick}
+            accessibilityLabel={props['aria-label']}
+        />)
+    };
+});
+
+let mockRoundMessageShow = jest.fn(() => Promise.resolve());
+
+jest.mock('../../../components/RoundMessage/useRoundMessage', () => ({
+    useRoundMessage: jest.fn(() => ({
+        show: mockRoundMessageShow,
+        message: '',
+        isVisible: false,
+        type: 'info',
+    })),
+}));
+
+jest.mock('../../../components/RoundMessage/RoundMessage', () => 'RoundMessage');
+
+
+const MOCK_OPTIONS = [1, 3];
+jest.mock('../utils/gameUtils', () => ({ 
+
+    generateFixedRepeatedOptions: jest.fn(target => MOCK_OPTIONS), 
 
     DEFAULT_REPEATS: 5, 
 }));
@@ -83,7 +128,6 @@ interface NumberDisplayProps {
     testID: string;
 }
 jest.mock('../../../components/common/NumberDisplays/NumberDisplay', () => {
-    const { TouchableOpacity } = require('react-native');
 
     return ({ numberProp }: NumberDisplayProps) => (
         <button >{numberProp.toString()}</button>
@@ -105,20 +149,6 @@ jest.mock('../../../components/FeedBack/Feedback', () => {
         </button>
     );
 });
-
-let mockRoundMessageShow = jest.fn(() => Promise.resolve());
-
-jest.mock('../../../components/RoundMessage/useRoundMessage', () => ({
-    useRoundMessage: jest.fn(() => ({
-        show: mockRoundMessageShow,
-        message: '',
-        isVisible: false,
-        type: 'info',
-    })),
-}));
-
-jest.mock('../../../components/RoundMessage/RoundMessage', () => 'RoundMessage');
-
 
 jest.mock('../../../components/common/BackButton/BackButton', () => 'BackButton');
 
@@ -148,7 +178,9 @@ jest.mock('../utils/gameManager', () => {
 });
 
 
-describe('SequenceGame - Interacción y Lógica', () => {
+describe('useGameManager - Core Logic', () => {
+    
+
 
     beforeEach(() => {
         mockAdvanceGame = jest.fn();
@@ -157,66 +189,57 @@ describe('SequenceGame - Interacción y Lógica', () => {
         jest.clearAllMocks(); 
     });
 
-    test('1. Debería avanzar el juego cuando se selecciona el orden ASCENDENTE correcto [1, 3, 5, 8]', async () => {
-        render(<SequenceGame />);
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+
+    test('1.  Debería avanzar el juego cuando se seleccionan bien', async() => {
+        render(<ContainerSort />);
         
         await waitFor(() => {
-            expect(require('../utils/gameUtils').generateRandomOptions).toHaveBeenCalledTimes(1); 
-        });
+            expect(require('../utils/gameUtils').generateFixedRepeatedOptions).toHaveBeenCalledTimes(1); 
+        });    
+
+
 
         fireEvent.press(screen.getByLabelText('number-option-1')); 
-        fireEvent.press(screen.getByLabelText('number-option-3'));
-        fireEvent.press(screen.getByLabelText('number-option-5'));
-        
-        fireEvent.press(screen.getByLabelText('number-option-8')); 
+        fireEvent.press(screen.getByLabelText('Container-Area-0'));
 
+        fireEvent.press(screen.getByLabelText('number-option-3')); 
+        fireEvent.press(screen.getByLabelText('Container-Area-1'));
+        
         await waitFor(() => {
             expect(mockAdvanceGame).toHaveBeenCalledTimes(1);
         });
-    });
 
-    test('2. NO debería avanzar el juego si el orden es INCORRECTO (ASCENDENTE)', async () => {
-        render(<SequenceGame />);
+    });
+    
+
+
+    test('2. No debería avanzar el juego cuando se seleccionan mal)', async() => {
+        render(<ContainerSort />);
+        
         await waitFor(() => {
-            expect(require('../utils/gameUtils').generateRandomOptions).toHaveBeenCalledTimes(1); 
-        });
+            expect(require('../utils/gameUtils').generateFixedRepeatedOptions).toHaveBeenCalledTimes(1); 
+        });    
+
+
 
         fireEvent.press(screen.getByLabelText('number-option-1')); 
-        fireEvent.press(screen.getByLabelText('number-option-5'));
-        fireEvent.press(screen.getByLabelText('number-option-3'));
+        fireEvent.press(screen.getByLabelText('Container-Area-0'));
+
+        fireEvent.press(screen.getByLabelText('number-option-3')); 
+        fireEvent.press(screen.getByLabelText('Container-Area-0'));
         
-        fireEvent.press(screen.getByLabelText('number-option-8')); 
-
-        expect(mockAdvanceGame).not.toHaveBeenCalled();
-    });
-
-    test('3. Debería avanzar el juego cuando se selecciona el orden DESCENDENTE correcto [8, 5, 3, 1]', async () => {
-        MOCK_CONFIG.upward = false; 
-        render(<SequenceGame />);
         await waitFor(() => {
-            expect(require('../utils/gameUtils').generateRandomOptions).toHaveBeenCalledTimes(1); 
-        });
-
-        fireEvent.press(screen.getByLabelText('number-option-8')); 
-        fireEvent.press(screen.getByLabelText('number-option-5'));
-        fireEvent.press(screen.getByLabelText('number-option-3'));
-        
-        fireEvent.press(screen.getByLabelText('number-option-1')); 
-
-        await waitFor(() => {
-            expect(mockAdvanceGame).toHaveBeenCalledTimes(1);
+            expect(mockAdvanceGame).not.toHaveBeenCalled();
         });
     });
-    
-    // --- PRUEBAS DE UI Y ESTADO ---
-    
-    test('4. El título debe reflejar la configuración de ordenamiento (DESCENDENTE)', async () => {
-        MOCK_CONFIG.upward = false; 
-        render(<SequenceGame />);
-        
-        expect(screen.getByText('Ordena del grande al pequeño')).toBeTruthy();
-    });
-    
+
+
+    // // --- D. MANEJO DE REINICIO (resetGame) ---
+
     test('5. Debería resetear el juego al presionar "Jugar de nuevo" en FeedbackScreen', async () => {
         const useGameManagerActual = jest.requireActual('../utils/gameManager').useGameManager as UseGameManagerType;
 
@@ -236,7 +259,7 @@ describe('SequenceGame - Interacción y Lógica', () => {
         const useGameManagerMock = require('../utils/gameManager').useGameManager as jest.Mock<any, [number, OnGameInitType]>;
         useGameManagerMock.mockImplementation(mockFn);
 
-        render(<SequenceGame />);
+        render(<ContainerSort />);
         
         const playAgainButton = await screen.getByLabelText('Jugar de nuevo');
         fireEvent(playAgainButton, 'onNotify'); 

@@ -4,6 +4,9 @@ import { DEFAULT_REPEATS } from '../utils/gameUtils';
 import { useUser } from '../../../hooks/useUser';
 
 
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_TIMEOUT = process.env.API_TIMEOUT;
+
 interface SessionStats {
   successfulPlays: number;
   failedPlays: number;
@@ -85,6 +88,7 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
         failed_plays: finalStats.failedPlays,
         abandoned: finalStats.abandoned,
         time_seconds: finalStats.timeSeconds,
+        timeout: +API_TIMEOUT
       });
     } catch (e: any) {
       setSubmitError(e?.message || 'Error enviando resultados');

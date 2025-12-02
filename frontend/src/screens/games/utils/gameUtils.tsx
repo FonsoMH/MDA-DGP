@@ -79,7 +79,7 @@ export const generateFixedRepeatedOptions = (
   }
 
   for (let i = 0; i < remainingCount; i++) {
-    const index = getRandomNumber(min, nOptions - 1);
+    const index = getRandomNumber(0, nOptions - 1);
     
     repetitionsArray[index]++;
   }
@@ -94,6 +94,7 @@ export const generateFixedRepeatedOptions = (
       result.push(option);
     }
   }
+
   return Array.from(result).sort(() => Math.random() - 0.5);
 }
 

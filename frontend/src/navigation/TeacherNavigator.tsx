@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TeacherStudentListScreen from '../screens/teacher/TeacherStudentListScreen';
 import StudentGameConfigScreen from '../screens/teacher/StudentGameConfig/StudentGameConfigScreen';
+import AccessibilitySettingsConfigScreen from '../screens/teacher/AccessibilitySettingsConfigScreen';
 
 // Stack de navegación para el área de Tutor/Profesor
 export type TeacherStackParamList = {
@@ -9,6 +10,7 @@ export type TeacherStackParamList = {
 	TeacherStudentList: { teacherId?: number } | undefined;
 	// Configuración de juegos por estudiante
 	StudentGameConfig: { studentId: number };
+	AccessibilitySettingsConfig: {studentId: number};
 };
 
 const TeacherStack = createNativeStackNavigator<TeacherStackParamList>();
@@ -29,6 +31,11 @@ function TeacherNavigator() {
 			<TeacherStack.Screen
 				name="StudentGameConfig"
 				component={StudentGameConfigScreen}
+			/>
+			
+			<TeacherStack.Screen 
+				name="AccessibilitySettingsConfig"
+				component={AccessibilitySettingsConfigScreen}
 			/>
 		</TeacherStack.Navigator>
 	);
