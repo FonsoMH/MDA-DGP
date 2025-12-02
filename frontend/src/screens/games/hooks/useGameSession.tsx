@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../../../config';
 import { DEFAULT_REPEATS } from '../utils/gameUtils';
 import { useUser } from '../../../hooks/useUser';
 
@@ -20,7 +19,7 @@ interface UseGameSessionApi {
   registerError: () => void;
   resolveRound: () => void;
   completeSession: (overrideStats?: SessionStats) => Promise<void>;
- abandonSession: () => Promise<void>; // marcar sesión como abandonada y enviar parcial
+  abandonSession: () => Promise<void>; // marcar sesión como abandonada y enviar parcial
   resetSession: () => void;
   hasErrorThisRound: boolean;
   stats: SessionStats;
@@ -31,6 +30,7 @@ interface UseGameSessionApi {
 interface RoundState { hasError: boolean; startedAt: number; resolved: boolean; }
 
 export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessionApi {
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL as string | undefined;
   const { user } = useUser();
 
   const [currentRound, setCurrentRound] = useState(1);
@@ -75,6 +75,9 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     setIsSubmitting(true);
     setSubmitError(null);
     try {
+      if (!API_BASE_URL) {
+        throw new Error('EXPO_PUBLIC_API_BASE_URL no está definida en .env');
+      }
       await axios.post(`${API_BASE_URL}/api/statistics/game_result/`, {
         student_id: user.id,
         game_id: gameId,
