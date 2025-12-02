@@ -4,6 +4,8 @@ import { View ,Text , StyleSheet, Pressable , TextInput} from 'react-native';
 import PasswordInput from '../../../components/common/PasswordInput/PasswordInput';
 import BackButton from '../../../components/common/BackButton/BackButton';
 import { useUser } from '../../../hooks/useUser';
+import { useEffect, useState } from 'react';
+import Alert from '../../../components/FeedBack/Alert';
 
 const MAX_WIDTH = 450;
 
@@ -84,6 +86,40 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [failedPassword, setFailedPassword] = React.useState(false);
+    const [error, setError] = React.useState(false);
+
+    const [alert, setAlert] = useState({
+        message: '',
+        success: true,
+        color: null,
+        onHide: () => setIsAlertVisible(false)
+    });
+
+    useEffect(() => {
+        if (failedPassword) {
+            setAlert({
+                ...alert,
+                message: 'Credenciales incorrectas. Inténtalo de nuevo.',
+                success: false,
+                onHide: () => setIsAlertVisible(false)
+            });
+            setIsAlertVisible(true);
+        }
+    }, [failedPassword]);
+
+    useEffect(() => {
+        if (error) {
+            setAlert({
+                ...alert,
+                message: 'Error al iniciar sesión. Por favor, inténtalo de nuevo más tarde.',
+                success: false,
+                onHide: () => { setIsAlertVisible(false); setError(false); }
+            });
+            setIsAlertVisible(true);
+        }
+    }, [error]);
+
+    const [isAlertVisible, setIsAlertVisible] = useState(false);
 
     const handleEmailChange = (text: string) => {
         setEmail(text);
@@ -99,6 +135,8 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
 
     const handleLogIn = async () => {
         try {
+            setFailedPassword(false);
+            setError(false);
             const user = await login(
                 {username: email, 
                     password: password}
@@ -109,17 +147,29 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
             }
 
             if(user?.role == 'admin'){
-                navigation.navigate('Admin', {
-                    screen: 'UserList'
+                setAlert({
+                    ...alert,
+                    message: 'Inicio de sesión exitoso.',
+                    success: true,
+                    onHide: () => navigation.navigate('Admin', {
+                        screen: 'UserList'
+                    })
                 });
+                setIsAlertVisible(true);
             }else if(user?.role == 'teacher'){
-                navigation.navigate('Teacher', {
-                    screen: 'TeacherStudentList'
+                setAlert({
+                    ...alert,
+                    message: 'Inicio de sesión exitoso.',
+                    success: true,
+                    onHide: () => navigation.navigate('Teacher', {
+                        screen: 'TeacherStudentList'
+                    })
                 });
+                setIsAlertVisible(true);
             }
            
         } catch (error) {
-            console.error('Error during login:', error);
+            setError(true);
         }   
     }
 
@@ -138,7 +188,11 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                         <Text style={failedPassword ? styles.failedText : null}>
                             Correo Electrónico
                         </Text>
-                        <TextInput placeholder="" testID= "teacher-email-input" style={[styles.input, failedPassword ? styles.failedInput : null]} onChangeText={handleEmailChange} />
+                        <TextInput 
+                            placeholder="" 
+                            testID= "teacher-email-input" 
+                            style={[styles.input, failedPassword ? styles.failedInput : null]} 
+                            onChangeText={handleEmailChange} />
                     </View>
                     <View style={{ width: '100%'}} >
                         <Text style={failedPassword ? styles.failedText : null}>
@@ -152,11 +206,6 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
                         />
                     </View>
                 </View>
-                {failedPassword && (
-                    <Text style={styles.failedText}>
-                        El correo o la contraseña son incorrectos.
-                    </Text>
-                )}
                 <Pressable style={styles.loginButton} onPress={handleLogIn} testID="login-submit-button">
                     <Text style={{ color: '#fff' }}>Iniciar Sesión</Text>
                 </Pressable>
@@ -166,6 +215,13 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
             </View>
 
             <BackButton width={130} height={50} alignSelf='center' />
+            <Alert
+                visible={isAlertVisible}
+                message={alert.message}
+                success={alert.success}
+                color={alert.color}
+                onHide={alert.onHide}
+            />
         </View>
         
     )

@@ -6,21 +6,40 @@ import BackButton from '../../../components/common/BackButton/BackButton';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { StudentLogin } from '../../../types/login';
 import { useStudentsData } from '../hook/usersList';
+import { useEffect, useState } from 'react';
+import Alert from '../../../components/FeedBack/Alert';
 
 
 type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
 
 export default function StudentLoginScreen({ navigation }: StudentLoginProps){
 
-    const { users, isLoading, refetch } = useStudentsData();
+    const { users, isLoading, refetch , error } = useStudentsData();
+
+    const [isAlertVisible, setIsAlertVisible] = useState(false);
+
+    const [alert, setAlert] = useState({
+        message: 'Cambios guardados con éxito',
+        success: true
+    });
 
     const handleSubmit = (user: StudentLogin) => {
         navigation.navigate('StudentPassword', { userParam: user });
     }
+
+    useEffect(() => {
+        if (error) {
+            setAlert({
+                message: error.message,
+                success: false
+            });
+            setIsAlertVisible(true);
+        }
+    }, [error]);
     
     if (isLoading) {
         return (
-            <LoadingSpinner></LoadingSpinner>
+            <LoadingSpinner />
         );
     }
     
@@ -48,6 +67,12 @@ export default function StudentLoginScreen({ navigation }: StudentLoginProps){
                     <Button title="Recargar" onPress={refetch} color="#4A90E2" />
                 </View>
             )}
+            <Alert
+                visible={isAlertVisible}
+                message={alert.message}
+                success={alert.success}
+                onHide={() => setIsAlertVisible(false)}
+            />
         </View>
         
     );

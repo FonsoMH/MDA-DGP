@@ -12,11 +12,12 @@ import { getAllConfig } from '../../../api/studentConfig';
 export function useStudentConfigs(studentId : number) {
   const [configs, setConfigs] = React.useState({});
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
     if (!studentId) {
         setConfigs({});
+        setError(new Error("ID de estudiante no recibido"));
         setLoading(false);
         return;
     }

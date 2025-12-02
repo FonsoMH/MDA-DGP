@@ -6,6 +6,8 @@ import BackButton from '../../../components/common/BackButton/BackButton';
 import { CONFIG_COMPONENTS_JSX } from './ConfigGameComponent';
 import { useSaveStudentConfig } from '../hooks/useSaveStudentConfig';
 import { useStudentConfigs } from '../hooks/useStudentConfig';
+import { useEffect , useState} from 'react';
+import Alert from '../../../components/FeedBack/Alert';
 
 // Add route type in navigation types: StudentGameConfig: { studentId: number }
 type Props = NativeStackScreenProps<TeacherStackParamList, 'StudentGameConfig'>;
@@ -27,6 +29,35 @@ export default function StudentGameConfigScreen({ route }: Props) {
   const titleSize = width >= 1024 ? 24 : width >= 768 ? 22 : 20;
 
   const { configs, loading, error, setConfigs } = useStudentConfigs(studentId);
+
+  const { saveOne, saving , errorSaving } = useSaveStudentConfig(studentId, configs);
+
+  const [isAlertVisible, setIsAlertVisible] = React.useState(false);
+
+  const [alert, setAlert] = useState({
+      message: 'Cambios guardados con éxito',
+      success: true
+  });
+  
+  useEffect(() => {
+    if (error) {
+        setAlert({
+            message: "Error al cargar la configuración: " + (error instanceof Error ? error.message : String(error)),
+            success: false
+        });
+        setIsAlertVisible(true);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (errorSaving) {
+        setAlert({
+            message: "Error al guardar la configuración: " + (errorSaving instanceof Error ? errorSaving.message : String(errorSaving)),
+            success: false
+        });
+        setIsAlertVisible(true);
+    }
+  }, [errorSaving]);
 
   const handleChange = React.useCallback((slug: string, key: string, value: string) => {
     
@@ -53,8 +84,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
     });
   };
 
-  const { saveOne, saving } = useSaveStudentConfig(studentId, configs);
-
   if (loading) {
     return (
       <View style={styles.center}> 
@@ -62,10 +91,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
         <Text style={{ marginTop: 8 }}>Cargando configuración…</Text>
       </View>
     );
-  }
-
-  if (error) {
-     return <View style={styles.center}><Text>❌ Error al cargar las configuraciones.</Text></View>;
   }
 
   const entries = Object.entries(configs) as [string, any][];
@@ -80,8 +105,10 @@ export default function StudentGameConfigScreen({ route }: Props) {
       contentContainerStyle={styles.content}
       style={{ flex: 1 }}
     >
-      <BackButton width={130} height={50} />
-      <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+        <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
+        <BackButton width={130} height={50} />
+      </View>
 
       <View style={[styles.gridContainer, { gap: GAP }]}>
         {entries.map(([slug, info]) => {
@@ -109,7 +136,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
               })}
 
               <View style={[styles.actions, { marginTop: 'auto' }]}>
-                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => saveOne(slug)} disabled={saving}
+                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={async () => { await saveOne(slug); setIsAlertVisible(true); }} disabled={saving}
                   accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name || slug}`}
                 >
                   <Text style={styles.btnText}>{saving ? 'Guardando…' : 'Guardar'}</Text>
@@ -119,6 +146,13 @@ export default function StudentGameConfigScreen({ route }: Props) {
           );
         })}
       </View>
+      <Alert
+        visible={isAlertVisible}
+        message={alert.message}
+        success={alert.success}
+        duration={1000} 
+        onHide={() => setIsAlertVisible(false)}
+      />
     </ScrollView>
     </KeyboardAvoidingView>
   );

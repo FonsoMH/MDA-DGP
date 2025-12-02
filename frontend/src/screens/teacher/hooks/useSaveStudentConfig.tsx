@@ -9,7 +9,8 @@ import { updateConfig } from '../../../api/studentConfig'; // Asegúrate de que 
  */
 export function useSaveStudentConfig(studentId: number, configs: any) {
   const [saving, setSaving] = React.useState(false);
-
+  const [errorSaving, setErrorSaving] = React.useState<Error | null>(null);
+  
   const saveOne = React.useCallback(async (slug: string) => {
     if (saving) return; 
 
@@ -21,12 +22,11 @@ export function useSaveStudentConfig(studentId: number, configs: any) {
       await updateConfig(studentId, slug, payload);
       
     } catch (error) {
-      console.error(`Error al guardar la configuración del juego ${slug}:`, error);
-      
+      setErrorSaving(error);
     } finally {
       setSaving(false);
     }
   }, [studentId, configs, saving]); 
 
-  return { saveOne, saving };
+  return { saveOne, saving , errorSaving };
 }

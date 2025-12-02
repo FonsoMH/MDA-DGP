@@ -11,7 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import { RootStackNavigationProp } from '../../../types/navigation';
 import { useUser } from '../../../hooks/useUser';
 import { usePictogramPassword } from '../../../utils/usePictogramPassword';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Alert from '../../../components/FeedBack/Alert';
 
 
 interface StudentParam {
@@ -27,6 +28,28 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
     const userParam: StudentParam = route.params.userParam; 
     const { login } = useUser();
     const [failedPassword, setFailedPassword] =  useState(false);
+
+    const [alert, setAlert] = useState({
+        message: '',
+        success: true,
+        color: null,
+        onHide: () => {}
+    });
+
+    useEffect(() => {
+        if (failedPassword) {
+            setAlert({
+                ...alert,
+                message: 'Contraseña incorrecta. Inténtalo de nuevo.',
+                success: false,
+                onHide: () => setIsAlertVisible(false)
+            });
+            setIsAlertVisible(true);
+            setFailedPassword(false);
+        }
+    }, [failedPassword]);
+
+    const [isAlertVisible, setIsAlertVisible] = useState(false);
     
     const { 
         password, 
@@ -54,18 +77,22 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
             );
 
             if(loggedInUser){
-                rootNavigation.navigate('GameMenu');
+                setAlert({
+                    ...alert,
+                    message: 'Inicio de sesión exitoso.',
+                    success: true,
+                    onHide: () => rootNavigation.navigate('GameMenu')
+                });
+                setIsAlertVisible(true);
             }
             else{
-                console.error("Invalid credentials");
                 clearPassword();
                 setFailedPassword(true);
             }
             
         } catch (error) {
-            // TODO handle error (mostrar un mensaje al usuario)
             clearPassword();
-            console.error("Login failed:", error);
+            setFailedPassword(true);
         }
     };
 
@@ -116,9 +143,6 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             }
                             
                         </View>
-                        {failedPassword ? 
-                            <Text style={{ fontWeight: 'bold', alignSelf: 'center', fontSize: 16 , color: 'red', margin: 10 }}>Inténtalo de nuevo</Text>
-                        : null}
                     </View>
                     <View style={styles.passwordOptions}>
                         <TextImageButton 
@@ -135,9 +159,15 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                             />
                     </View>
                 </View>
-
             </View>
-
+            <Alert
+                visible={isAlertVisible}
+                message={alert.message}
+                success={alert.success}
+                duration={2000}
+                color={alert.color}
+                onHide={alert.onHide}
+            />
         </View>
     )
 }

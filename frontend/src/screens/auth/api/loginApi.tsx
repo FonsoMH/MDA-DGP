@@ -21,13 +21,12 @@ export async function fetchStudents(): Promise<StudentLogin[]> {
         const response = await axios.get<StudentLogin[]>(endpoint, { 
             timeout: API_TIMEOUT 
         });
-
         
         const data: StudentLogin[] = response.data;
         return data;
 
     } catch (error) {
-        return [];
+        throw error;
     }
 }
 
@@ -44,7 +43,7 @@ export async function performLogin(credentials: LoginCredentials): Promise<AuthR
         const response = await axios.post<AuthResponse>(
             endpoint, 
             credentials,
-            { 
+            {
                 timeout: API_TIMEOUT 
             }
         );

@@ -8,19 +8,49 @@ import type { TeacherStackParamList } from '../../navigation/TeacherNavigator';
 import { useTeacherStudents } from './hooks/useTeacherStudents';
 import StudentRow from '../../components/users/StudentRow';
 import { useUser } from '../../hooks/useUser';
+import { useEffect, useState } from 'react';
+import Alert from '../../components/FeedBack/Alert';
 
 export default function TeacherStudentListScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<TeacherStackParamList>>();
   const route = useRoute<RouteProp<TeacherStackParamList, 'TeacherStudentList'>>();
-  const { user } = useUser();
-
+  const { user , userError} = useUser();
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  
   const teacherId = React.useMemo(() => {
     if (route?.params?.teacherId) return route.params.teacherId;
     if (user?.role === 'teacher') return user.id;
     return undefined;
   }, [route?.params?.teacherId, user]);
 
+
   const { students, loading, error, refetch } = useTeacherStudents(teacherId);
+
+  const [alert, setAlert] = useState({
+      message: '',
+      success: true
+  });
+
+  useEffect(() => {
+    if (userError) {
+      setAlert({
+        message: `Error: ${userError.message}`,
+        success: false
+      });
+      setIsAlertVisible(true);
+    }
+  }, [userError]);
+
+  useEffect(() => {
+    if (error) {
+      setAlert({
+        message: `Error: ${error}`,
+        success: false
+      });
+      setIsAlertVisible(true);
+    }
+  }, [error]);
+
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -86,6 +116,12 @@ export default function TeacherStudentListScreen() {
           </ScrollView>
         </View>
       )}
+      <Alert visible={isAlertVisible}
+             message={alert.message}
+             success={alert.success}
+             duration={3000}
+             onHide={() => setIsAlertVisible(false)}
+      />
     </View>
   );
 }
