@@ -109,9 +109,6 @@ function ContainerSort() {
 
             setTargetSum(result.targetSum);
 
-            console.log(Array(numContainers).fill([]).map(() => []));
-            
-
         }
 
         else {
@@ -302,6 +299,7 @@ function ContainerSort() {
                             key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
+                            testID={"option-item"}
                         >
                             <NumberDisplay
                                 numberProp={option.value} 
@@ -327,6 +325,7 @@ function ContainerSort() {
                     onLayoutMeasured={handleContainerLayout}
                     aria-label={`Container-Area-${index}`}
                     accessibilitySettings={accessibilitySettings}
+                    isSum={targetSum != null}
                     />
                 ))}
             </View>
