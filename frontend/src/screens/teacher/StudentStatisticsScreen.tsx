@@ -44,7 +44,6 @@ export default function StudentStatisticsScreen({route}: Props) {
         }).start();
     };
 
-    
     const pieData = statistics ? [
         { label: 'Éxitos', value: statistics.successfulPlays, color: '#4CAF51' },
         { label: 'Fallos', value: statistics.totalPlays - statistics.successfulPlays, color: '#F44336' },
@@ -79,8 +78,7 @@ export default function StudentStatisticsScreen({route}: Props) {
                             Filtros
                         </Text>
                     </TouchableOpacity>
-                <Text>Contenido de estadísticas aquí...</Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     <StatsPieChart data={pieData} />
 
                     <StatsLineChart data={timeData} />
@@ -187,7 +185,7 @@ const styles = StyleSheet.create({
         top: 0,
         width: 200,
         height: '100%',
-        backgroundColor: '#b83232',
+        backgroundColor: '#c9c9c9ff',
         padding: 20,
         borderTopRightRadius: 20,
         borderBottomRightRadius: 20,
@@ -200,7 +198,7 @@ const styles = StyleSheet.create({
     filterTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#1e1e1eff',
         marginTop: 10,
     }
 

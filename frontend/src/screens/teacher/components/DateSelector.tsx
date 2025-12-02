@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     },
     pressable: {
         padding: 2,
-        backgroundColor: '#cfcfcfff',
+        backgroundColor: '#ffffffff',
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#ccc',

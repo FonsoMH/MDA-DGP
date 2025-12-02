@@ -1,6 +1,10 @@
 import axios from "axios";
 import { StudentStatisticsApiData, StudentStatisticsFrontend } from "../../../types/statistics";
 
+import { Directory , File , Paths } from 'expo-file-system';
+import { Platform, Alert } from 'react-native';
+
+
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
@@ -8,37 +12,35 @@ const ALL_GAMES_ID = -1;
 
 
 export async function fetchStudentStatistics(studentId: number, gameId: number, initialDate: Date | null, finalDate: Date | null): Promise<StudentStatisticsFrontend> {
-    if (!studentId) {
-        console.error("fetchAllStudentStatistics: studentId faltante.");
-        return null;
-    }
-
-    console.log("Fetching statistics for studentId:", studentId, "gameId:", gameId, "initialDate:", initialDate, "finalDate:", finalDate);
-
-    const endpoint = `${BASE_URL}/api/statistics/${studentId}${gameId === ALL_GAMES_ID ? '' : `/${gameId}`}`;
-    let urlWithParams = endpoint;
-
-    const params = new URLSearchParams();
-    if (initialDate) {
-        params.append('initial_date', initialDate.toISOString());
-    }
-    if (finalDate) {
-        params.append('final_date', finalDate.toISOString());
-    }
-    console.log("Initial date:", initialDate, "Final date:", finalDate);
-    if (Array.from(params).length > 0) {
-        urlWithParams += `?${params.toString()}`;
-    }
 
     try {
+        if (!studentId) {
+            throw new Error("ID de estudiante es requerido para obtener estadísticas.");
+        }
+
+        const endpoint = `${BASE_URL}/api/statistics/${studentId}${gameId === ALL_GAMES_ID ? '' : `/${gameId}`}`;
+        let urlWithParams = endpoint;
+
+        const params = new URLSearchParams();
+
+        if (initialDate) {
+            params.append('initial_date', initialDate.toISOString());
+        }
+        if (finalDate) {
+            params.append('final_date', finalDate.toISOString());
+        }
+
+        if (Array.from(params).length > 0) {
+            urlWithParams += `?${params.toString()}`;
+        }
+
         const response = await axios.get<StudentStatisticsApiData>(urlWithParams, {
             timeout: +API_TIMEOUT
         });
-        console.log("API response data:", response.data);
+        
 
         if (!response.data || Object.keys(response.data).length === 0) {
-            console.warn("No se recibieron datos de estadísticas del estudiante.");
-            return null;
+            throw new Error("No se encontraron datos de estadísticas para los parámetros dados.");
         }
 
         const statsData = response.data;
@@ -56,10 +58,31 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
             finalDate: statsData.final_date,
         };
 
-        console.log("Fetched and mapped statistics:", mappedStats);
         return mappedStats;
     } catch (error) {
-        console.error("Error fetching all student statistics:", error);
-        return null;
+        throw new Error(error);
     }
 }
+
+const exportStudentGameStatisticsCsv = async (
+    studentId: number, 
+    gameId: number, 
+) => {
+    const url = `${BASE_URL}/statistics/${studentId}/${gameId}/csv`;
+    const filename = `student_${studentId}_game_${gameId}_stats.csv`;
+
+
+    try {
+
+        const response = await axios.get(url, {});
+
+        const destination = new File(Paths.cache,`resultados-${studentId}-${gameId}.pdf`);
+
+        destination.write(await response.data);
+
+
+    } catch (error) {
+        console.error("Error al exportar CSV:", error);
+        Alert.alert('Error Inesperado', 'No se pudo completar la exportación.');
+    }
+};
