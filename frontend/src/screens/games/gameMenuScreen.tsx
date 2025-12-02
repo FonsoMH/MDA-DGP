@@ -38,7 +38,7 @@ const GAMES: Game[] = [
         image: require('../../../assets/icons/games_icons/icon_game3.png'),
     },
     {
-        id: 'Game4',
+        id: 'LeaveSame',
         title: 'Deja el mismo número',
         image: require('../../../assets/icons/games_icons/icon_game4.png'),
     },
