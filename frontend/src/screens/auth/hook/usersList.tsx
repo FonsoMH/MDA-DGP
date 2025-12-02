@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchStudents } from '../api/loginApi';
-import { StudentLogin } from '../../../types/login';
+import { StudentLogin, PaginatedStudentsResponse } from '../../../types/login';
 
 
 interface UseStudentsDataResult {
-    users: StudentLogin[];
+    users: PaginatedStudentsResponse;
     isLoading: boolean;
     refetch: () => void;
 }
@@ -15,7 +15,7 @@ interface UseStudentsDataResult {
  * @returns An object with the list of users, loading status, error, and a refetch function.
  */
 export const useStudentsData = (): UseStudentsDataResult => {
-    const [users, setUsers] = useState<StudentLogin[]>([]);
+    const [users, setUsers] = useState<PaginatedStudentsResponse>({items: [], total_count: 0, total_pages: 0, current_page: 0});
     const [isLoading, setIsLoading] = useState(false);
 
     const loadStudents = useCallback(async () => {
