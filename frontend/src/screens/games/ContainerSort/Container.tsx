@@ -132,6 +132,7 @@ function Container({
         >
             {items.map((option, index) => (
                 <DraggableItem
+                testID={`item-in-container`}
                 onPress={() => handleNumberCLick(option)}
                 onDrop={() => handleNumberCLick(option)}
                 dropZonesLayouts={topZoneLayout} 

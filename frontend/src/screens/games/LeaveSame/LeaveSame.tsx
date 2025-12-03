@@ -19,7 +19,7 @@ const GAME_ID = 4;
 type Layout = { x: number; y: number; width: number; height: number; };
 
 
-function ContainerSort() {
+function LeaveSame() {
 
     const accessibilitySettings = useAccessibilitySettings();
     const roundMessage = useRoundMessage();
@@ -296,6 +296,7 @@ function ContainerSort() {
 
                         return( 
                         <DraggableItem
+                            testID={`option-item`}
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
                             isDisabled={false} 
@@ -304,8 +305,7 @@ function ContainerSort() {
                             key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
-                            testID={"option-item"}
-                        >
+                            >
                             <NumberDisplay
                                 numberProp={option.value} 
                                 size={100}
@@ -349,4 +349,4 @@ function ContainerSort() {
 }
 
 
-export default ContainerSort;
+export default LeaveSame;

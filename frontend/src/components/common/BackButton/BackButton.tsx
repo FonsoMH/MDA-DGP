@@ -7,7 +7,7 @@ interface BackProps {
     width: number
     height: number
     alignSelf?: FlexAlignType
-  testID?: string
+    testID?: string
 }
 
 const BASE_ICON_SIZE = 28;
@@ -72,7 +72,6 @@ function BackButton({ width, height, alignSelf = 'flex-start', testID }: BackPro
           paddingHorizontal: newPaddingHorizontal,
         }
       ]}
-      testID={testID}
     >
       <Text style={[styles.text, { fontSize: newFontSize }]}>Volver</Text>
       

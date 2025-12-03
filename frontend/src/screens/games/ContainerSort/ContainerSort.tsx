@@ -300,7 +300,6 @@ function ContainerSort() {
                             key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
-                            testID={"option-item"}
                         >
                             <NumberDisplay
                                 numberProp={option.value} 
