@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { useGameManager } from "../utils/gameManager";
-import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions } from "../utils/gameUtils";
+import { generateEquitableAdjustmentPuzzle } from "../utils/gameUtils";
 import { View, Text, StyleSheet } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
 import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
-import Container from "./Container";
 import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 import { useAnimatedRef, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
+import Container from "../ContainerSort/Container";
 
-const GAME_ID = 3; 
+const GAME_ID = 4; 
 
 //TODO calcular puntuacion
 type Layout = { x: number; y: number; width: number; height: number; };
@@ -88,6 +88,7 @@ function ContainerSort() {
 
     const [containerStatuses, setContainerStatuses] = useState<string[]>();
     const [containerValues, setContainerValues] = useState<Option[][]>();
+    const [isSum, setIsSum] = useState<boolean>();
     
     const [options, setOptions] = useState<Option[]>([]);
     const [containers, setContainers] = useState<number>(0);
@@ -97,30 +98,34 @@ function ContainerSort() {
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
             
-        if ( sum ){
-            const result = generateEquitableFixedSizeArray(minValue, maxValue, optionsCount, numContainers);
 
-            const newItemsWithOptions = result.puzzleArray.map((value, index) => ({
-                id: `item-${index}-${Date.now()}`, 
-                value: value,
-            }));
+        const result = generateEquitableAdjustmentPuzzle(
+            minValue, maxValue, optionsCount, numContainers, !sum);
+        
 
-            setOptions(newItemsWithOptions);
+        let optionsFlatList: { id: string, value: number }[] = [];
+        const initialContainersWithIds: { id: string, value: number }[][] = 
+            result.initialContainers.map((containerArray) => {
+                
+                const containerWithIds = containerArray.map((value, indexInContainer) => {
+                    const newId = `option-${value}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+                    
+                    const itemObject = {
+                        id: newId, 
+                        value: value,
+                    };
+                    
+                    optionsFlatList.push(itemObject); 
 
-            setTargetSum(result.targetSum);
+                    return itemObject;
+                });
 
-        }
+                return containerWithIds;
+            });
 
-        else {
-            const newOptions = generateFixedRepeatedOptions(minValue, maxValue, optionsCount, numContainers);
-            
-            const newItemsWithOptions = newOptions.map((value, index) => ({
-                id: `item-${index}-${Date.now()}`, 
-                value: value,
-            }));
+        setContainerValues(initialContainersWithIds);
 
-            setOptions(newItemsWithOptions);
-        }
+        setTargetSum(result.target);
 
 
         setContainers(numContainers);
@@ -128,7 +133,7 @@ function ContainerSort() {
         setSelectedNumber(null);
         setContainerStatuses(Array(numContainers).fill(EMPTY_COLOR));
 
-        setContainerValues(Array(numContainers).fill(null).map(() => []));
+        setOptions([]);
 
 
 
@@ -199,7 +204,7 @@ function ContainerSort() {
 
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
 
-        if (allGreen && options.length == 0) {
+        if (allGreen) {
 
             const handleRoundComplete = async () => {
                 
@@ -268,8 +273,8 @@ function ContainerSort() {
             alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
 
             </BackButton>
-            <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
-            <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
+            <Text style={styles.titleText} >Deja igual</Text>
+            <Text style={styles.instructionText}>Saca los que sobran para que todos tengan la misma cantidad</Text>    
             </View>
                 
 
@@ -325,7 +330,7 @@ function ContainerSort() {
                     onLayoutMeasured={handleContainerLayout}
                     aria-label={`Container-Area-${index}`}
                     accessibilitySettings={accessibilitySettings}
-                    isSum={targetSum != null}
+                    isSum={isSum}
                     />
                 ))}
             </View>
