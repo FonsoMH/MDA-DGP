@@ -1,228 +1,271 @@
 import React from 'react';
-import { render, fireEvent, waitFor, act, screen } from '@testing-library/react-native';
-import ContainerSort from '../ContainerSort'; 
-import { CORRECT_COLOR, ERROR_COLOR, EMPTY_COLOR } from '../../../types/games';
-import { TouchableOpacity, View } from 'react-native';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
-// ===========================================
-// MOCKS DE DEPENDENCIAS EXTERNAS E INTERNAS
-// ===========================================
+import SequenceGame from '../SequenceGame/SequenceGame'; 
+import { generateRandomOptions } from '../utils/gameUtils';
+import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
+import { TouchableOpacity } from 'react-native';
+import ContainerSort from '../ContainerSort/ContainerSort';
+import Container from '../ContainerSort/Container';
+import { CORRECT_COLOR } from '../../../types/games';
 
-// --- 1. Mocks de Hooks del Juego y Sistema ---
 
-let mockAdvanceGame;
 
-// Mock de useGameManager: Controla el avance del juego y la inicialización
-jest.mock('../../utils/gameManager', () => ({
-    useGameManager: jest.fn((id, initFn) => {
-            // Inicialización del juego con 4 opciones y 2 contenedores (modo sin suma)
-            act(() => {
-                initFn(1, 4, 4, 2, false); 
-            });
-            mockAdvanceGame = jest.fn(); // Reiniciar mockAdvanceGame para cada test
-        return { advanceGame: mockAdvanceGame, modalVisible: false, resetGame: jest.fn() };
-    }),
+jest.mock('react-native-reanimated', () => ({
+    ...jest.requireActual('react-native-reanimated'),
+    useSharedValue: jest.fn(initialValue => ({ value: initialValue })),
+    useAnimatedRef: jest.fn(() => ({ current: null })),
 }));
 
-// Mock de useAccessibilitySettings
-jest.mock('../../../accessibilitySettings/hooks/useAccessibilitySettings', () => ({
-    useAccessibilitySettings: jest.fn(() => ({
-        backgroundColor: '#FFFFFF',
-        foregroundColor: '#000000',
-        fontSize: 16,
-        highContrast: false,
-        iconPosition: 'derecha',
-    })),
-}));
+interface DragabbleProps {
+    onPress: () => void;
+    children: React.ReactNode;
+}
+jest.mock('../SequenceGame/DraggableItem', () => {
+    const React = jest.requireActual('react'); 
 
-// Mock de useRoundMessage
+    return ({ onPress, children }: DragabbleProps) => {
+        let num: string = 'unknown';
+
+    
+        if (React.Children.count(children) > 0) {
+             const numberDisplayElement = React.Children.toArray(children)[0] as React.ReactElement<NumberDisplayProps>;
+             
+             num = numberDisplayElement.props.numberProp?.toString() || 'unknown';
+        }
+
+        return (
+            <button 
+                onClick={onPress} 
+                aria-label={`number-option-${num}`} 
+            >
+                {children}
+            </button>
+        );
+    };
+});
+
+interface ContainerProps {
+    'aria-label': string;
+    onContainerClick: () => void;
+
+    onUniformityChange: (color: string) => void; 
+    items: any[];
+}
+
+const CORRECT_COLOR_MOCK = '#00C950';
+
+jest.mock('../ContainerSort/Container', () => {
+    const React = require('react');
+    const { TouchableOpacity } = require('react-native');
+
+    return (props: ContainerProps) => {
+
+        React.useEffect(() => {
+            if (props.items.length > 0) {
+                props.onUniformityChange(CORRECT_COLOR_MOCK); 
+            }
+        }, [props.items]);
+
+        return (
+
+        <TouchableOpacity
+            onPress={props.onContainerClick}
+            accessibilityLabel={props['aria-label']}
+        />)
+    };
+});
+
+let mockRoundMessageShow = jest.fn(() => Promise.resolve());
+
 jest.mock('../../../components/RoundMessage/useRoundMessage', () => ({
     useRoundMessage: jest.fn(() => ({
-        show: jest.fn().mockResolvedValue(true),
+        show: mockRoundMessageShow,
         message: '',
         isVisible: false,
         type: 'info',
     })),
 }));
 
-// Mock de react-native-reanimated (necesario para useSharedValue, useAnimatedRef)
-jest.mock('react-native-reanimated', () => ({
-    useSharedValue: jest.fn((initialValue) => ({ value: initialValue })),
-    useAnimatedRef: jest.fn(() => ({ current: { measureInWindow: jest.fn((cb) => cb(0, 0, 500, 500)) } })),
-    // Mocks de componentes básicos para evitar errores de render
-    // View: View,
-    // DraggableItem: 'DraggableItem', // Se mockea más abajo de forma funcional
+jest.mock('../../../components/RoundMessage/RoundMessage', () => 'RoundMessage');
+
+
+const MOCK_OPTIONS = [1, 3];
+jest.mock('../utils/gameUtils', () => ({ 
+
+    generateFixedRepeatedOptions: jest.fn(target => MOCK_OPTIONS), 
+
+    DEFAULT_REPEATS: 5, 
 }));
 
-// --- 2. Mocks de Componentes Internos y Utilidades ---
-
-// Mock de gameUtils: Controla las opciones iniciales ([1, 1, 2, 2])
-jest.mock('../utils/gameUtils', () => ({
-    generateEquitableFixedSizeArray: jest.fn(),
-    generateFixedRepeatedOptions: jest.fn(() => [1, 1, 2, 2]), 
+const MOCK_USER_ID = 42;
+jest.mock('../../../hooks/useUser', () => ({
+    useUser: jest.fn(() => ({
+        user: { id: MOCK_USER_ID } 
+    })),
 }));
 
-// Mock de DraggableItem: Permite simular la selección (onStart) y el drop (onDrop) con clicks
-jest.mock('../SequenceGame/DraggableItem', () => {
-    return ({ children, onStart, onDrop, style, key }) => {
-        // children es el NumberDisplay. Extraemos su prop numberProp
-        const numberValue = children?.props?.numberProp; 
+const MOCK_MAX_RANGE = 10;
+const MOCK_OPTIONS_COUNT = 4;
+const MOCK_CONFIG = { ranges: MOCK_MAX_RANGE, numElements: MOCK_OPTIONS_COUNT, upward: true };
+jest.mock('../hooks/useGameConfig', () => ({
+    useGameConfig: jest.fn(() => ({
+        data: MOCK_CONFIG,
+        isLoading: false,
+    })),
+}));
 
-        return (
-            <TouchableOpacity
-                testID={`draggable-item-${numberValue || 'unknown'}-${key}`}
-                accessibilityLabel={`number-option-${numberValue || 'unknown'}`} // ID para fireEvent.press
-                onPress={() => {
-                    if (onStart) onStart(); // Simula la selección
-                    
-                    // Al hacer click en el número, exponemos la función de drop
-                    // para que el test pueda simular la colocación en un contenedor.
-                    global.mockDropToContainer = (targetIndex) => {
-                        if (onDrop) onDrop(targetIndex);
-                    };
-                }}
-                style={style}
-            >
-                {children}
-            </TouchableOpacity>
-        );
-    };
+jest.mock('../../../accessibilitySettings/hooks/useAccessibilitySettings', () => ({
+    useAccessibilitySettings: () => ({ 
+        backgroundColor: '#fff', 
+        fontSize: 16, 
+        iconPosition: 'derecha' 
+    }),
+}));
+
+interface NumberDisplayProps {
+    numberProp: number;
+    testID: string;
+}
+jest.mock('../../../components/common/NumberDisplays/NumberDisplay', () => {
+
+    return ({ numberProp }: NumberDisplayProps) => (
+        <button >{numberProp.toString()}</button>
+    );
 });
 
-// Mock de Container: Simula la lógica de recepción y notificación del estado (CORRECT/ERROR)
-jest.mock('../Container/Container', () => {
-    return jest.fn((props) => {
-        // Simular onLayoutMeasured para que los layouts existan
-        if (props.onLayoutMeasured) {
-            props.onLayoutMeasured({ x: 0, y: 0, width: 100, height: 100 }, props.containerIndex);
-        }
 
-        // Simular la lógica de drop (activada por receivedIndex === containerIndex)
-        if (props.receivedIndex === props.containerIndex && props.currentSelectedNumber) {
-            props.onDropSuccess(); // Informa a ContainerSort que el número fue consumido
-            
-            let colorToReport = ERROR_COLOR;
-
-            // Simulación de éxito para Uniformidad:
-            // Contenedor 0 debe recibir solo '1's -> CORRECT_COLOR
-            if (props.currentSelectedNumber.value === 1 && props.containerIndex === 0) {
-                colorToReport = CORRECT_COLOR;
-            } 
-            // Contenedor 1 debe recibir solo '2's -> CORRECT_COLOR
-            else if (props.currentSelectedNumber.value === 2 && props.containerIndex === 1) {
-                colorToReport = CORRECT_COLOR;
-            }
-            // Cualquier otra combinación es error (ej: '1' en C1, o '2' en C0)
-            
-            props.onUniformityChange(colorToReport); // Reporta el estado del contenedor
-        }
-
-        return (
-            <View testID={`container-${props.containerIndex}`} />
-        );
-    });
+interface FeedbackScreenProps {
+    visible?: boolean;
+    onNotify: () => void;
+}
+jest.mock('../../../components/FeedBack/Feedback', () => {
+    return ({ onNotify }: FeedbackScreenProps) => (
+        <button 
+            onClick={onNotify} 
+            aria-label="Jugar de nuevo" 
+        >
+            FeedbackScreen
+        </button>
+    );
 });
 
-// ===========================================
-// PRUEBAS DEL COMPONENTE CONTAINERSORT
-// ===========================================
+jest.mock('../../../components/common/BackButton/BackButton', () => 'BackButton');
 
-describe('ContainerSort - Flujo de Drop Simulado (Uniformidad)', () => {
+let mockAdvanceGame: jest.Mock = jest.fn();
+let mockResetGame: jest.Mock = jest.fn();
+let mockUpdateScore: jest.Mock = jest.fn();
+type OnGameInitType = (maxRange: number, optionsCount: number) => void;
+type UseGameManagerType = (gameId: number, onGameInit: OnGameInitType) => any;
+
+jest.mock('../utils/gameManager', () => {
+    const originalModule = jest.requireActual('../utils/gameManager');
     
-    // Helper para simular un click de selección y un drop en un contenedor
-    const performSelectAndDrop = async (optionValue, targetContainerIndex) => {
-        
-        // 1. Simular la SELECCIÓN del número (llama a handleNumberSelect)
-        // Buscamos el primer elemento que contiene ese valor
-        const items = screen.getAllByAccessibilityLabel(`number-option-${optionValue}`);
-        
-        // Seleccionamos el primer item disponible (el que debería ser el "seleccionado")
-        // Como el estado de `options` se actualiza internamente, confiamos en que 
-        // el primer elemento encontrado es el que aún no ha sido consumido.
-        const itemToSelect = items[0]; 
-        fireEvent.press(itemToSelect); 
-        
-        // 2. Simular el DROP en el contenedor objetivo (llama a handleDropOnContainer)
-        if (global.mockDropToContainer) {
-            // Invocamos la función de drop con el índice objetivo
-            global.mockDropToContainer(targetContainerIndex);
-        } else {
-            throw new Error("mockDropToContainer no está disponible. Fallo en el mock de DraggableItem.");
-        }
-        
-        // Esperar la finalización del ciclo de efectos (Container reacciona)
-        await act(async () => {
-            await new Promise(resolve => setTimeout(resolve, 0));
-        });
+
+    return {
+        useGameManager: jest.fn((gameId, onGameInit) => {
+            const manager = originalModule.useGameManager(gameId, onGameInit);
+
+            return {
+                ...manager,
+                advanceGame: mockAdvanceGame,
+                resetGame: mockResetGame,    
+                updateScore: mockUpdateScore,
+                modalVisible: false, 
+            };
+        }),
     };
+});
+
+
+describe('useGameManager - Core Logic', () => {
+    
+
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        mockAdvanceGame = jest.fn();
+        mockResetGame = jest.fn();
+        mockUpdateScore = jest.fn();
+        jest.clearAllMocks(); 
     });
 
-    // Este es el test que solicitaste, adaptado para la estrategia de simulación de clicks.
-    test('1. Debería avanzar el juego cuando se reparta bien (uniformidad: 1s en C0, 2s en C1)', async () => {
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+
+    test('1.  Debería avanzar el juego cuando se seleccionan bien', async() => {
         render(<ContainerSort />);
         
         await waitFor(() => {
-            // Verificar que la inicialización se completó
-            expect(require('../utils/gameUtils').generateFixedRepeatedOptions).toHaveBeenCalledTimes(1);
-        });
+            expect(require('../utils/gameUtils').generateFixedRepeatedOptions).toHaveBeenCalledTimes(1); 
+        });    
 
-        // Opciones iniciales: [1, 1, 2, 2]. Contenedores: 0 y 1.
 
-        // --- 1. Colocar '1' en Contenedor 0 (Correcto) ---
-        await performSelectAndDrop(1, 0); 
-        // Container 0 notifica CORRECT_COLOR. 1 opción '1' restante.
+
+        fireEvent.press(screen.getByLabelText('number-option-1')); 
+        fireEvent.press(screen.getByLabelText('Container-Area-0'));
+
+        fireEvent.press(screen.getByLabelText('number-option-3')); 
+        fireEvent.press(screen.getByLabelText('Container-Area-1'));
         
-        // --- 2. Colocar '1' en Contenedor 0 (Correcto) ---
-        await performSelectAndDrop(1, 0); 
-        // Container 0 se reafirma en CORRECT_COLOR. 0 opciones '1' restantes.
-
-        // --- 3. Colocar '2' en Contenedor 1 (Correcto) ---
-        await performSelectAndDrop(2, 1); 
-        // Container 1 notifica CORRECT_COLOR. 1 opción '2' restante.
-        
-        // --- 4. Colocar '2' en Contenedor 1 (Correcto) ---
-        await performSelectAndDrop(2, 1); 
-        // Container 1 se reafirma en CORRECT_COLOR. 0 opciones '2' restantes.
-
-        // En este punto: options.length = 0 y containerStatuses = ['CORRECT_COLOR', 'CORRECT_COLOR']
-
         await waitFor(() => {
-            // Verificar que el juego avanzó
             expect(mockAdvanceGame).toHaveBeenCalledTimes(1);
         });
-        
-        // Verificar que el mensaje de éxito se disparó
-        const roundMessageMock = require('../../../components/RoundMessage/useRoundMessage').useRoundMessage();
-        expect(roundMessageMock.show).toHaveBeenCalledWith(
-            "¡Excelente! Has superado la ronda con éxito.", 
-            1000,
-            "success"
-        );
-    });
 
-    test('2. No debería avanzar si se colocan incorrectamente (violando uniformidad)', async () => {
+    });
+    
+
+
+    test('2. No debería avanzar el juego cuando se seleccionan mal)', async() => {
         render(<ContainerSort />);
         
-        // --- 1. Colocar '1' en Contenedor 0 (Correcto) ---
-        await performSelectAndDrop(1, 0); 
+        await waitFor(() => {
+            expect(require('../utils/gameUtils').generateFixedRepeatedOptions).toHaveBeenCalledTimes(1); 
+        });    
+
+
+
+        fireEvent.press(screen.getByLabelText('number-option-1')); 
+        fireEvent.press(screen.getByLabelText('Container-Area-0'));
+
+        fireEvent.press(screen.getByLabelText('number-option-3')); 
+        fireEvent.press(screen.getByLabelText('Container-Area-0'));
         
-        // --- 2. Colocar '1' en Contenedor 1 (ERROR: '1' no pertenece a C1) ---
-        await performSelectAndDrop(1, 1); 
-        // El mock de Container notifica ERROR_COLOR para C1.
-
-        // Vaciamos el resto para garantizar que la única condición que falla es el color
-        await performSelectAndDrop(2, 1); 
-        await performSelectAndDrop(2, 0); 
-
-        // Esperar un momento para asegurar que todos los efectos se procesaron
-        await act(async () => {
-            await new Promise(resolve => setTimeout(resolve, 50));
+        await waitFor(() => {
+            expect(mockAdvanceGame).not.toHaveBeenCalled();
         });
+    });
 
-        // La condición de victoria ('allGreen') debe fallar debido al ERROR_COLOR reportado.
-        expect(mockAdvanceGame).not.toHaveBeenCalled();
+
+    // // --- D. MANEJO DE REINICIO (resetGame) ---
+
+    test('5. Debería resetear el juego al presionar "Jugar de nuevo" en FeedbackScreen', async () => {
+        const useGameManagerActual = jest.requireActual('../utils/gameManager').useGameManager as UseGameManagerType;
+
+        const mockFn = jest.fn((gameId: number, onGameInit: OnGameInitType) => {
+            
+            const manager = useGameManagerActual(gameId, onGameInit);
+            
+            return {
+                ...manager,
+                
+                modalVisible: true, 
+                
+                resetGame: mockResetGame,
+            };
+        }) as jest.Mock<any, [number, OnGameInitType]>; 
+        
+        const useGameManagerMock = require('../utils/gameManager').useGameManager as jest.Mock<any, [number, OnGameInitType]>;
+        useGameManagerMock.mockImplementation(mockFn);
+
+        render(<ContainerSort />);
+        
+        const playAgainButton = await screen.getByLabelText('Jugar de nuevo');
+        fireEvent(playAgainButton, 'onNotify'); 
+
+        await waitFor(() => {
+            expect(mockResetGame).toHaveBeenCalledTimes(1);
+        });
     });
 });

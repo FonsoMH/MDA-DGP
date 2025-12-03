@@ -106,6 +106,19 @@ jest.mock('../utils/gameManager', () => {
     };
 });
 
+let mockRoundMessageShow = jest.fn(() => Promise.resolve());
+
+jest.mock('../../../components/RoundMessage/useRoundMessage', () => ({
+    useRoundMessage: jest.fn(() => ({
+        show: mockRoundMessageShow,
+        message: '',
+        isVisible: false,
+        type: 'info',
+    })),
+}));
+
+jest.mock('../../../components/RoundMessage/RoundMessage', () => 'RoundMessage');
+
 
 
 
@@ -183,7 +196,7 @@ describe('TapNumberGame - Interacción y Lógica', () => {
             expect(mockPlayTTS).toHaveBeenCalledTimes(1);
         });
 
-        const listenButton = screen.getByLabelText('Botón de imagen');
+        const listenButton = screen.getByLabelText('Escuchar el número objetivo de nuevo');
         fireEvent.press(listenButton);
 
         expect(mockPlayTTS).toHaveBeenCalledTimes(2); 

@@ -14,11 +14,16 @@ export default function StatsPieChart({data }: {data: { label: string; value: nu
 
   return (
     <View style={styles.container}>
-      <PieChart
-        data={data}
-        innerRadius={60}
-        radius={100}
-      />
+      <View>
+        <PieChart
+          data={data}
+          innerRadius={60}
+          radius={100}
+        />
+        <Text style={{textAlign: 'center', fontSize: 16, color: '#555', fontWeight: 'bold', marginTop: 8}}>
+          Total: {data.reduce((sum, item) => sum + item.value, 0)}
+        </Text>
+      </View>
       <View>
         {data.map((item, index) => (
           <ChartItem key={index} item={item} />

@@ -38,9 +38,9 @@ function TapNumberGame() {
         ttsButtonContainer: {
             padding: 10,
             borderRadius: 15,
-            backgroundColor: '#F3F4F6', 
+            backgroundColor: accessibilitySettings.containerColor, 
             borderWidth: 1, 
-            borderColor: '#D1D5DB', 
+            borderColor: '#111', 
             alignItems: 'center', 
             justifyContent: 'center',
             minWidth: 120, 
@@ -60,7 +60,7 @@ function TapNumberGame() {
         ttsButtonText: {
             fontSize: accessibilitySettings.fontSize - 2,
             fontWeight: '600',
-            color: '#1F2937',
+            color: accessibilitySettings.foregroundColor,
         },
     
         header: {
@@ -71,7 +71,7 @@ function TapNumberGame() {
         title: {
             fontSize: accessibilitySettings.fontSize + 10,
             fontWeight: '900',
-            color: '#101828',
+            color: accessibilitySettings.foregroundColor,
             marginBottom: 10,
         },
         messageText: {
@@ -174,8 +174,7 @@ function TapNumberGame() {
                 {options.map((num, index) => {
                     const displayColor = num === selectedDisplay 
                         ? resultColor 
-                        //TODO change to boxCOlor
-                        : accessibilitySettings.backgroundColor;
+                        : accessibilitySettings.boxColor;
 
                     return (
                         <TouchableOpacity 
@@ -188,6 +187,7 @@ function TapNumberGame() {
                                 key={index}
                                 numberProp={num} 
                                 size={155}
+                                numberColor={accessibilitySettings.numberColor}
                                 style={{backgroundColor: displayColor}} 
                             />
                         </TouchableOpacity>

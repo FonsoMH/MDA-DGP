@@ -56,13 +56,13 @@ function SequenceGame() {
         title: {
             fontSize: accessibilitySettings.fontSize + 10,
             fontWeight: '900',
-            color: '#101828',
+            color: accessibilitySettings.foregroundColor,
             marginBottom: 10,
             textAlign: 'center',
         },
         messageText: {
             fontSize: accessibilitySettings.fontSize,
-            color: '#333',
+            color: accessibilitySettings.foregroundColor,
             fontWeight: '500',
         },
 
@@ -97,7 +97,7 @@ function SequenceGame() {
         },
         bar: {
             width: 15,
-            backgroundColor: '#101828',
+            backgroundColor: accessibilitySettings.foregroundColor,
             marginHorizontal: 3,
             borderRadius: 4,
         },
@@ -117,7 +117,7 @@ function SequenceGame() {
             margin: 5,
             borderRadius: 12,
             borderWidth: 2,
-            borderColor: '#888',
+            borderColor: '#000000',
             justifyContent: 'center',
             alignItems: 'center',
         }
@@ -247,7 +247,7 @@ function SequenceGame() {
                 {visualIcon}
             </View>
             <View
-                style={[styles.gridContainer, { height: '40%' }]}
+                style={[styles.gridContainer, { height: '40%' },{backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -259,6 +259,7 @@ function SequenceGame() {
                     {options.map((num, index) => (
                         <DraggableItem
                             key={`option-${num}-${index}`}
+                            testID={`sequence-item-${num}`}
                             onPress={() => handleSelection(num)} 
                             onDrop={() => handleSelection(num)}
                             dropZonesLayouts={bottomZoneLayout} 
@@ -269,13 +270,14 @@ function SequenceGame() {
                             <NumberDisplay
                                 numberProp={num} 
                                 size={120}
-                                style={isSelected(num) ? styles.disabled : null}
+                                numberColor={accessibilitySettings.numberColor}
+                                style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
                             />
                         </DraggableItem>
                     ))}
             </View>
             <View
-                style={[styles.gridContainer, { height: '35%' }]}
+                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.containerColor}]}
                 ref={bottomZoneRef}
                 onLayout={() => {
                     bottomZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -295,6 +297,7 @@ function SequenceGame() {
                             return (
                                 <DraggableItem
                                     key={`selected-${target.value}-${index}`}
+                                    testID={`sequence-item-${target.value}`}
                                     onPress={() => handleSelection(target.value)}
                                     onDrop={() => handleSelection(target.value)}
                                     dropZonesLayouts={topZoneLayout}
@@ -305,6 +308,7 @@ function SequenceGame() {
                                     <NumberDisplay
                                         numberProp={target.value} 
                                         size={100}
+                                        numberColor={accessibilitySettings.numberColor}
                                         style={{backgroundColor: feedbackColor}} 
                                     />
                                 </DraggableItem>

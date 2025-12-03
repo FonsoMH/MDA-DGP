@@ -31,6 +31,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
     
     const setBackgroundColor = (color: string) => setSettings(s => ({ ...s, backgroundColor: color }));
     const setForegroundColor = (color: string) => setSettings(s => ({ ...s, foregroundColor: color }));
+    const setContainerColor = (color: string) => setSettings(s => ({ ...s, containerColor: color }));
     const setNumberColor = (color: string) => setSettings(s => ({ ...s, numberColor: color }));
     const setBoxColor = (color: string) => setSettings(s => ({ ...s, boxColor: color }));
     const setIconPosition = (pos: CornerOption) => setSettings(s => ({ ...s, iconPosition: pos }));
@@ -58,7 +59,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
 
     const exampleStyle = StyleSheet.create({
         background: {
-            backgroundColor: settings?.backgroundColor,
+            backgroundColor: settings.backgroundColor,
             padding: 20,
             alignItems: 'center',
             flexDirection: 'column',
@@ -68,7 +69,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
             gap: 30,
         },
         container:{
-            backgroundColor: settings?.foregroundColor,
+            backgroundColor: settings.containerColor,
             padding: 10,
             justifyContent: 'center',
             alignItems: 'center',
@@ -77,7 +78,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
             gap: 50,
         },
         box: {
-            backgroundColor: settings?.boxColor,
+            backgroundColor: settings.boxColor,
             justifyContent: 'center',
             alignItems: 'center',
             width: 100,
@@ -86,13 +87,15 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
             margin: 5,
         },
         numbers: {
-            color: settings?.numberColor,
+            color: settings.numberColor,
         },
         text: {
-            fontSize: settings?.fontSize + 10,
+            fontSize: settings.fontSize + 10,
+            color: settings.foregroundColor,
         },
         subText: {
-            fontSize: settings?.fontSize,
+            fontSize: settings.fontSize,
+            color: settings.foregroundColor,
         },
         icon:{
             backgroundColor: 'white',
@@ -106,7 +109,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
             ],
             flexDirection: 'row', 
             alignItems: 'center', 
-            alignSelf: settings?.iconPosition === "izquierda" ? 'flex-start' : 'flex-end', 
+            alignSelf: settings.iconPosition === "izquierda" ? 'flex-start' : 'flex-end', 
             borderRadius: 100, 
             paddingHorizontal: 10
         }
@@ -137,7 +140,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                         </Text>
                         <ColorPickerComponent 
                             onColorSelected={(color) => setBackgroundColor(color)} 
-                            actualColor={settings?.backgroundColor}
+                            actualColor={settings.backgroundColor}
                             />
                     </View>
                     <View style={styles.optionPickContainer}>
@@ -145,8 +148,8 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                             Color de contenedores:
                         </Text>
                         <ColorPickerComponent 
-                            onColorSelected={(color) => setForegroundColor(color)} 
-                            actualColor={settings?.foregroundColor}
+                            onColorSelected={(color) => setContainerColor(color)} 
+                            actualColor={settings.containerColor}
                             />
                     </View>
                     <View style={styles.optionPickContainer}>
@@ -155,7 +158,16 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                         </Text>
                         <ColorPickerComponent 
                             onColorSelected={(color) => setBoxColor(color)} 
-                            actualColor={settings?.boxColor}
+                            actualColor={settings.boxColor}
+                            />
+                    </View> 
+                    <View style={styles.optionPickContainer}>
+                        <Text>
+                            Color de texto:
+                        </Text>
+                        <ColorPickerComponent 
+                            onColorSelected={(color) => setForegroundColor(color)} 
+                            actualColor={settings.foregroundColor}
                             />
                     </View>
                     <View style={styles.optionPickContainer}>
@@ -164,7 +176,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                         </Text>
                         <ColorPickerComponent 
                             onColorSelected={(color) => setNumberColor(color)} 
-                            actualColor={settings?.numberColor}
+                            actualColor={settings.numberColor}
                             />
                     </View>
                     <View style={styles.optionPickContainer}>
@@ -173,7 +185,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                         </Text>
                         <Switch 
                             style={styles.switch}
-                            value={settings?.showNumbersMode}
+                            value={settings.showNumbersMode}
                             onValueChange={(value) => setShowNumbersMode(value)}
                             />
                     </View>
@@ -183,7 +195,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                         </Text>
                         <CornerSelector
                             onChange={(position) => setIconPosition(position)}
-                            actualSelected={settings?.iconPosition}
+                            actualSelected={settings.iconPosition}
                             />
                     </View>
                     <View style={styles.optionPickContainer}>
@@ -193,7 +205,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                         <TextInput 
                             style={styles.textInput}
                             keyboardType="numeric"
-                            value={settings?.fontSize.toString() ?? ""}
+                            value={settings.fontSize.toString() ?? ""}
                             onChangeText={(text) => {
                                 const newSize = Number(text);
                                 if (!isNaN(newSize) && newSize >= 1) {
@@ -221,9 +233,9 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                         <Text style={exampleStyle.subText}>Ejemplo de texto</Text>
                         
                         <View style={exampleStyle.container}>
-                            <NumberDisplay numberProp={8} size={80} numberColor={settings?.numberColor} style={{ backgroundColor: settings?.boxColor  }} />
-                            <NumberDisplay numberProp={15} size={80} numberColor={settings?.numberColor} style={{ backgroundColor: settings?.boxColor }} />
-                            <NumberDisplay numberProp={23} size={80} numberColor={settings?.numberColor} style={{ backgroundColor: settings?.boxColor }} />
+                            <NumberDisplay numberProp={8} size={80} numberColor={settings.numberColor} style={{ backgroundColor: settings.boxColor  }} />
+                            <NumberDisplay numberProp={15} size={80} numberColor={settings.numberColor} style={{ backgroundColor: settings.boxColor }} />
+                            <NumberDisplay numberProp={23} size={80} numberColor={settings.numberColor} style={{ backgroundColor: settings.boxColor }} />
                         </View>
                     </View>
                     <View style={{flexDirection: 'row', justifyContent: 'center', gap: 20}}>

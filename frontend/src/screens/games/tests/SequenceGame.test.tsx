@@ -83,6 +83,7 @@ interface NumberDisplayProps {
     testID: string;
 }
 jest.mock('../../../components/common/NumberDisplays/NumberDisplay', () => {
+    const { TouchableOpacity } = require('react-native');
 
     return ({ numberProp }: NumberDisplayProps) => (
         <button >{numberProp.toString()}</button>
@@ -104,6 +105,20 @@ jest.mock('../../../components/FeedBack/Feedback', () => {
         </button>
     );
 });
+
+let mockRoundMessageShow = jest.fn(() => Promise.resolve());
+
+jest.mock('../../../components/RoundMessage/useRoundMessage', () => ({
+    useRoundMessage: jest.fn(() => ({
+        show: mockRoundMessageShow,
+        message: '',
+        isVisible: false,
+        type: 'info',
+    })),
+}));
+
+jest.mock('../../../components/RoundMessage/RoundMessage', () => 'RoundMessage');
+
 
 jest.mock('../../../components/common/BackButton/BackButton', () => 'BackButton');
 
@@ -199,7 +214,7 @@ describe('SequenceGame - Interacción y Lógica', () => {
         MOCK_CONFIG.upward = false; 
         render(<SequenceGame />);
         
-        expect(screen.getByText('Mueve del grande al pequeño')).toBeTruthy();
+        expect(screen.getByText('Ordena del grande al pequeño')).toBeTruthy();
     });
     
     test('5. Debería resetear el juego al presionar "Jugar de nuevo" en FeedbackScreen', async () => {

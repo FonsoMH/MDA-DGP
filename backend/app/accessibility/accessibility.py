@@ -21,6 +21,28 @@ def validate_booleano(val):
     return isinstance(val, bool)
 
 # --- GET ---
+@accessibility_bp.route("/accessibility/defaults", methods=["GET"])
+def get_default_accessibility():
+    cur = get_db_cursor()
+    try:
+        default_settings = {
+            "background_color": "#F7F8FA",
+            "foreground_color": "#000000",
+            "number_color": "#000000",
+            "box_color": "#D9D9D9",
+            "icon_position": "izquierda",
+            "high_contrast_mode": False,
+            "show_numbers_mode": True,
+            "font_size": 16
+        }
+
+        return jsonify(default_settings), 200
+
+    except Exception as e:
+        return jsonify({"error": "Error al obtener configuración por defecto"}), 500
+    finally:
+        cur.close()
+
 @accessibility_bp.route("/accessibility/<int:student_id>", methods=["GET"])
 def get_accessibility(student_id):
     cur = get_db_cursor()
@@ -41,6 +63,7 @@ def update_accessibility(student_id):
     # --- Obtener valores con default ---
     background_color = data.get("background_color", "#D9D9D9")
     foreground_color = data.get("foreground_color", "#000000")
+    container_color = data.get("container_color", "#FFFFFF")
     number_color = data.get("number_color", "#000000")
     box_color = data.get("box_color", "#D9D9D9")
     icon_position = data.get("icon_position", "izquierda")
@@ -55,6 +78,8 @@ def update_accessibility(student_id):
         errores.append("background_color inválido " + background_color)
     if not validate_color_hex(foreground_color):
         errores.append("foreground_color inválido " + foreground_color)
+    if not validate_color_hex(container_color):
+        errores.append("container_color inválido " + container_color)
     if not validate_color_hex(number_color):
         errores.append("number_color inválido " + number_color)
     if not validate_color_hex(box_color):
@@ -76,6 +101,7 @@ def update_accessibility(student_id):
         UPDATE accessibility_settings
         SET background_color = %s,
             foreground_color = %s,
+            container_color = %s,
             number_color = %s,
             box_color = %s,
             icon_position = %s,
@@ -85,6 +111,7 @@ def update_accessibility(student_id):
     """, (
         background_color,
         foreground_color,
+        container_color,
         number_color,
         box_color,
         icon_position,
@@ -112,3 +139,4 @@ def update_accessibility(student_id):
         "message": "Configuración actualizada correctamente",
         "updated_settings": updated_settings
     }), 200
+

@@ -64,25 +64,27 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
     }
 }
 
-const exportStudentGameStatisticsCsv = async (
-    studentId: number, 
-    gameId: number, 
-) => {
-    const url = `${BASE_URL}/statistics/${studentId}/${gameId}/csv`;
-    const filename = `student_${studentId}_game_${gameId}_stats.csv`;
+// export const exportStudentGameStatisticsCsv = async (
+//     studentId: number, 
+//     gameId: number, 
+// ) => {
+//     const url = `${BASE_URL}/api/statistics/${studentId}/${gameId}/csv`;
+//     const filename = `student_${studentId}_game_${gameId}_stats.csv`;
 
 
-    try {
+//     try {
 
-        const response = await axios.get(url, {});
+//         const response = await axios.get(url, {});
+// 	console.log("llega");
 
-        const destination = new File(Paths.cache,`resultados-${studentId}-${gameId}.pdf`);
+//         const destination = new File(Paths.cache,`resultados-${studentId}-${gameId}.pdf`);
+// 	console.log("llega2");
 
-        destination.write(await response.data);
+//         destination.write(await response.data);
+// 	console.log("llega3");
 
-
-    } catch (error) {
-        console.error("Error al exportar CSV:", error);
-        Alert.alert('Error Inesperado', 'No se pudo completar la exportación.');
-    }
-};
+//     } catch (error) {
+//         console.log("Error al exportar CSV:", error);
+//         Alert.alert('Error Inesperado', 'No se pudo completar la exportación.');
+//     }
+// };

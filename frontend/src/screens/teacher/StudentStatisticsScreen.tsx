@@ -46,7 +46,7 @@ export default function StudentStatisticsScreen({route}: Props) {
 
     const pieData = statistics ? [
         { label: 'Éxitos', value: statistics.successfulPlays, color: '#4CAF51' },
-        { label: 'Fallos', value: statistics.totalPlays - statistics.successfulPlays, color: '#F44336' },
+        { label: 'Fallos', value: statistics.failedPlays, color: '#F44336' },
         { label: 'Abandonos', value: statistics.abandonPlays, color: '#FF9800' },
     ] : [
         { label: 'No hay datos', value: null, color: '#CCCCCC' },
@@ -54,7 +54,7 @@ export default function StudentStatisticsScreen({route}: Props) {
 
     const timeData = statistics ? statistics.times.map((time, index) => ({
         value: time.averageTime,
-        label: time.dates.split('-')[1] + '-' + time.dates.split('-')[2],
+        label: time.dates.split('-')[2] + '-' + time.dates.split('-')[1],
         date: time.dates,
     })) : [];
 
@@ -83,6 +83,13 @@ export default function StudentStatisticsScreen({route}: Props) {
 
                     <StatsLineChart data={timeData} />
                 </View>
+
+                {/* <TouchableOpacity
+                    
+                    onPress={() => exportStudentGameStatisticsCsv(studentId, selectedGameId)}
+                >
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Exportar CSV</Text>
+                </TouchableOpacity> */}
 
                 <Animated.View
                     style={[
