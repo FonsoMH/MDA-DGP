@@ -177,6 +177,13 @@ describe('E2E flujo completo de la configuracion de rangos', () => {
 
 
 
+    cy.get('[data-testid="back-button"]:visible').click();
+
+    cy.contains('Deja ')
+    .scrollIntoView()
+    .click();
+
+
 
 
   });
