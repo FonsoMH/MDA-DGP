@@ -1,5 +1,5 @@
 import axios from "axios";
-import { StudentLogin, LoginCredentials, AuthResponse } from "../../../types/login";
+import { StudentLogin, LoginCredentials, AuthResponse, PaginatedStudentsResponse } from "../../../types/login";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
@@ -9,7 +9,7 @@ const API_TIMEOUT = process.env.API_TIMEOUT;
  * @returns Una promesa que resuelve con la lista de objetos StudentLogin.
  * @throws Un error si la variable BASE_URL no está definida o si la respuesta HTTP no es exitosa.
  */
-export async function fetchStudents(): Promise<StudentLogin[]> {
+export async function fetchStudents(): Promise<PaginatedStudentsResponse> {
     if (!BASE_URL) {
         throw new Error("Configuration Error: BASE_URL is not defined in environment.");
     }
@@ -18,16 +18,21 @@ export async function fetchStudents(): Promise<StudentLogin[]> {
     
     
     try {
-        const response = await axios.get<StudentLogin[]>(endpoint, { 
+        const response = await axios.get<PaginatedStudentsResponse>(endpoint, { 
             timeout: API_TIMEOUT 
         });
 
         
-        const data: StudentLogin[] = response.data;
+        const data: PaginatedStudentsResponse = response.data;
         return data;
 
     } catch (error) {
-        return [];
+        return {
+            items: [],
+            total_count: 0,
+            total_pages: 0,
+            current_page: 0
+        };
     }
 }
 

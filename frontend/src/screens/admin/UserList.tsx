@@ -5,49 +5,42 @@ import BackButton from '../../components/common/BackButton/BackButton';
 import StateCard from '../../components/users/StateCard';
 import FilterButtons, { FilterOption } from '../../components/users/FilterButtons';
 import UserCard from '../../components/users/UserCard';
-import { UserFrontend, UserApiData } from '../../types/users';
+// Importamos la interfaz correcta
+import { UserApiData, PaginatedUsersResponse } from '../../types/users';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { useUsers } from './hook/useUserList';
-import { set } from 'react-hook-form';
 import { useUser } from '../../hooks/useUser';
 
 type UserListProps = NativeStackScreenProps<any, 'UserList'>;
 
 export default function UserListScreen({ navigation }: UserListProps) { 
   const {user} = useUser();
+  
+  // 'users' ya viene tipado como PaginatedUsersResponse desde el hook
   const { users, isLoading, refetch } = useUsers();
-  const [filteredUsers, setFilteredUsers] = useState<UserFrontend[]>([]);
-  const [filter, setFilter] = useState<FilterOption>('todos');
 
+  // MANTENEMOS EL TIPO: El estado sigue siendo un PaginatedUsersResponse
+  const [filteredUsers, setFilteredUsers] = useState<PaginatedUsersResponse>({ 
+      items: [], 
+      total_count: 0, 
+      total_pages: 0, 
+      current_page: 0 
+  });
+  
+  const [filter, setFilter] = useState<FilterOption>('todos');
   const [showMenu, setShowMenu] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState<UserApiData | null>(null);
-
-  
 
   const handleOpenEditModal = (user: UserApiData) => {
     setSelectedUserForEdit(user);
     setIsEditModalVisible(true);
   };
 
-  const handleCloseEditModal = () => {
-    setSelectedUserForEdit(null);
-    setIsEditModalVisible(false);
-  };
-
-  const handleSavedUser = () => {
-    setIsEditModalVisible(false);
-    setSelectedUserForEdit(null);
-    // refresh user list
-    refetch();
-  };
-
   const handleNavigation = (screen: keyof AdminStackParamList) => {
-    navigation.navigate('Admin', {
-        screen: screen,
-    });
+    navigation.navigate('Admin', { screen: screen });
   }
 
   const roleMap: Record<FilterOption, string | null> = {
@@ -58,36 +51,47 @@ export default function UserListScreen({ navigation }: UserListProps) {
   };
 
   useEffect(() => {
+    if (!users) return;
+
+    const originalItems = users.items || [];
+    let newItems = [];
+
     if (filter === 'todos') {
-      setFilteredUsers(users);
+      newItems = originalItems;
     } else {
       const role = roleMap[filter];
-      setFilteredUsers(users.filter(u => u.role === role));
+      newItems = originalItems.filter(u => u.role === role);
     }
+
+    setFilteredUsers({
+        ...users,
+        items: newItems
+    });
+
   }, [filter, users]);
 
-  const countByRole = (role: 'admin' | 'teacher' | 'student') =>
-    users.filter(u => u.role === role).length;
+
+  
+  const countByRole = (role: 'admin' | 'teacher' | 'student') => {
+      const items = users?.items || [];
+      return items.filter(u => u.role === role).length;
+  }
 
   return (
     <View style={styles.container} >
-      {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
         <BackButton width={130} height={50} />
       </View>
 
-      {/* Stats */}
       <View style={styles.statsRow}>
         <StateCard title="Administradores" count={countByRole('admin')} emoji="👨‍💼" color="purple" />
         <StateCard title="Tutores" count={countByRole('teacher')} emoji="👨‍🏫" color="blue" />
         <StateCard title="Estudiantes" count={countByRole('student')} emoji="👨‍🎓" color="green" />
       </View>
 
-      {/* Filters */}
       <FilterButtons onFilterChange={(f) => setFilter(f)} />
 
-      {/* UserList */}
       <View style={styles.listHeader}>
         <Text style={[styles.listHeaderText, { flex: 2 }]}>Nombre completo</Text>
         <Text style={[styles.listHeaderText, { flex: 2 }]}>Email</Text>
@@ -96,16 +100,14 @@ export default function UserListScreen({ navigation }: UserListProps) {
         <Text style={[styles.listHeaderText, { flex: 1 }]}></Text>
       </View>
 
-      
       {isLoading ? (
         <ActivityIndicator size="large" color="#333" style={{ marginTop: 20 }} />
       ) : (
-        filteredUsers.map((u, index) => {
+        
+        filteredUsers.items.map((u, index) => {
           
-          // if (index === 0) console.log("🔍 DATOS CRUDOS DEL PRIMER USUARIO:", JSON.stringify(u, null, 2));
-
           const userApiData: UserApiData = {
-              id: u.userId || (u as any).id || (u as any).user_id,
+              id: u.userId, 
               name: u.name,
               email: u.email,
               role: u.role,
@@ -116,20 +118,17 @@ export default function UserListScreen({ navigation }: UserListProps) {
 
           return (
               <UserCard
-                  key={u.userId || index}
+                  key={u.userId|| index}
                   user={userApiData}
                   onEdit={handleOpenEditModal}
-                  onUserDeleted={() => {
-                    refetch();
-                  }}
+                  onUserDeleted={() => refetch()}
                   navigation={navigation}
-                  adminId={user.id}
+                  adminId={user?.id || 0}
               />
           );
         })
       )}
       
-
       {showMenu && (
           <View style={styles.menuContainer}>
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }}>
@@ -155,18 +154,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
       >
           <Text style={styles.fabText}>{showMenu ? '✕' : '+'}</Text>
       </TouchableOpacity>
-
-      {/* {selectedUserForEdit && (
-          <EditUserForm
-              user={selectedUserForEdit}
-              visible={isEditModalVisible}
-              teachers={[]}
-              onClose={handleCloseEditModal}
-              onSaved={handleSavedUser}
-          />
-      )} */}
     </View>
-    
   );
 }
 

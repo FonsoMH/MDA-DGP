@@ -86,8 +86,15 @@ def get_teachers():
     try:
         page = int(request.args.get('page', 1))
         page_size = int(request.args.get('page_size', 10))
+        offset = int(request.args.get('offset', default=0))
 
-        offset = (page - 1) * page_size
+        if per_page < 1: per_page = 10
+        if page < 1: page = 1
+
+        if offset is not None:
+            offset = max(0, int(offset))
+        else:
+            offset = (page - 1) * page_size
 
         cur = get_db_cursor()
 
@@ -99,8 +106,6 @@ def get_teachers():
         cur.execute("SELECT COUNT(*) AS count FROM users WHERE role_id = %s AND assigned_teacher_id IS NULL", (TEACHER_ROLE_ID,))
         total_row = cur.fetchone()
         total_count = total_row['count'] if total_row else 0
-
-
 
         query = """
         SELECT 
@@ -116,7 +121,6 @@ def get_teachers():
 
         rows = cur.fetchall()
 
-        
         teachers = [
             {
                 'id': row['id'],
@@ -232,17 +236,29 @@ def delete_teacher(user_id):
 def get_assigned_students_by_teacher(user_id):
     cur = get_db_cursor()
     try:
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 10))
+        offset = (page - 1) * page_size
+
         cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (user_id,))
         teacher = cur.fetchone()
         if not teacher:
             return jsonify({'error': 'Teacher not found.'}), 404
+
+        cur.execute("""SELECT COUNT(*) AS count
+            FROM users
+            WHERE assigned_teacher_id = %s
+        """, (user_id,))
+        total_row = cur.fetchone()
+        total_count = total_row['count'] if total_row else 0
 
         cur.execute("""
             SELECT user_id, name, email
             FROM users
             WHERE assigned_teacher_id = %s
             ORDER BY name ASC
-        """, (user_id,))
+            LIMIT %s OFFSET %s
+        """, (user_id, page_size, offset))
         students = cur.fetchall()
 
         students_list = [{
@@ -251,13 +267,18 @@ def get_assigned_students_by_teacher(user_id):
             'email': s['email']
         } for s in students]
 
+        total_pages = (total_count + page_size - 1) // page_size if total_count else 0
+
         return jsonify({
             'teacher': {
                 'id': teacher['user_id'],
                 'name': teacher['name'],
                 'email': teacher['email']
             },
-            'students': students_list
+            'students': students_list,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'current_page': page
         }), 200
 
     except Exception as e:
