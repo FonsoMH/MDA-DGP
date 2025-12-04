@@ -64,9 +64,7 @@ CREATE TABLE IF NOT EXISTS game_results (
     failed_plays INTEGER NOT NULL,
 
     played_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    time_seconds INTEGER NOT NULL,
-
-    played_parameters JSONB NOT NULL -- New column to store game parameters as JSONB for historical results
+    time_seconds INTEGER NOT NULL
 );
 
 -- 
@@ -161,7 +159,7 @@ ON CONFLICT (student_id, game_id) DO UPDATE SET
 
 -- 6. Populate Game Results (valid columns)
 -- Inserta varias partidas para Eva Student en dos fechas distintas para pruebas de estadísticas
-INSERT INTO game_results (student_id, game_id, abandoned, successful_plays, failed_plays, played_at, time_seconds, played_parameters)
+INSERT INTO game_results (student_id, game_id, abandoned, successful_plays, failed_plays, played_at, time_seconds)
 VALUES
 -- Eva en 'toca-numero' (día 2025-11-20)
 (
@@ -169,16 +167,14 @@ VALUES
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     false, 3, 1,
     '2025-11-20T10:00:00+00:00',
-    45,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+    45
 ),
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     true, 0, 0,
     '2025-11-20T12:15:00+00:00',
-    30,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+    30
 ),
 -- Eva en 'toca-numero' (día 2025-11-21)
 (
@@ -186,15 +182,13 @@ VALUES
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     false, 4, 2,
     '2025-11-21T09:30:00+00:00',
-    60,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+    60
 ),
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     false, 2, 3,
     '2025-11-21T15:45:00+00:00',
-    55,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+    55
 );
 

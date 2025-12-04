@@ -148,9 +148,6 @@ def create_game_result():
       "failed_plays": int,
       "abandoned": bool,
       "time_seconds": int,            # total elapsed seconds for the session
-      "played_parameters": {          # arbitrary dict snapshot of config
-          ...
-      }
     }
 
     Rules:
@@ -166,7 +163,6 @@ def create_game_result():
         if not data:
             return jsonify({'error': 'Missing or invalid JSON body'}), 400
 
-        # played_parameters será opcional inicialmente para simplificar
         required_fields = [
             'student_id', 'game_id', 'successful_plays', 'failed_plays',
             'abandoned', 'time_seconds'
@@ -181,7 +177,6 @@ def create_game_result():
         failed_plays = data['failed_plays']
         abandoned = data['abandoned']
         time_seconds = data['time_seconds']
-        played_parameters = data.get('played_parameters')  # opcional
 
         # Basic type/value validations
         def _is_int(v):
@@ -195,8 +190,6 @@ def create_game_result():
             return jsonify({'error': 'time_seconds must be a non-negative integer'}), 400
         if not isinstance(abandoned, bool):
             return jsonify({'error': 'abandoned must be boolean'}), 400
-        if played_parameters is not None and not isinstance(played_parameters, (dict, list)):
-            return jsonify({'error': 'played_parameters must be an object or array when provided'}), 400
 
         total_rounds_reported = successful_plays + failed_plays
         if total_rounds_reported > DEFAULT_REPEATS:
@@ -227,15 +220,13 @@ def create_game_result():
         if not game_row:
             return jsonify({'error': 'Game not found'}), 404
 
-        # Insert result
-        # Si no se envían parámetros, guardamos un objeto vacío para mantener consistencia tipo JSONB
-        stored_params = json.dumps(played_parameters if played_parameters is not None else {})
+        # Insert result (sin played_parameters)
         cur.execute(
             """
             INSERT INTO game_results (
               student_id, game_id, abandoned, successful_plays, failed_plays,
-              time_seconds, played_parameters
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+              time_seconds
+            ) VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING result_id
             """,
             (
@@ -244,8 +235,7 @@ def create_game_result():
                 abandoned,
                 successful_plays,
                 failed_plays,
-                time_seconds,
-                stored_params
+                time_seconds
             )
         )
         inserted = cur.fetchone()
