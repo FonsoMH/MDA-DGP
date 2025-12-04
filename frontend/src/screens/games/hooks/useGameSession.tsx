@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../../config';
+import { postGameResult } from '../api/gameResultsApi';
 import { DEFAULT_REPEATS } from '../utils/gameUtils';
 import { useUser } from '../../../hooks/useUser';
 
@@ -75,7 +74,7 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      await axios.post(`${API_BASE_URL}/api/statistics/game_result/`, {
+      await postGameResult({
         student_id: user.id,
         game_id: gameId,
         successful_plays: finalStats.successfulPlays,
