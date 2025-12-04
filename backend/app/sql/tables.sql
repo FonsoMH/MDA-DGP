@@ -196,6 +196,6 @@ VALUES
     '2025-11-21T15:45:00+00:00',
     55,
     '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
-);
+)
 ON CONFLICT DO NOTHING;
 

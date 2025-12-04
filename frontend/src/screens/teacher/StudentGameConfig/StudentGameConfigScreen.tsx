@@ -29,8 +29,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
 
   const { configs, loading, error, setConfigs } = useStudentConfigs(studentId);
 
-  //TODO hacer esto sin el slug
-
   const handleChange = React.useCallback((gameId: number, key: string, value: string) => {
     
     const rawValue = value.trim() === '' ? '0' : value;
