@@ -43,7 +43,6 @@ def test_store_game_result_happy_path(client, temp_student, slug):
         "failed_plays": 2,
         "abandoned": False,
         "time_seconds": 123,
-        "played_parameters": {"level": "easy"},
     }
 
     try:
@@ -58,7 +57,7 @@ def test_store_game_result_happy_path(client, temp_student, slug):
         cur = get_db_cursor()
         cur.execute(
             """
-            SELECT abandoned, successful_plays, failed_plays, time_seconds, played_parameters
+            SELECT abandoned, successful_plays, failed_plays, time_seconds
             FROM game_results
             WHERE student_id = %s AND game_id = %s
             ORDER BY result_id DESC
@@ -73,13 +72,7 @@ def test_store_game_result_happy_path(client, temp_student, slug):
         assert row["successful_plays"] == 3
         assert row["failed_plays"] == 2
         assert row["time_seconds"] == 123
-        # played_parameters puede venir como dict (JSONB) o string; aceptamos ambos
-        pp = row["played_parameters"]
-        if isinstance(pp, str):
-            import json
-            pp = json.loads(pp)
-        assert isinstance(pp, (dict, list))
-        assert pp == {"level": "easy"}
+        # Sin played_parameters: ya no existe la columna, no se verifica.
 
         # GET agregados para este estudiante y juego
         get_resp = client.get(f"/api/statistics/{student_id}/{game_id}/")
@@ -294,12 +287,8 @@ def test_store_game_result_not_student_role(client, temp_teacher, slug):
 
 
 @pytest.mark.parametrize("slug", ["toca-numero"])  # juego existente
-@pytest.mark.parametrize("played_parameters", [
-    {"mode": "A", "level": 2},
-    [1, 2, 3, {"nested": True}],
-    None,  # no se envían parámetros -> debe guardarse {}
-])
-def test_store_game_result_played_parameters_variants(client, temp_student, slug, played_parameters):
+def test_store_game_result_basic_insert(client, temp_student, slug):
+    # Sustituye el anterior test de variantes de played_parameters por una inserción básica
     if isinstance(temp_student, tuple):
         student_id = temp_student[0]
     else:
@@ -317,8 +306,6 @@ def test_store_game_result_played_parameters_variants(client, temp_student, slug
         "abandoned": False,
         "time_seconds": 33,
     }
-    if played_parameters is not None:
-        payload["played_parameters"] = played_parameters
 
     try:
         resp = client.post("/api/statistics/game_result/", json=payload)
@@ -327,7 +314,8 @@ def test_store_game_result_played_parameters_variants(client, temp_student, slug
         cur = get_db_cursor()
         cur.execute(
             """
-            SELECT played_parameters FROM game_results
+            SELECT abandoned, successful_plays, failed_plays, time_seconds
+            FROM game_results
             WHERE student_id = %s AND game_id = %s
             ORDER BY result_id DESC
             LIMIT 1
@@ -337,13 +325,9 @@ def test_store_game_result_played_parameters_variants(client, temp_student, slug
         row = cur.fetchone()
         cur.close()
         assert row is not None
-        stored = row["played_parameters"]
-        if isinstance(stored, str):
-            import json
-            stored = json.loads(stored)
-        if played_parameters is None:
-            assert stored == {}, "Cuando no se envían parámetros debe guardarse {}"
-        else:
-            assert stored == played_parameters
+        assert row["abandoned"] is False
+        assert row["successful_plays"] == 2
+        assert row["failed_plays"] == 1
+        assert row["time_seconds"] == 33
     finally:
         _cleanup_results(student_id, game_id)

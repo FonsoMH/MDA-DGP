@@ -4,8 +4,6 @@ import { DEFAULT_REPEATS } from '../utils/gameUtils';
 import { useUser } from '../../../hooks/useUser';
 
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-const API_TIMEOUT = process.env.API_TIMEOUT;
 
 interface SessionStats {
   successfulPlays: number;
