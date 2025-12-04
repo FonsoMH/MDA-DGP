@@ -97,18 +97,36 @@ function ContainerSort() {
     
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
-            
-
-        const result = generateEquitableAdjustmentPuzzle(
-            minValue, maxValue, optionsCount, numContainers, !sum);
         
+        setIsSum(sum);
+
+        let result: { initialContainers: number[][]; target: number };
+
+        if (window.Cypress && window.Cypress.env('E2E_DATA') === 'FIXED_CONTAINERS') {
+            console.log("Inicializando con datos fijos para E2E.");
+            result = {
+                initialContainers: [
+                    [4, 8, 3],
+                    [10, 2, 9],
+                    [7, 5, 1]
+                ],
+                target: 12
+
+            };
+        } else {
+            result = generateEquitableAdjustmentPuzzle(
+                minValue, maxValue, optionsCount, numContainers, sum);
+        }
+
+            console.log(result);
+            
 
         let optionsFlatList: { id: string, value: number }[] = [];
         const initialContainersWithIds: { id: string, value: number }[][] = 
             result.initialContainers.map((containerArray) => {
                 
                 const containerWithIds = containerArray.map((value, indexInContainer) => {
-                    const newId = `option-${value}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+                    const newId = `option-${value}-${Date.now()}`;
                     
                     const itemObject = {
                         id: newId, 
@@ -279,7 +297,7 @@ function ContainerSort() {
                 
 
             <View
-                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.containerColor}]}
+                style={[styles.gridContainer, { height: '25%' }, {backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -328,7 +346,6 @@ function ContainerSort() {
                     topZoneLayout={topZoneLayout}
                     containerIndex={index}
                     onLayoutMeasured={handleContainerLayout}
-                    aria-label={`Container-Area-${index}`}
                     accessibilitySettings={accessibilitySettings}
                     isSum={isSum}
                     />
