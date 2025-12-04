@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, Animated, TouchableOpacity, Pressable } from 'react-native';
+import { StyleSheet, Animated, TouchableOpacity, Pressable, Touchable } from 'react-native';
 import { View , Text } from 'react-native';
 import { TeacherStackParamList } from '../../navigation/TeacherNavigator';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -12,6 +12,7 @@ import Svg, { G } from 'react-native-svg';
 import { useState } from 'react';
 import StatsPieChart from './components/StatsPieChart';
 import StatsLineChart from './components/StatsLineChart';
+import { exportStudentGameStatisticsCsv } from './api/studentStatisticsApi';
 
 const ALL_GAMES_ID = -1;
 
@@ -84,12 +85,22 @@ export default function StudentStatisticsScreen({route}: Props) {
                     <StatsLineChart data={timeData} />
                 </View>
 
-                {/* <TouchableOpacity
-                    
-                    onPress={() => exportStudentGameStatisticsCsv(studentId, selectedGameId)}
+                <Pressable
+                    style={{
+                        position: 'absolute',
+                        bottom: 20,
+                        right: 20,
+                        backgroundColor: '#28a745',
+                        paddingVertical: 10,
+                        paddingHorizontal: 18,
+                        borderRadius: 8,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}                    
+                    onPress={() =>  exportStudentGameStatisticsCsv(studentId, selectedGameId)}
                 >
                     <Text style={{ color: '#fff', fontWeight: 'bold' }}>Exportar CSV</Text>
-                </TouchableOpacity> */}
+                </Pressable>
 
                 <Animated.View
                     style={[

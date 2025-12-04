@@ -1,8 +1,10 @@
 import axios from "axios";
 import { StudentStatisticsApiData, StudentStatisticsFrontend } from "../../../types/statistics";
 
-import { Directory , File , Paths } from 'expo-file-system';
-import { Platform, Alert } from 'react-native';
+
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -64,27 +66,68 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
     }
 }
 
-// export const exportStudentGameStatisticsCsv = async (
-//     studentId: number, 
-//     gameId: number, 
-// ) => {
-//     const url = `${BASE_URL}/api/statistics/${studentId}/${gameId}/csv`;
-//     const filename = `student_${studentId}_game_${gameId}_stats.csv`;
+// Helper para arreglar tipos si TS se queja
+const FS = FileSystem as any;
+const { StorageAccessFramework } = FS;
 
+export const exportStudentGameStatisticsCsv = async (
+    studentId: number, 
+    gameId: number
+) => {
+    try {
+        const filename = `stats_student_${studentId}_game_${gameId}.csv`;
+        
+        // 1. Obtener los datos (CSV String)
+        const response = await fetch(`${BASE_URL}/api/statistics/${studentId}/${gameId}/csv`, {
+        });
 
-//     try {
+        if (!response.ok) throw new Error("Error descargando datos");
+        const csvData = await response.text();
 
-//         const response = await axios.get(url, {});
-// 	console.log("llega");
+        // ============================================================
+        //  OPCIÓN A: ANDROID (Usar "Guardar como..." nativo)
+        // ============================================================
+        if (Platform.OS === 'android') {
+            // 1. Pedir permiso al usuario para acceder a una carpeta
+            const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
 
-//         const destination = new File(Paths.cache,`resultados-${studentId}-${gameId}.pdf`);
-// 	console.log("llega2");
+            if (permissions.granted) {
+                // 2. Crear el archivo en la carpeta elegida por el usuario
+                const uri = await StorageAccessFramework.createFileAsync(
+                    permissions.directoryUri,
+                    filename,
+                    'text/csv' // Tipo MIME
+                );
 
-//         destination.write(await response.data);
-// 	console.log("llega3");
+                // 3. Escribir los datos en ese archivo
+                await FileSystem.writeAsStringAsync(uri, csvData, {
+                    encoding: 'utf8' as any
+                });
+            } else {
+                // El usuario canceló la selección de carpeta
+                throw new Error("Permiso de carpeta no concedido.");
+            }
+        } 
+        
+        // ============================================================
+        //  OPCIÓN B: iOS (El menú compartir tiene "Guardar en Archivos")
+        // ============================================================
+        else {
+            // En iOS necesitamos guardar temporalmente primero
+            const fileUri = `${FS.cacheDirectory}${filename}`;
+            
+            await FileSystem.writeAsStringAsync(fileUri, csvData, {
+                encoding: 'utf8' as any
+            });
 
-//     } catch (error) {
-//         console.log("Error al exportar CSV:", error);
-//         Alert.alert('Error Inesperado', 'No se pudo completar la exportación.');
-//     }
-// };
+            await Sharing.shareAsync(fileUri, {
+                mimeType: 'text/csv',
+                UTI: 'public.comma-separated-values-text',
+                dialogTitle: 'Guardar CSV'
+            });
+        }
+
+    } catch (e) {
+        throw e;
+    }
+};
