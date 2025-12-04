@@ -33,7 +33,6 @@ interface UseGameSessionApi {
 interface RoundState { hasError: boolean; startedAt: number; resolved: boolean; }
 
 export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessionApi {
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL as string | undefined;
   const { user } = useUser();
 
   const [currentRound, setCurrentRound] = useState(1);
@@ -85,7 +84,6 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
         failed_plays: finalStats.failedPlays,
         abandoned: finalStats.abandoned,
         time_seconds: finalStats.timeSeconds,
-        timeout: +API_TIMEOUT
       });
     } catch (e: any) {
       setSubmitError(e?.message || 'Error enviando resultados');
