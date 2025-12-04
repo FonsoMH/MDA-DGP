@@ -75,10 +75,10 @@ export const exportStudentGameStatisticsCsv = async (
     gameId: number
 ) => {
     try {
-        const filename = `stats_student_${studentId}_game_${gameId}.csv`;
+        const filename = `stats_student_${studentId}${gameId === ALL_GAMES_ID ? '_all_games' : `_game_${gameId}`}.csv`;
         
         // 1. Obtener los datos (CSV String)
-        const response = await fetch(`${BASE_URL}/api/statistics/${studentId}/${gameId}/csv`, {
+        const response = await fetch(`${BASE_URL}/api/statistics/${studentId}${gameId === ALL_GAMES_ID ? '' : `/${gameId}`}/csv`, {
         });
 
         if (!response.ok) throw new Error("Error descargando datos");
