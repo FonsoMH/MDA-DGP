@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import axios from 'axios';
+import { postGameResult } from '../api/gameResultsApi';
 import { DEFAULT_REPEATS } from '../utils/gameUtils';
 import { useUser } from '../../../hooks/useUser';
 
@@ -78,10 +78,7 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      if (!API_BASE_URL) {
-        throw new Error('EXPO_PUBLIC_API_BASE_URL no está definida en .env');
-      }
-      await axios.post(`${API_BASE_URL}/api/statistics/game_result/`, {
+      await postGameResult({
         student_id: user.id,
         game_id: gameId,
         successful_plays: finalStats.successfulPlays,
