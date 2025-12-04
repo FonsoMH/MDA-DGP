@@ -60,7 +60,7 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
 
         return mappedStats;
     } catch (error) {
-        throw new Error(error);
+        throw error;
     }
 }
 

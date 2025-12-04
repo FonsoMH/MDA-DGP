@@ -7,11 +7,10 @@ import { useStatistics } from './hooks/useStatistics';
 import BackButton from '../../components/common/BackButton/BackButton';
 import DateSelector from './components/DateSelector';
 import GameSelector from './components/GameSelector';
-import { PieChart, pieDataItem, RadarChart } from 'react-native-gifted-charts';
-import Svg, { G } from 'react-native-svg';
-import { useState } from 'react';
 import StatsPieChart from './components/StatsPieChart';
 import StatsLineChart from './components/StatsLineChart';
+import { useEffect, useState } from 'react';
+import Alert from '../../components/FeedBack/Alert';
 
 const ALL_GAMES_ID = -1;
 
@@ -25,13 +24,29 @@ export default function StudentStatisticsScreen({route}: Props) {
     const [initialDate, setInitialDate] = React.useState<Date | null>(null);
     const [finalDate, setFinalDate] = React.useState<Date | null>(null);
 
-    const {
-        data : statistics,
-        isLoading,
-        error
-    } = useStatistics(studentId, selectedGameId, initialDate, finalDate);
+    const [alert, setAlert] = useState({
+        message: 'Cambios guardados con éxito',
+        success: true
+    });
 
-    
+    const [isAlertVisible, setIsAlertVisible] = useState(false);
+
+        const {
+            data : statistics,
+            isLoading,
+            error
+        } = useStatistics(studentId, selectedGameId, initialDate, finalDate);
+
+    useEffect(() => {
+        if (error) {
+            setAlert({
+                message: 'Error al cargar las estadísticas: ' + error.message,
+                success: false
+            });
+            setIsAlertVisible(true);
+        }
+    }, [error]);
+
     const [isOpen, setIsOpen] = React.useState(false);
     const slideAnim = React.useRef(new Animated.Value(-300)).current;
 
@@ -118,6 +133,12 @@ export default function StudentStatisticsScreen({route}: Props) {
                     </Pressable>
                 </Animated.View>
             </View>
+            <Alert
+                message={alert.message}
+                success={alert.success}
+                onHide={() => setIsAlertVisible(false)}
+                visible={isAlertVisible}
+            />
 
         </View>
     );
