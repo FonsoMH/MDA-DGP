@@ -12,11 +12,6 @@ import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
 import BounceDisplay from '../../../components/common/NumberDisplays/BounceDisplay';
-import HintButton from '../../../components/common/HintButton/HintButton';
-
-
-
-
 
 //TODO calcular puntuacion
 const GAME_ID = 1; 
@@ -101,7 +96,7 @@ function TapNumberGame() {
     const [selectedDisplay, setSelectedDisplay] = useState<number | null>(null);
     const [resultColor, setResultColor] = useState<string>();
 
-    const [activateHint, setActivateHint] = useState<boolean>(false);
+    const [activeHint, setActiveHint] = useState<boolean>(false);
 
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number) => {    
         
@@ -111,25 +106,26 @@ function TapNumberGame() {
         setTargetNumber(newTarget);
         setOptions(newOptions);
         setSelectedDisplay(null);
-        setActivateHint(false);
+        setActiveHint(false);
         
         playTTS(newTarget.toString());
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
 
-    // useEffect(() => {
-    //     setActivateHint(false);
+    useEffect(() => {
 
-    //     if (manager.isLoading) return;
+        if (manager.isLoading) return;
 
-    //     const timer = setTimeout(() => {
-    //         setActivateHint(true);
-    //     }, 10000);
+        if(activeHint) return;
+
+        const timer = setTimeout(() => {
+            setActiveHint(true);
+        }, 5000);
         
-    //     return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
 
-    // }, [targetNumber, selectedDisplay, manager.isLoading]);
+    }, [targetNumber, selectedDisplay, manager.isLoading, activeHint]);
 
     const handlePlayAgain = () => {
         manager.resetGame();
@@ -146,7 +142,7 @@ function TapNumberGame() {
                 1000,
                 "success"
             );
-            setActivateHint(false);
+            setActiveHint(false);
             manager.advanceGame();
             return;
         }
@@ -167,7 +163,6 @@ function TapNumberGame() {
         <View style={styles.screenContainer}>
             <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%' }}>
                 <BackButton width={215} height={76}></BackButton>
-                <HintButton onPress={() => setActivateHint(true)}></HintButton>
             </View>
             <TouchableOpacity 
                 testID="tts-button" 
@@ -205,7 +200,7 @@ function TapNumberGame() {
                             onPress={() => handleSelection(num)}
                             style={styles.optionWrapper}
                         >
-                            <BounceDisplay isBouncing={num === targetNumber && activateHint} loop={true} onAnimationEnd={() => setActivateHint(false)}>
+                            <BounceDisplay isBouncing={num === targetNumber && activeHint} onAnimationEnd={() => setActiveHint(false)}>
 
                                 <NumberDisplay 
                                     key={index}

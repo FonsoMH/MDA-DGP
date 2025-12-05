@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import {
@@ -16,6 +16,7 @@ import DraggableItem from './DraggableItem';
 import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
+import BounceDisplay from '../../../components/common/NumberDisplays/BounceDisplay';
 
 
 type TargetElement = {
@@ -140,6 +141,24 @@ function SequenceGame() {
     
     const bottomZoneRef = useAnimatedRef<View>();
     const bottomZoneLayout = useSharedValue<Layout[] | null>(null);
+
+    const [activeHint, setActiveHint] = useState<boolean>(false);
+
+
+    useEffect(() => {
+
+        if (manager.isLoading) return;
+
+        if(activeHint) return;
+
+        const timer = setTimeout(() => {
+            setActiveHint(true);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+
+    }, [selectedNumbers, manager.isLoading, activeHint]);
+
     
     const handlePlayAgain = () => {
         manager.resetGame();
@@ -200,6 +219,15 @@ function SequenceGame() {
 
         return JSON.stringify(selected) === JSON.stringify(correctOrder);
     };
+
+    const includeWrongPlacement = (selected: number[]): boolean => {
+        for (let i = 0; i < selected.length; i++) {
+            if (selected[i] !== undefined && selected[i] !== correctSequence[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     const targetElements: TargetElement[] = correctSequence.map((correctValue, index) => {
         
@@ -267,12 +295,14 @@ function SequenceGame() {
                             isDisabled={isSelected(num)} 
                             comeBack={true}
                         >
-                            <NumberDisplay
-                                numberProp={num} 
-                                size={120}
-                                numberColor={accessibilitySettings.numberColor}
-                                style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
-                            />
+                            <BounceDisplay isBouncing={!includeWrongPlacement(selectedNumbers) && num === correctSequence[selectedNumbers.length] && activeHint} onAnimationEnd={() => {setActiveHint(false)}}>
+                                <NumberDisplay
+                                    numberProp={num} 
+                                    size={120}
+                                    numberColor={accessibilitySettings.numberColor}
+                                    style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
+                                />
+                            </BounceDisplay>
                         </DraggableItem>
                     ))}
             </View>
@@ -305,12 +335,14 @@ function SequenceGame() {
                                     isDisabled={false}
                                     comeBack={false}
                                 >
-                                    <NumberDisplay
-                                        numberProp={target.value} 
-                                        size={100}
-                                        numberColor={accessibilitySettings.numberColor}
-                                        style={{backgroundColor: feedbackColor}} 
-                                    />
+                                    <BounceDisplay isBouncing={includeWrongPlacement(selectedNumbers) && !target.isCorrect && activeHint} onAnimationEnd={() => setActiveHint(false)}>
+                                        <NumberDisplay
+                                            numberProp={target.value} 
+                                            size={100}
+                                            numberColor={accessibilitySettings.numberColor}
+                                            style={{backgroundColor: feedbackColor}} 
+                                        />
+                                    </BounceDisplay>
                                 </DraggableItem>
                             );
                         } else {
