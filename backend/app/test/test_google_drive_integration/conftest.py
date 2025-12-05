@@ -2,8 +2,6 @@ import pytest
 import os
 from app import create_app
 from app.db import get_db_cursor
-
-# Importamos TUS funciones y variables reales
 from app.google_drive.google_drive_utils import (
     drive_service, 
     get_or_create_folder, 
@@ -12,73 +10,118 @@ from app.google_drive.google_drive_utils import (
 
 @pytest.fixture(scope='session')
 def app():
-    """
-    Crea la app FLASK REAL e inicializa la estructura en Google Drive
-    usando las funciones de utilidad existentes.
-    """
     os.environ['FLASK_ENV'] = 'testing'
-    
     app = create_app()
     app.config.update({"TESTING": True})
 
-    # --- INICIALIZACIÓN DE DRIVE (Con tus funciones) ---
+    # --- 1. INICIALIZAR GOOGLE DRIVE ---
     with app.app_context():
         try:
             print("\n🌍 Conectando a Google Drive real...")
-            
-            # 1. Asegurar que existe la carpeta raíz "Resources"
-            #    Usa tu función get_or_create_folder para no duplicarla
             resources_root_id = get_or_create_folder("Resources", PARENT_FOLDER)
-            print(f"   📂 Carpeta Root 'Resources' ID: {resources_root_id}")
-
-            # 2. Definir qué carpetas necesitamos y cómo se llaman en Drive
-            #    Formato: 'clave_que_usa_el_endpoint': 'Nombre_en_Drive'
-            folders_to_init = {
-                'imagen': 'Images',
-                'video': 'Videos',
-                'audio': 'Audios',
-                'pictograma': 'Pictograms',
-                'documento': 'Documents' # Agregamos esta si tu test usa 'documento'
-            }
             
+            # Mapa de carpetas
+            folders_to_init = {
+                'video': 'Videos',
+                'pictograma': 'Pictograms',
+            }
             real_folder_ids = {}
-
-            # 3. Iterar y obtener/crear los IDs reales
             for app_key, drive_name in folders_to_init.items():
-                # Usamos TU función: busca dentro de 'Resources'
                 folder_id = get_or_create_folder(drive_name, resources_root_id)
                 real_folder_ids[app_key] = folder_id
             
-            # 4. Inyectar la configuración en la App
-            #    Ahora, cuando el endpoint busque config['RESOURCE_TYPE_FOLDERS']['imagen'],
-            #    encontrará el ID real de Google Drive.
             app.config['RESOURCE_TYPE_FOLDERS'] = real_folder_ids
-            
-            print(f"✅ IDs de carpetas cargados: {real_folder_ids}")
-
+            print(f"✅ IDs de Drive cargados.")
         except Exception as e:
-            print(f"⚠️ Error inicializando Drive en el test: {e}")
-            # Importante: Si esto falla, los tests de subida fallarán con error 500
+            print(f"⚠️ Error inicializando Drive: {e}")
+
+    # --- 2. INICIALIZAR BASE DE DATOS (CREAR TABLAS) ---
+    # Esto soluciona el error 'relation resources does not exist'
+    with app.app_context():
+        _init_db_tables()
 
     return app
+
+def _init_db_tables():
+    """Crea las tablas y datos maestros si no existen."""
+    print("\n🔨 Creando tablas en base de datos de test...")
+    cur = get_db_cursor()
+    try:
+        # 1. Crear Tabla Resource Types
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS resource_types (
+                type_id SERIAL PRIMARY KEY,
+                type_name VARCHAR(50) NOT NULL UNIQUE,
+                is_default BOOLEAN DEFAULT FALSE
+            );
+        """)
+
+        # 2. Crear Tabla Resources
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS resources (
+                resource_id SERIAL PRIMARY KEY,
+                name VARCHAR(150) NOT NULL,
+                description TEXT,
+                type_id INTEGER NOT NULL REFERENCES resource_types(type_id),
+                storage_url TEXT NOT NULL,
+                file_format VARCHAR(10) NOT NULL,         
+                file_size BIGINT NOT NULL,                
+                mime_type VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+
+        # 3. Crear Tabla Tags
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS tags (
+                tag_id SERIAL PRIMARY KEY,
+                name VARCHAR(50) NOT NULL UNIQUE
+            );
+        """)
+
+        # 4. Crear Tabla Intermedia
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS resource_tags (
+                resource_id INTEGER NOT NULL REFERENCES resources(resource_id) ON DELETE CASCADE,
+                tag_id INTEGER NOT NULL REFERENCES tags(tag_id) ON DELETE CASCADE,
+                PRIMARY KEY (resource_id, tag_id)
+            );
+        """)
+
+        # 5. INSERTAR DATOS MAESTROS (CRÍTICO)
+        # Tu test usa type='imagen'. Si no existe en la DB, fallará por Foreign Key.
+        types_to_insert = ['video', 'pictograma']
+        for t in types_to_insert:
+            cur.execute("INSERT INTO resource_types (type_name) VALUES (%s) ON CONFLICT DO NOTHING", (t,))
+
+        cur.connection.commit()
+        print("✅ Tablas creadas y tipos insertados.")
+    except Exception as e:
+        print(f"❌ Error creando tablas: {e}")
+        cur.connection.rollback()
+    finally:
+        cur.close()
 
 @pytest.fixture(scope='session')
 def client(app):
     return app.test_client()
 
 @pytest.fixture(autouse=True)
-def clean_db_and_drive():
-    """Limpia la base de datos antes y después de cada test."""
-    _clean_database()
+def clean_db_and_drive(app):
+    with app.app_context():
+        _clean_database()
     yield
-    _clean_database()
+    with app.app_context():
+        _clean_database()
 
 def _clean_database():
     try:
         cur = get_db_cursor()
+        # Borramos datos pero NO borramos las tablas ni los resource_types
         cur.execute("DELETE FROM resource_tags")
         cur.execute("DELETE FROM resources")
-        # cur.execute("DELETE FROM tags") # Opcional
+        # No borramos resource_types para que los IDs sigan siendo válidos
         cur.connection.commit()
         cur.close()
     except Exception as e:
@@ -86,14 +129,10 @@ def _clean_database():
 
 @pytest.fixture
 def delete_file_from_drive():
-    """
-    Ayudante para borrar archivos reales de Drive (ya que DELETE endpoint no lo hace aún).
-    """
     def _delete(file_id):
         if file_id:
             try:
                 drive_service.files().delete(fileId=file_id).execute()
-                print(f"🗑️ Archivo borrado de Drive: {file_id}")
             except Exception:
-                print(f"⚠️ No se pudo borrar archivo de Drive: {file_id}")
+                pass
     return _delete

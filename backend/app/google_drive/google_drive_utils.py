@@ -1,22 +1,40 @@
-
-import mimetypes
 import os
-from google.oauth2 import service_account
+import mimetypes
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseUpload, MediaInMemoryUpload
+from googleapiclient.http import MediaInMemoryUpload # Asegúrate de tener esto
 
+
+# --- CONFIGURACIÓN ---
 SCOPES = ['https://www.googleapis.com/auth/drive']
-SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_SERVICE_ACCOUNT_FILE")
+# Ruta al token que acabamos de generar
+TOKEN_FILE = os.path.join(os.path.dirname(__file__), 'token.json')
+# ID de la carpeta donde quieres guardar todo (créala en tu Drive y copia el ID de la URL)
 PARENT_FOLDER = os.getenv("GOOGLE_DRIVE_PARENT_FOLDER")
 
-# Inicializar credenciales
-try:
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
-    )
-    drive_service = build('drive', 'v3', credentials=credentials)
-except Exception as e:
-    raise
+def get_drive_service():
+    """Autenticación usando OAuth 2.0 (Token de usuario)"""
+    creds = None
+    
+    if os.path.exists(TOKEN_FILE):
+        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    
+    # Si el token existe pero caducó, lo refrescamos automáticamente
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                print(f"Error refrescando token: {e}")
+                raise e
+        else:
+            raise Exception("❌ No hay token válido. Ejecuta generar_token.py primero.")
+
+    return build('drive', 'v3', credentials=creds)
+
+# Inicializamos el servicio una vez
+drive_service = get_drive_service()
 
 # -----------------------------
 # UTILIDADES
@@ -65,7 +83,7 @@ def init_drive_structure():
     # Carpeta Resources
     resources_root = get_or_create_folder("Resources", PARENT_FOLDER)
     resource_type_folders = {}
-    for t in ["Images", "Videos", "Audios", "Pictograms"]:
+    for t in ["Videos", "Pictograms"]:
         resource_type_folders[t] = get_or_create_folder(t, resources_root)
 
     # Carpeta Students

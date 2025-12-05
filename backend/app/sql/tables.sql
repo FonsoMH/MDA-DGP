@@ -102,18 +102,18 @@ CREATE TABLE IF NOT EXISTS resource_types (
     is_default BOOLEAN DEFAULT FALSE
 );
 
--- Tags Table
-CREATE TABLE IF NOT EXISTS tags (
-    tag_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
+-- -- Tags Table
+-- CREATE TABLE IF NOT EXISTS tags (
+--     tag_id SERIAL PRIMARY KEY,
+--     name VARCHAR(50) NOT NULL UNIQUE
+-- );
 
--- Resource-Tags Many-to-Many Relationship
-CREATE TABLE IF NOT EXISTS resource_tags (
-    resource_id INTEGER NOT NULL REFERENCES resources(resource_id) ON DELETE CASCADE,
-    tag_id INTEGER NOT NULL REFERENCES tags(tag_id) ON DELETE CASCADE,
-    PRIMARY KEY (resource_id, tag_id)
-);
+-- -- Resource-Tags Many-to-Many Relationship
+-- CREATE TABLE IF NOT EXISTS resource_tags (
+--     resource_id INTEGER NOT NULL REFERENCES resources(resource_id) ON DELETE CASCADE,
+--     tag_id INTEGER NOT NULL REFERENCES tags(tag_id) ON DELETE CASCADE,
+--     PRIMARY KEY (resource_id, tag_id)
+-- );
 
 -- CREATE TABLE IF NOT EXISTS resource_usage (
 --     usage_id SERIAL PRIMARY KEY,

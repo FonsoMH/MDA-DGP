@@ -19,8 +19,9 @@ def get_resources():
     cur = get_db_cursor()
 
     try:
-        cur.execute("""
-        SELECT DISTINCT r.type_id, r.resource_id, r.name, r.description, r.storage_url,
+        # 1. Definimos la consulta BASE en una variable string
+        sql_query = """
+            SELECT DISTINCT r.resource_id, r.name, r.description, r.storage_url,
                             r.file_format, r.file_size, r.mime_type,
                             rt.type_name,
                             r.created_at, r.updated_at
@@ -29,20 +30,24 @@ def get_resources():
             LEFT JOIN resource_tags rtag ON r.resource_id = rtag.resource_id
             LEFT JOIN tags t ON rtag.tag_id = t.tag_id
             WHERE 1=1
-            """)
+        """
         
         params = []
 
+        # 2. Concatenamos las condiciones al string
         if search:
-            cur.execute(" AND (r.name ILIKE %s OR r.description ILIKE %s)", (f'%{search}%', f'%{search}%'))
+            sql_query += " AND (r.name ILIKE %s OR r.description ILIKE %s)"
             params.extend([f'%{search}%', f'%{search}%'])
+        
         if type_name:
-            cur.execute(" AND rt.type_name = %s", (type_name,))
+            sql_query += " AND rt.type_name = %s"
             params.append(type_name)
+        
         if tags_param:
             tags = [tag.strip() for tag in tags_param.split(',')]
             tag_placeholders = ','.join(['%s'] * len(tags))
-            cur.execute(f"""
+            
+            sql_query += f"""
                 AND r.resource_id IN (
                     SELECT rtag.resource_id
                     FROM resource_tags rtag
@@ -51,11 +56,16 @@ def get_resources():
                     GROUP BY rtag.resource_id
                     HAVING COUNT(DISTINCT t.name) = %s
                 )
-            """, (*tags, len(tags)))
+            """
             params.extend(tags)
+            params.append(len(tags))
 
-        cur.execute(" ORDER BY r.created_at DESC LIMIT %s OFFSET %s", (limit, offset))
+        # 3. Concatenamos el orden y paginación
+        sql_query += " ORDER BY r.created_at DESC LIMIT %s OFFSET %s"
         params.extend([limit, offset])
+
+        # 4. EJECUTAMOS LA CONSULTA UNA SOLA VEZ AL FINAL
+        cur.execute(sql_query, tuple(params))
 
         rows = cur.fetchall()
         resources = []
@@ -75,6 +85,9 @@ def get_resources():
             resources.append(resource_dict)
 
         return jsonify(resources)
+    except Exception as e:
+        current_app.logger.error(f"Error fetching resources: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
     finally:
         cur.close()
 
@@ -202,6 +215,7 @@ def create_resource():
         type_name = data.get('type')  
         tags_array = request.form.getlist('tags') 
 
+        # --- VALIDACIONES BÁSICAS ---
         if not name:
             return jsonify({'error': 'Resource name is required.'}), 400
         if not file:
@@ -211,7 +225,7 @@ def create_resource():
         if not type_name:
             return jsonify({'error': 'Resource type is required.'}), 400
 
-        # File size validation
+        # --- VALIDACIÓN DE TAMAÑO ---
         ext = get_extension(file.filename)
         file.seek(0, 2)
         file_size = file.tell()
@@ -219,37 +233,53 @@ def create_resource():
         if file_size > MAX_FILE_SIZE_MB * 1024 * 1024:
             return jsonify({'error': 'File size exceeds the maximum limit.'}), 400
 
+        # --- [NUEVO] BUSCAR EL TYPE_ID ---
+        # Buscamos el ID numérico correspondiente al nombre del tipo (ej: "imagen" -> 1)
+        cur.execute("SELECT type_id FROM resource_types WHERE type_name = %s", (type_name,))
+        type_row = cur.fetchone()
+
+        if not type_row:
+            return jsonify({'error': f'Resource type "{type_name}" not found in database.'}), 400
         
+        type_id = type_row['type_id'] 
 
-
-        # Get folder according to type
+        # --- SUBIDA A GOOGLE DRIVE ---
         resource_type_folders = current_app.config.get('RESOURCE_TYPE_FOLDERS', {})
         parent_id = resource_type_folders.get(type_name)
+        
         if not parent_id:
             return jsonify({'error': f'Resource type folder not initialized for {type_name}'}), 500
 
-        # Upload file to Google Drive
         upload_result = upload_file_to_drive(file, parent_id=parent_id)
 
         storage_url = upload_result['webViewLink']
         mime_type = upload_result['mimeType']
-        file_size = int(upload_result['size'])
+        file_size_drive = int(upload_result['size']) # Usamos el tamaño real reportado por Drive
 
-        # Insert metadata in DB
+        # --- [MODIFICADO] INSERTAR EN DB CON TYPE_ID ---
+        # Se agregó 'type_id' a las columnas y al VALUES
         cur.execute("""
             INSERT INTO resources 
-            (name, description, storage_url, file_format, file_size, mime_type)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            (name, description, type_id, storage_url, file_format, file_size, mime_type)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING resource_id
-        """, (name, description, storage_url, ext, file_size, mime_type))
+        """, (name, description, type_id, storage_url, ext, file_size_drive, mime_type))
+        
         resource_id = cur.fetchone()['resource_id']
+
+        # --- PROCESAMIENTO DE TAGS (Igual que antes) ---      
+        # Si recibes una sola string "tag1, tag2" en lugar de varias keys:
+        if len(tags_array) == 1 and ',' in tags_array[0]:
+             tags_array = tags_array[0].split(',')
 
         for tag_name in tags_array:
             tag_name = tag_name.strip()
             if not tag_name:
                 continue
+            
             cur.execute("SELECT tag_id FROM tags WHERE name = %s", (tag_name,))
             tag = cur.fetchone()
+            
             if not tag:
                 cur.execute("INSERT INTO tags (name) VALUES (%s) RETURNING tag_id", (tag_name,))
                 tag_id = cur.fetchone()['tag_id']
