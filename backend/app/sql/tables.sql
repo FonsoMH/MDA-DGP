@@ -197,5 +197,4 @@ VALUES
     55,
     '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
 );
-ON CONFLICT DO NOTHING;
 
