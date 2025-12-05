@@ -39,6 +39,7 @@ export default function BasicCredentialsForm({
             placeholder="Ej: Juan Pérez"
             placeholderTextColor={placeholderColor}
             style={[localStyles.input, nameError && localStyles.inputError]}
+            testID='name-input'
           />
         )}
       />
@@ -58,6 +59,7 @@ export default function BasicCredentialsForm({
             style={[localStyles.input, emailError && localStyles.inputError]}
             keyboardType="email-address"
             autoCapitalize="none"
+            testID='email-input'
           />
         )}
       />

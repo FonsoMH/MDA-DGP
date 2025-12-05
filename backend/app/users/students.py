@@ -157,7 +157,7 @@ def update_student(user_id):
         if isinstance(fields, dict) and 'error' in fields:
             return jsonify(fields), values  # values contains the status code in this case
         
-        if assigned_teacher_id is not None:
+        if 'assigned_teacher_id' in data:
             fields.append("assigned_teacher_id = %s")
             values.append(assigned_teacher_id)
 

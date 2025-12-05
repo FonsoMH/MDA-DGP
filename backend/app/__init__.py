@@ -6,6 +6,9 @@ from flask_cors import CORS
 
 from .google_drive.google_drive_utils import init_drive_structure
 from .db import init_app, get_db_cursor, init_db
+# from .students import bp as students_bp
+# from .users import users_bp
+
 
 
 load_dotenv()  # carga las variables del .env
@@ -45,11 +48,11 @@ def create_app():
     from .login import auth
     app.register_blueprint(auth.auth_bp)
 
-    from .accessibility.accessibilitySettings import accessibility_settings_bp
-    app.register_blueprint(accessibility_settings_bp)
-
     from .accessibility.accessibility import accessibility_bp
     app.register_blueprint(accessibility_bp)
+
+    from .accessibility.accessibilitySettings import accessibility_settings_bp
+    app.register_blueprint(accessibility_settings_bp)
 
     from .users.teachers import teacher_bp
     app.register_blueprint(teacher_bp)
@@ -69,5 +72,8 @@ def create_app():
     from .resources.resources_general import resources_bp
     app.register_blueprint(resources_bp)
 
+    # Statistics endpoints
+    from .users.statistics import statistics_bp
+    app.register_blueprint(statistics_bp)
 
     return app

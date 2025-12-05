@@ -14,13 +14,17 @@ import BasicCredentialsForm from './components/BasicCredentialsForm';
 import { useForm } from 'react-hook-form';
 import { CredentialsData, credentialsSchema } from '../../types/validationSchemas';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { EditUserHook } from '../../components/users/hook/EditUserHook';
 
 
 type Props = NativeStackScreenProps<any, 'TeacherCreate'>;
 
 
-export default function TeacherCreateScreen({ navigation }: Props) {
-  const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
+export default function TeacherCreateScreen({ navigation, route }: Props) {
+
+  const teacherToEdit = route.params?.teacher; 
+  
+  const [selectedIds, setSelectedIds] = React.useState<number[]>(route.params?.teacher?.assignedStudents ?? []);
 
   const { 
       control,
@@ -28,10 +32,11 @@ export default function TeacherCreateScreen({ navigation }: Props) {
       formState: { errors, isSubmitting: isFormValidating }
   } = useForm({
       resolver: yupResolver(credentialsSchema),
+      context: { isEdit: teacherToEdit != null },
       defaultValues: { 
-          name: '', 
-          email: '', 
-          password: '',
+          name: teacherToEdit?.name || '', 
+          email: teacherToEdit?.email || '', 
+          password: '', 
       },
       mode: 'onBlur',
   });
@@ -53,6 +58,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
   };
 
   const { isSubmitting: isApiSubmitting, onSubmitFrom } = useCreateTeacher();
+  const { isSaving , saveUser } = EditUserHook();
 
   const isTotalSubmitting = isFormValidating || isApiSubmitting; 
 
@@ -63,10 +69,12 @@ export default function TeacherCreateScreen({ navigation }: Props) {
           password: data.password ?? '',
           assigned_students_ids: selectedIds,
       };
-      
-      onSubmitFrom(payload); 
+
+      teacherToEdit ? saveUser(teacherToEdit, payload) : onSubmitFrom(payload); 
       navigation.goBack();
   };
+
+  const buttonLabel: string = teacherToEdit ? 'Editar Tutor' : 'Crear Tutor'
 
   return (
     <View style={styles.safe}>
@@ -78,7 +86,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
             userRole='teacher'
             
             nameError={errors.name?.message}
-            emailError={errors.email?.message}
+            emailError={errors.email?.message }
             passwordError={errors.password?.message}
         />
 
@@ -136,7 +144,7 @@ export default function TeacherCreateScreen({ navigation }: Props) {
             onPress={handleSubmit(onSubmitRHF)}
             disabled={isTotalSubmitting}
           >
-          <Text style={styles.btnText}>{isApiSubmitting ? 'Guardando...' : 'Crear Tutor'}</Text>    
+          <Text style={styles.btnText}>{isApiSubmitting ? 'Guardando...' : buttonLabel}</Text>    
           
           </Pressable>
         </View>

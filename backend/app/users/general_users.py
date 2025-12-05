@@ -16,7 +16,7 @@ def get_users():
 
     if role:
         cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name
+            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
             FROM users u
             JOIN roles r ON u.role_id = r.role_id
             WHERE r.role_name = %s
@@ -24,7 +24,7 @@ def get_users():
         """, (role,))
     elif name:
         cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name
+            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
             FROM users u
             JOIN roles r ON u.role_id = r.role_id
             WHERE u.name ILIKE %s
@@ -32,7 +32,7 @@ def get_users():
         """, (f'%{name}%',))
     else:
         cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name
+            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
             FROM users u
             JOIN roles r ON u.role_id = r.role_id
             ORDER BY u.name
@@ -43,10 +43,11 @@ def get_users():
     users = []
     for row in rows:
         user_dict = {
-            'user_id': row['user_id'],
+            'id': row['user_id'],
             'name': row['name'],
             'email': row['email'],
-            'role': row['role_name']
+            'role': row['role_name'],
+            'assignedTeacherId': row['assigned_teacher_id']
         }
 
         # If user is a teacher, fetch assigned students
