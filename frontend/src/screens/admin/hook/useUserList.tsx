@@ -7,7 +7,7 @@ import { UserFrontend, PaginatedUsersResponse } from "../../../types/users";
  * Custom Hook para cargar y manejar la lista de usuarios.
  * @returns {{ users: UserFrontend[]; isLoading: boolean }}
  */
-export function useUsers() {
+export function useUsers(page: number, limit:number) {
   const [users, setUsers] = useState<PaginatedUsersResponse>({ items: [], total_count: 0, total_pages: 0, current_page: 0 });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -25,14 +25,17 @@ export function useUsers() {
   const loadUsersData = useCallback(async () => {
     setIsLoading(true);
     try {
-        const data = await fetchUsers();
+
+        const offset = (page - 1)* limit;
+        const data = await fetchUsers(page, offset, limit)
+        
         setUsers(data);
     } catch (error) {
         console.error("Error al cargar usuarios:", error);
     } finally {
         setIsLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useFocusEffect(
       useCallback(() => {
