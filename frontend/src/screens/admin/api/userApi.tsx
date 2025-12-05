@@ -12,7 +12,7 @@ const sleep = (ms: number) => {
  * Obtiene todos los usuarios y los mapea al formato frontend.
  * @returns {Promise<PaginatedUsersResponse>} Lista de usuarios adaptados.
  */
-export async function fetchUsers(): Promise<PaginatedUsersResponse> {
+export async function fetchUsers(page: number, offset: number, limit: number): Promise<PaginatedUsersResponse> {
   const endpoint = `${BASE_URL}/api/users`;
 
   try {
@@ -24,6 +24,9 @@ export async function fetchUsers(): Promise<PaginatedUsersResponse> {
         Expires: "0",
       },
       params: {
+        page: page,
+        offset: offset,
+        page_size: limit,
         t: Date.now(),
       }
     });
@@ -57,15 +60,13 @@ export async function fetchUsers(): Promise<PaginatedUsersResponse> {
   }
 }
 
-export async function loadStudentsApi(page :number, pageSize : number): Promise<PaginatedResponse<Student>> {
+export async function loadStudentsApi(page :number, pageSize : number, offset: number): Promise<PaginatedResponse<Student>> {
   const endpoint = `${BASE_URL}/api/students/no_teacher`;
 
   try {
-
-    await sleep(2000);
-
+    
     const response = await axios.get<PaginatedResponse<Student>>(endpoint, {
-        params: { page: page, page_size: pageSize },
+        params: { page: page, page_size: pageSize, offset: offset },
         timeout: +API_TIMEOUT
       });
     const apiData = response.data;
@@ -82,15 +83,12 @@ export async function loadStudentsApi(page :number, pageSize : number): Promise<
   }
 }
 
-export async function loadTeachersApi(page :number, pageSize : number): Promise<PaginatedResponse<Teacher>> {
+export async function loadTeachersApi(page :number, pageSize : number, offset: number): Promise<PaginatedResponse<Teacher>> {
   const endpoint = `${BASE_URL}/api/teachers`;
 
   try {
-
-    await sleep(2000);
-
     const response = await axios.get<PaginatedResponse<Teacher>>(endpoint, {
-        params: { page: page, page_size: pageSize },
+        params: { page: page, page_size: pageSize, offset: offset },
         timeout: +API_TIMEOUT
       });
     const apiData = response.data;
