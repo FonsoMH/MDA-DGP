@@ -3,7 +3,10 @@ import {
   generateRandomOptions,
   generateOptionsWithTarget,
   generateFixedRepeatedOptions,
-  generateEquitableFixedSizeArray
+  generateEquitableFixedSizeArray,
+  generateEquitableFixedSizeArrayDiff,
+  findExactPartition,
+  generateEquitableAdjustmentPuzzle
  } from '../utils/gameUtils';
 
 
@@ -311,6 +314,187 @@ describe('generateEquitableFixedSizeArray', () => {
     expect(result.targetSum).toBe(5);
     expect(result.puzzleArray).toEqual([5, 5, 5, 5]);
     expect(mathRandomSpy).toHaveBeenCalledTimes(8); 
+  });
+
+});
+
+
+describe('generateEquitableFixedSizeArrayDiff', () => {
+  let mathRandomSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    mathRandomSpy = jest.spyOn(global.Math, 'random');
+  });
+
+  afterEach(() => {
+    mathRandomSpy.mockRestore();
+  });
+
+  it('Debería generar un array particionable en el primer intento', () => {
+    const numContainers = 3;
+    const minValue = 1;
+    const maxValue = 10;
+    
+    mathRandomSpy
+      .mockReturnValueOnce(0.5)
+      .mockReturnValueOnce(0.6)
+      .mockReturnValueOnce(0.3)
+      .mockReturnValueOnce(0);
+
+    const result = generateEquitableFixedSizeArrayDiff(maxValue, minValue, numContainers);
+    
+    expect(result.puzzleSolution).toHaveLength(numContainers);
+    expect(result.targetDifference).toBe(5);
+    expect(result.puzzleSolution).toEqual([[4,9], [2, 7], [1,6]]); 
+  });
+
+});
+
+describe('findExactPartition', () => {
+    test('debería encontrar una partición exacta para un caso simple', () => {
+        const nums = [1, 2, 3, 4, 5, 6];
+        const numCont = 3;
+        const targetSum = 7;
+
+        const result = findExactPartition(nums, numCont, targetSum);
+
+        expect(result).not.toBeNull();
+        expect(result).toHaveLength(numCont);
+
+        result.forEach(container => {
+            const sum = container.reduce((acc, val) => acc + val, 0);
+            expect(sum).toBe(targetSum);
+        });
+
+        const flattened = result.flat();
+        expect(flattened.sort()).toEqual(nums.sort());
+    });
+    
+    test('debería manejar números repetidos correctamente', () => {
+        const nums = [5, 5, 5, 5];
+        const numCont = 2;
+        const targetSum = 10;
+
+        const result = findExactPartition(nums, numCont, targetSum);
+
+        expect(result).toEqual([[5, 5], [5, 5]]);
+    });
+
+    test('debería encontrar una partición para un conjunto más grande', () => {
+        const nums = [10, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+        const numCont = 4;
+        const targetSum = 15;
+
+        const result = findExactPartition(nums, numCont, targetSum);
+
+        expect(result).not.toBeNull();
+
+        result.forEach(container => {
+            const sum = container.reduce((acc, val) => acc + val, 0);
+            expect(sum).toBe(targetSum);
+        });
+        
+        const containerWithTen = result.find(c => c.includes(10));
+        expect(containerWithTen).toEqual(expect.arrayContaining([10, 5]));
+
+        const containersOfFives = result.filter(c => !c.includes(10));
+        expect(containersOfFives).toHaveLength(3);
+        containersOfFives.forEach(c => {
+           expect(c).toEqual([5, 5, 5]);
+        });
+    });
+
+    test('debería manejar el caso donde un solo número llena un contenedor', () => {
+        const nums = [10, 5, 5];
+        const numCont = 2;
+        const targetSum = 10;
+
+        const result = findExactPartition(nums, numCont, targetSum);
+
+        expect(result).not.toBeNull();
+        expect(result[0]).toEqual([10]);
+        expect(result[1]).toEqual([5, 5]); 
+    });
+    
+    test('debería retornar null si no es posible una partición exacta', () => {
+        const nums = [10, 5, 5, 1];
+        const numCont = 3;
+        const targetSum = 7
+
+
+        const result = findExactPartition(nums, numCont, targetSum);
+
+        expect(result).toBeNull();
+    });
+
+    test('debería funcionar con un solo contenedor (numCont = 1)', () => {
+        const nums = [1, 2, 3];
+        const numCont = 1;
+        const targetSum = 6;
+
+        const result = findExactPartition(nums, numCont, targetSum);
+
+        expect(result).toEqual([[3, 2, 1]]);
+    });
+});
+
+describe('generateEquitableAdjustmentPuzzle', () => {
+
+  let mathRandomSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    mathRandomSpy = jest.spyOn(global.Math, 'random');
+  });
+
+  afterEach(() => {
+    mathRandomSpy.mockRestore();
+  });
+
+  it('Debería generar una solucion siendo suma', () => {
+    
+    const arraySize = 6;
+    const numContainers = 3;
+    const minValue = 1;
+    const maxValue = 10;
+    
+    mathRandomSpy
+      .mockReturnValueOnce(0.3)
+      .mockReturnValueOnce(0.4)
+      .mockReturnValueOnce(0.3)
+      .mockReturnValueOnce(0.6)
+      .mockReturnValueOnce(0.2)
+      .mockReturnValue(0);
+
+    const result = generateEquitableAdjustmentPuzzle(minValue, maxValue, arraySize ,numContainers, true);
+    
+    expect(result.initialContainers).toHaveLength(numContainers);
+    expect(result.target).toBe(8);
+
+
+    expect(result.initialContainers).toEqual([ [ 1, 1, 1, 7 ], [ 3, 1, 1, 5 ], [ 4, 1, 1, 4 ] ]); 
+  });
+
+  it('Debería generar una solucion siendo resta', () => {
+    
+    const arraySize = 6;
+    const numContainers = 3;
+    const minValue = 1;
+    const maxValue = 10;
+    
+    mathRandomSpy
+      .mockReturnValueOnce(0.5)
+      .mockReturnValueOnce(0.6)
+      .mockReturnValueOnce(0.3)
+      .mockReturnValueOnce(0)
+      .mockReturnValue(0);
+
+    const result = generateEquitableAdjustmentPuzzle(minValue, maxValue, arraySize ,numContainers, false);
+    
+    expect(result.initialContainers).toHaveLength(numContainers);
+    expect(result.target).toBe(5);
+
+
+    expect(result.initialContainers).toEqual([ [ 9, 1, 1, 4 ], [ 7, 1, 1, 2 ], [ 6, 1, 1, 1 ] ]); 
   });
 
 });

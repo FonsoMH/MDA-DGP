@@ -123,6 +123,7 @@ function Container({
                 onLayoutMeasured(layout, containerIndex);
             });
         }}
+        aria-label={`Container-Area-${containerIndex}`}
         >
 
         <TouchableOpacity 
@@ -137,6 +138,7 @@ function Container({
                 key={`opt-${option.id}-${index}`}
                 comeBack={false}
                 style={styles.optionWrapper}
+                testID={`opt-${option.value}`}
                  >
                     <NumberDisplay
                         numberProp={option.value} 
