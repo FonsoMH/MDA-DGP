@@ -22,6 +22,7 @@ interface ContainerProps{
     containerIndex: number;
     onLayoutMeasured?: (layout: Layout, index: number) => void;
     accessibilitySettings: AccessibilitySettingsFrontend;
+    isSum: boolean
     
 }
 
@@ -36,6 +37,7 @@ function Container({
     containerIndex,
     onLayoutMeasured,
     accessibilitySettings,
+    isSum
 }: ContainerProps) {
 
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
@@ -52,14 +54,34 @@ function Container({
     };
 
     const checkSum = (numbers: Option[]): string => {
-        
         if (numbers.length === 0) {
             return EMPTY_COLOR;
         }
         
-        const totalSum = numbers.reduce((sum, current) => sum + current.value, 0);
+        let result: number;
 
-        return totalSum === targetSum ? CORRECT_COLOR : ERROR_COLOR;
+        if (isSum) {
+            // Lógica de suma original
+            result = numbers.reduce((sum, current) => sum + current.value, 0);
+
+        } else {
+            // Lógica de resta acumulativa:
+            // Toma el primer valor y le resta el resto de los valores.
+            
+            if (numbers.length === 1) {
+                result = numbers[0].value;
+            } else {
+                // Inicializa con el primer valor y resta los subsiguientes
+                const firstValue = numbers[0].value;
+                result = numbers.slice(1).reduce((diff, current) => diff - current.value, firstValue);
+                result = Math.abs(result);
+            }
+
+        }
+
+        // Comprobación final
+        // Usamos Math.abs(result) si la resta puede dar negativo, pero el target siempre es positivo.
+        return result === targetSum ? CORRECT_COLOR : ERROR_COLOR;
     };
 
     useEffect(() => {
@@ -130,7 +152,7 @@ function Container({
             <OperacionDisplay 
                 containerColor={borderColor}
                 numbers={items} 
-                operationType="suma"
+                operationType={isSum ? "suma" : "resta"}
             />
         )}
 
