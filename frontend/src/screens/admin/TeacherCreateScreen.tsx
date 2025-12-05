@@ -15,6 +15,7 @@ import { useForm } from 'react-hook-form';
 import { CredentialsData, credentialsSchema } from '../../types/validationSchemas';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { EditUserHook } from '../../components/users/hook/EditUserHook';
+import AdvancedPagination from '../../components/common/Pagination/Pagination';
 
 
 type Props = NativeStackScreenProps<any, 'TeacherCreate'>;
@@ -114,25 +115,12 @@ export default function TeacherCreateScreen({ navigation, route }: Props) {
               );
             })}
 
-          <View style={styles.paginationRow}>
-            <Pressable
-              disabled={currentPage <= 1 || studentsLoading}
-              style={[styles.pageBtn, (currentPage <= 1 || studentsLoading) && { opacity: 0.5 }]}
-              onPress={() => changePage(currentPage - 1)}
-            >
-              <Text style={styles.pageBtnText}>Anterior</Text>
-            </Pressable>
-            <Text style={styles.pageInfo}>
-              Página {currentPage.toString()} de {totalPages.toString()} 
-            </Text>
-            <Pressable
-              disabled={currentPage >= totalPages || studentsLoading}
-              style={[styles.pageBtn, (currentPage >= totalPages || studentsLoading) && { opacity: 0.5 }]}
-              onPress={() => changePage(currentPage + 1)}
-            >
-              <Text style={styles.pageBtnText}>Siguiente</Text>
-            </Pressable>
-          </View>
+          <AdvancedPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={changePage}
+            pageLimit={7} // Mostrar hasta 7 botones de página
+          />
         </View>
 
         <View style={styles.actionsRow}>

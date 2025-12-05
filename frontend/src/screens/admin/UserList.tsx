@@ -12,14 +12,19 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { useUsers } from './hook/useUserList';
 import { useUser } from '../../hooks/useUser';
+import AdvancedPagination from '../../components/common/Pagination/Pagination';
 
 type UserListProps = NativeStackScreenProps<any, 'UserList'>;
 
+const ITEMS_PER_PAGE = 10;
+
 export default function UserListScreen({ navigation }: UserListProps) { 
   const {user} = useUser();
+
+  const [currentPage, setCurrentPage] = useState(1);
   
   // 'users' ya viene tipado como PaginatedUsersResponse desde el hook
-  const { users, isLoading, refetch } = useUsers();
+  const { users, isLoading, refetch } = useUsers(currentPage, ITEMS_PER_PAGE);
 
   // MANTENEMOS EL TIPO: El estado sigue siendo un PaginatedUsersResponse
   const [filteredUsers, setFilteredUsers] = useState<PaginatedUsersResponse>({ 
@@ -77,6 +82,10 @@ export default function UserListScreen({ navigation }: UserListProps) {
       return items.filter(u => u.role === role).length;
   }
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <View style={styles.container} >
       <View style={styles.headerContainer}>
@@ -128,6 +137,13 @@ export default function UserListScreen({ navigation }: UserListProps) {
           );
         })
       )}
+
+      <AdvancedPagination
+        currentPage={users.current_page}
+        totalPages={users.total_pages}
+        onPageChange={handlePageChange}
+        pageLimit={users.total_pages}
+      />
       
       {showMenu && (
           <View style={styles.menuContainer}>
@@ -135,12 +151,16 @@ export default function UserListScreen({ navigation }: UserListProps) {
               <Text style={styles.menuText}>Crear Administrador</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate');
-                                                                     refetch();
+                                                                     setTimeout(() => {
+                                                                          refetch();
+                                                                      }, 500);;
            }}>
               <Text style={styles.menuText}>Crear Tutor</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); 
-                                                                      refetch();
+                                                                      setTimeout(() => {
+                                                                          refetch();
+                                                                      }, 500);;
           }} testID='create-student-button'>
               <Text style={styles.menuText}>Crear Estudiante</Text>
           </TouchableOpacity>
