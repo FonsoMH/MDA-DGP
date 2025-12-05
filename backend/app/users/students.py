@@ -218,7 +218,7 @@ def get_students_without_teacher():
         page_size = int(request.args.get('page_size', 10))
         offset = int(request.args.get('offset', default=0))
 
-        if per_page < 1: per_page = 10
+        if page_size < 1: page_size = 10
         if page < 1: page = 1
 
         if offset is not None:
