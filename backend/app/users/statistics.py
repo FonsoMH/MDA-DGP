@@ -359,7 +359,7 @@ def export_student_game_statistics_csv(student_id: int, game_id: int):
 
 
 @statistics_bp.route('/statistics/<int:student_id>/csv', methods=['GET'])
-def export_student_game_statistics_csv(student_id: int):
+def export_student_all_game_statistics_csv(student_id: int):
     """
     Exporta los resultados de juego de un alumno en formato CSV.
     Query params opcionales:
