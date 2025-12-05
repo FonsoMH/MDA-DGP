@@ -4,6 +4,9 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
+# from .students import bp as students_bp
+# from .users import users_bp
+
 
 
 load_dotenv()  # carga las variables del .env
@@ -34,7 +37,10 @@ def create_app():
     from .login import auth
     app.register_blueprint(auth.auth_bp)
 
-    from .accesibility.accessibilitySettings import accessibility_settings_bp
+    from .accessibility.accessibility import accessibility_bp
+    app.register_blueprint(accessibility_bp)
+
+    from .accessibility.accessibilitySettings import accessibility_settings_bp
     app.register_blueprint(accessibility_settings_bp)
 
     from .users.teachers import teacher_bp
@@ -51,5 +57,9 @@ def create_app():
 
     from .users.user_deletion import users_deletion_bp
     app.register_blueprint(users_deletion_bp)
+
+    # Statistics endpoints
+    from .users.statistics import statistics_bp
+    app.register_blueprint(statistics_bp)
 
     return app

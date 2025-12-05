@@ -120,10 +120,14 @@ const styles = StyleSheet.create({
         padding: 30,
         width: "85%",
         alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
+        boxShadow: [
+            {
+            offsetX: 0,
+            offsetY: 2,
+            blurRadius: 4,
+            color: 'rgba(0,0,0,0.25)',
+            }
+        ],
         elevation: 5,
     },
     messageText: {
@@ -147,10 +151,14 @@ const styles = StyleSheet.create({
         paddingVertical: 18,
         marginHorizontal: 8,
         borderRadius: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        boxShadow: [
+            {
+            offsetX: 0,
+            offsetY: 2,
+            blurRadius: 3.84,
+            color: 'rgba(0,0,0,0.25)',
+            }
+        ],
         elevation: 5,
     },
 

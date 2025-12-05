@@ -4,9 +4,11 @@
 export interface AccessibilitySettingsApiData {
     background_color: string;
     foreground_color: string;
+    container_color: string;
+    number_color: string;
+    box_color: string;
     icon_position: string;
-    high_contrast: boolean;
-    show_numbers: boolean;
+    show_numbers_mode: boolean;
     font_size: number;
 }
 
@@ -16,8 +18,10 @@ export interface AccessibilitySettingsApiData {
 export interface AccessibilitySettingsFrontend {
     backgroundColor: string;
     foregroundColor: string;
+    containerColor: string;
+    numberColor: string;
+    boxColor: string;
     iconPosition: string;
-    highContrast: boolean;
-    showNumbers: boolean;
+    showNumbersMode: boolean;
     fontSize: number;
 }

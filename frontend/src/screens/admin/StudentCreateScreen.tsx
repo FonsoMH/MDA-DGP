@@ -20,13 +20,16 @@ import PasswordItem from '../auth/components/PasswordItem';
 import TextImageButton from '../auth/components/TextImageButton';
 
 import trashCanIcon from '../../../assets/trash_can.png';
+import { EditUserHook } from '../../components/users/hook/EditUserHook';
 
 
 type Props = NativeStackScreenProps<AdminStackParamList, 'StudentCreate'>;
 
-export default function StudentCreateScreen({ navigation }: Props) {
+export default function StudentCreateScreen({ navigation, route }: Props) {
 
-  const [selectedTutorId, setSelectedTutorId] = React.useState<number | null>(null);
+  const studentToEdit = route.params?.student; 
+
+  const [selectedTutorId, setSelectedTutorId] = React.useState<number | null>(route.params?.student?.assignedTeacherId ?? null);
 
   const { 
       password: passwordIcons, 
@@ -38,21 +41,22 @@ export default function StudentCreateScreen({ navigation }: Props) {
       availableIcons
   } = usePictogramPassword(); 
 
-
+  const requiredPassword :boolean = (studentToEdit == null);
 
   const { 
-      control,
-      handleSubmit,
-      formState: { errors, isSubmitting: isFormValidating }
-  } = useForm({
-      resolver: yupResolver(credentialsSchema),
-      defaultValues: { 
-          name: '', 
-          email: '',
-          password: '1234567'
-      },
-      mode: 'onBlur',
-  });
+        control,
+        handleSubmit,
+        formState: { errors, isSubmitting: isFormValidating }
+    } = useForm({
+        resolver: yupResolver(credentialsSchema),
+        context: { isEdit: studentToEdit != null },
+        defaultValues: { 
+            name: studentToEdit?.name || '', 
+            email: studentToEdit?.email || '', 
+            password: '1234567', 
+        },
+        mode: 'onBlur',
+    });
 
 
   const { 
@@ -64,15 +68,9 @@ export default function StudentCreateScreen({ navigation }: Props) {
 
   const isTotalSubmitting = isFormValidating || isApiSubmitting; 
 
-
-  const onSubmitRHF = (data: CredentialsData) => {
-      if (!isPasswordComplete) {
-          console.error("Formulario incompleto: Tutor o Contraseña de Pictogramas faltante.");
-          return;
-      }
-      console.log("calcular contraseña");
-      
-
+  const { isSaving , saveUser } = EditUserHook();
+    
+  const onSubmitRHF = async (data: CredentialsData) => {
       const pictogramPassword = getPasswordSequence();
 
       const payload = {
@@ -81,20 +79,24 @@ export default function StudentCreateScreen({ navigation }: Props) {
           password: pictogramPassword, 
           assigned_teacher: selectedTutorId!,
       };
-      console.log(payload);
-      
-      
-      console.log("enviamos");
-      
-      onSubmitFrom(payload); 
-      navigation.goBack();
+
+      let ok = false;
+      if (studentToEdit) {
+        ok = await saveUser(studentToEdit, payload);
+      } else {
+        ok = await onSubmitFrom(payload);
+      }
+
+      if (ok) {
+        // Volver una pantalla (UserList recupera el foco y hace refetch por useFocusEffect)
+        navigation.goBack();
+      }
   };
 
   return (
     <View style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.title]}>Crear Nuevo Estudiante</Text>
-
+        <Text style={[styles.title]}>{ requiredPassword ? 'Crear Estudiante' : 'Editar Estudiante'}</Text>
         <BasicCredentialsForm
             control={control}
             userRole='student'
@@ -144,7 +146,7 @@ export default function StudentCreateScreen({ navigation }: Props) {
               label="Limpiar" 
           />
           {
-            !isPasswordComplete && (
+            (!isPasswordComplete && requiredPassword) && (
                 <Text style={[styles.help, { color: '#d9534f', fontWeight: 'bold' }]}>
                     ⚠️ Debes seleccionar {maxPasswordLength} pictogramas.
                 </Text>
@@ -191,12 +193,12 @@ export default function StudentCreateScreen({ navigation }: Props) {
             <Text style={[styles.btnText, styles.btnTextSecondary]}>Cancelar</Text>
           </Pressable>
           <Pressable
-            style={[styles.btn, styles.btnPrimary, (!isPasswordComplete || isTotalSubmitting) && { opacity: 0.7 }]}
+            style={[styles.btn, styles.btnPrimary, ((!isPasswordComplete && requiredPassword) || isTotalSubmitting) && { opacity: 0.7 }]}
             onPress={handleSubmit(onSubmitRHF)}
-            disabled={!isPasswordComplete || isTotalSubmitting}
+            disabled={(!isPasswordComplete && requiredPassword) || isTotalSubmitting}
             testID='submit-create-student'
           >
-            <Text style={styles.btnText}>Crear Estudiante</Text>
+            <Text style={styles.btnText}>{ requiredPassword ? 'Crear Estudiante' : 'Editar Estudiante'}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -213,6 +215,8 @@ const styles = StyleSheet.create({
     maxWidth: 800,
     width: '100%',
     alignSelf: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 20
   },
   title: {
     fontWeight: '700',

@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useGameManager } from "../utils/gameManager";
 import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions } from "../utils/gameUtils";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
 import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import Container from "./Container";
-import { CORRECT_COLOR, EMPTY_COLOR, Option } from "../../../types/games";
+import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
-import { useAnimatedRef, useDerivedValue, useSharedValue } from "react-native-reanimated";
+import { useAnimatedRef, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
+import RoundMessage from "../../../components/RoundMessage/RoundMessage";
+import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
 
 const GAME_ID = 3; 
 
@@ -20,7 +22,8 @@ type Layout = { x: number; y: number; width: number; height: number; };
 function ContainerSort() {
 
     const accessibilitySettings = useAccessibilitySettings();
-    
+    const roundMessage = useRoundMessage();
+       
 
     const styles = StyleSheet.create({
         screenContainer: {
@@ -37,9 +40,8 @@ function ContainerSort() {
         },
 
         titleText: {
-            fontSize: accessibilitySettings.fontSize * 1.5, 
-            color: accessibilitySettings.highContrast ? '#FFFF00' : accessibilitySettings.foregroundColor, 
-            fontWeight: accessibilitySettings.highContrast ? '900' : 'bold',
+            fontSize: accessibilitySettings.fontSize * 1.5,         
+            color: accessibilitySettings.foregroundColor,
             marginBottom: 5,
             textAlign: 'center',
             
@@ -85,18 +87,18 @@ function ContainerSort() {
     const [selectedNumber, setSelectedNumber] = useState<Option | null>(null);
 
     const [containerStatuses, setContainerStatuses] = useState<string[]>();
-    const [resetSignal, setResetSignal] = useState(false);
+    const [containerValues, setContainerValues] = useState<Option[][]>();
     
     const [options, setOptions] = useState<Option[]>([]);
     const [containers, setContainers] = useState<number>(0);
     const [targetSum, setTargetSum] = useState<number | null>(null);
     
     
-    const initializeGame = useCallback((maxRange: number, optionsCount: number, 
+    const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
             
         if ( sum ){
-            const result = generateEquitableFixedSizeArray(maxRange, optionsCount, numContainers);
+            const result = generateEquitableFixedSizeArray(minValue, maxValue, optionsCount, numContainers);
 
             const newItemsWithOptions = result.puzzleArray.map((value, index) => ({
                 id: `item-${index}-${Date.now()}`, 
@@ -110,7 +112,7 @@ function ContainerSort() {
         }
 
         else {
-            const newOptions = generateFixedRepeatedOptions(maxRange, optionsCount, numContainers);
+            const newOptions = generateFixedRepeatedOptions(minValue, maxValue, optionsCount, numContainers);
             
             const newItemsWithOptions = newOptions.map((value, index) => ({
                 id: `item-${index}-${Date.now()}`, 
@@ -124,8 +126,11 @@ function ContainerSort() {
         setContainers(numContainers);
 
         setSelectedNumber(null);
-        setResetSignal(false);
         setContainerStatuses(Array(numContainers).fill(EMPTY_COLOR));
+
+        setContainerValues(Array(numContainers).fill(null).map(() => []));
+
+
 
         
         
@@ -133,23 +138,50 @@ function ContainerSort() {
 
     const manager = useGameManager(GAME_ID, initializeGame);
 
+    const handleDropOnContainer = useCallback((targetContainerIndex: number) => {
+        if (!selectedNumber) return;
 
-    const clearSelectedNumber = () => {
+        const droppedItem = selectedNumber;
 
         setOptions(prevItems =>
-            prevItems.filter(item => item.id !== selectedNumber.id)
+            prevItems.filter(item => item.id !== droppedItem.id)
         );
+
+        setContainerValues(prevContainers => {
+            const newContainers = [...prevContainers];
+            const currentContainer = [...(newContainers[targetContainerIndex] || [])];
+            
+            newContainers[targetContainerIndex] = [...currentContainer, droppedItem];
+            return newContainers;
+        });
+        
         setSelectedNumber(null);
-        setDropSelected(null);
-    };
+    }, [selectedNumber]);
+
+    const handleItemReturnedFromContainer = useCallback((item: Option, containerIndex: number) => {      
+        
+        setOptions(prevItems => [...prevItems, item]);
+
+        setContainerValues(prevContainers => {
+            const newContainers = [...prevContainers];
+            newContainers[containerIndex] = newContainers[containerIndex].filter(
+                val => val.id !== item.id
+            );
+            return newContainers;
+        });
+
+    }, []);
+
+    const handleContainerClick = useCallback((containerIndex: number) => {
+        if (selectedNumber) {
+            handleDropOnContainer(containerIndex);
+        }
+    }, [selectedNumber, handleDropOnContainer]);
 
     const handleNumberSelect = (numberValue: Option) => {
         setSelectedNumber(numberValue);
     };
 
-    const handleItemReturnedFromContainer = (item: Option) => {      
-        setOptions(prevItems => [...prevItems, item]);
-    };
 
     const handleContainerStatusUpdate = (color: string, containerIndex: number) => {
     
@@ -168,14 +200,28 @@ function ContainerSort() {
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
 
         if (allGreen && options.length == 0) {
-            setResetSignal(true);
-            manager.advanceGame();
+
+            const handleRoundComplete = async () => {
+                
+                await roundMessage.show(
+                    "¡Excelente! Has superado la ronda con éxito.", 
+                    1000,
+                    "success"
+                );
+                
+                manager.advanceGame();
+                return;
+            };
+
+            handleRoundComplete();
             
         }
+
+
+
     }, [containerStatuses]);
 
     const handlePlayAgain = () => {
-        setResetSignal(true);
         manager.resetGame();
     };
 
@@ -214,13 +260,6 @@ function ContainerSort() {
         
     });
 
-
-    const [dropSelected, setDropSelected] =  useState<number | null>(null);
-
-    const handleDropOnContainer = ((index: number) => {
-        setDropSelected(index);
-    });
-
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
@@ -229,13 +268,13 @@ function ContainerSort() {
             alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
 
             </BackButton>
-            <Text style={styles.titleText} >Reparte Equitativamente</Text>
+            <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
             <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
             </View>
                 
 
             <View
-                style={[styles.gridContainer, { height: '35%' }]}
+                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -244,41 +283,57 @@ function ContainerSort() {
                     });
                 }}
             >
-                    {options.map((option) => (
+                    {options.map((option, index) => {
+
+                        const displayColor = option.id === selectedNumber?.id
+                        ? SELECTED_COLOR 
+                        : accessibilitySettings.boxColor;
+
+                        return( 
                         <DraggableItem
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
                             isDisabled={false} 
                             onStart={() => handleNumberSelect(option)}
                             onDrop={(targetIndex) => handleDropOnContainer(targetIndex)}
-                            key={`option-${option.id}`}
+                            key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
+                            testID={"option-item"}
                         >
                             <NumberDisplay
                                 numberProp={option.value} 
                                 size={100}
+                                numberColor={accessibilitySettings.numberColor}
+                                style={{backgroundColor: displayColor}} 
                             />
                         </DraggableItem>
-                    ))}
+                        )
+                        })}
             </View>
 
             <View style={styles.resultsContainer}>
                 {Array(containers).fill(null).map((_, index) => (
                     <Container targetSum={targetSum}
-                    currentSelectedNumber={selectedNumber}
-                    onDropSuccess={clearSelectedNumber}
-                    onItemReturned={(option: Option) => handleItemReturnedFromContainer(option)}
+                    key={index}
+                    onContainerClick={() => handleContainerClick(index)}
+                    items={containerValues[index] || []}
+                    onItemReturned={(option: Option) => handleItemReturnedFromContainer(option, index)}
                     onUniformityChange={(color: string) => handleContainerStatusUpdate(color, index)}
-                    resetSignal={resetSignal}
                     topZoneLayout={topZoneLayout}
-
                     containerIndex={index}
                     onLayoutMeasured={handleContainerLayout}
-                    receivedIndex={dropSelected}
+                    aria-label={`Container-Area-${index}`}
+                    accessibilitySettings={accessibilitySettings}
+                    isSum={targetSum != null}
                     />
                 ))}
             </View>
+            <RoundMessage 
+                message={roundMessage.message} 
+                isVisible={roundMessage.isVisible}
+                type={roundMessage.type}
+            />
             <FeedbackScreen 
             visible={manager.modalVisible} 
             onNotify={handlePlayAgain}/>

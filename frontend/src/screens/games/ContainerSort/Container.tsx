@@ -1,44 +1,45 @@
 import { useEffect, useState } from "react";
-import {StyleSheet, TouchableOpacity, View } from "react-native";
+import {StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR, Option } from "../../../types/games";
 import OperacionDisplay from "./OperationDisplay";
 import DraggableItem from "../SequenceGame/DraggableItem";
 import { SharedValue, useAnimatedRef } from "react-native-reanimated";
+import { useAccessibilitySettings } from "../../teacher/hooks/useAccessibilitySettings";
+import { AccessibilitySettingsFrontend } from "../../../types/accessibility";
 
 type Layout = { x: number; y: number; width: number; height: number; };
 
 
 interface ContainerProps{
-    currentSelectedNumber: Option | null;
-    onDropSuccess: () => void;
+    items: Option[];
+    onContainerClick: () => void;
     onItemReturned: (itemId: Option) => void;
     onUniformityChange: (color: string) => void;
     targetSum: number | null;
-    resetSignal: boolean;
     topZoneLayout: SharedValue<Layout[] | null>;
 
     containerIndex: number;
     onLayoutMeasured?: (layout: Layout, index: number) => void;
-    receivedIndex: number | null
+    accessibilitySettings: AccessibilitySettingsFrontend;
+    isSum: boolean
+    
 }
 
 
 function Container({
-    targetSum, 
-    currentSelectedNumber, 
-    onDropSuccess, 
+    targetSum,
+    items,
+    onContainerClick,
     onItemReturned,
     onUniformityChange,
-    resetSignal,
     topZoneLayout,
     containerIndex,
     onLayoutMeasured,
-    receivedIndex
+    accessibilitySettings,
+    isSum
 }: ContainerProps) {
 
-    const [myNumbers, setMyNumbers] = useState<Option[]>([]);
-    const [myTotal, setMyTotal] = useState(0);
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
 
     const checkUniformity = (numbers: Option[]): string => {
@@ -53,72 +54,64 @@ function Container({
     };
 
     const checkSum = (numbers: Option[]): string => {
-        
         if (numbers.length === 0) {
             return EMPTY_COLOR;
         }
         
-        const totalSum = numbers.reduce((sum, current) => sum + current.value, 0);
+        let result: number;
 
-        return totalSum === targetSum ? CORRECT_COLOR : ERROR_COLOR;
-    };
+        if (isSum) {
+            // Lógica de suma original
+            result = numbers.reduce((sum, current) => sum + current.value, 0);
 
-    useEffect(() => {
-        if (resetSignal) {
-            setMyNumbers([]);
-            setMyTotal(0);
+        } else {
+            // Lógica de resta acumulativa:
+            // Toma el primer valor y le resta el resto de los valores.
+            
+            if (numbers.length === 1) {
+                result = numbers[0].value;
+            } else {
+                // Inicializa con el primer valor y resta los subsiguientes
+                const firstValue = numbers[0].value;
+                result = numbers.slice(1).reduce((diff, current) => diff - current.value, firstValue);
+                result = Math.abs(result);
+            }
+
         }
-        
-    }, [resetSignal]);
+
+        // Comprobación final
+        // Usamos Math.abs(result) si la resta puede dar negativo, pero el target siempre es positivo.
+        return result === targetSum ? CORRECT_COLOR : ERROR_COLOR;
+    };
 
     useEffect(() => {
         
         if(targetSum){
-            const color = checkSum(myNumbers);
+            const color = checkSum(items);
             setBorderColor(color);
             onUniformityChange(color);
             return;
         }
 
-        const color = checkUniformity(myNumbers);
+        const color = checkUniformity(items);
         setBorderColor(color);
         onUniformityChange(color);
-    }, [myNumbers]);
+    }, [items]);
 
     const handleContainerClick = () => {
-        
-        if (currentSelectedNumber === null) {
-            return;
-        }
 
-        const newNumbers = [...myNumbers, currentSelectedNumber];
-        setMyNumbers(newNumbers);
-        
-        setMyTotal(myTotal + currentSelectedNumber.value);
-
-        onDropSuccess(); 
+        onContainerClick(); 
         
 
     };
 
     const handleNumberCLick = (itemToReturn: Option) => {
 
-        setMyNumbers(prevItems =>
-            prevItems.filter(item => item.id !== itemToReturn.id)
-        );
-
         onItemReturned(itemToReturn);
         
     }
 
     const containerRef = useAnimatedRef<View>();
-
-    useEffect(() => {
-        
-        if(receivedIndex == containerIndex){
-            handleContainerClick();
-        }
-    }, [receivedIndex])
 
     return (
         <View style={styles.area}
@@ -130,12 +123,13 @@ function Container({
                 onLayoutMeasured(layout, containerIndex);
             });
         }}
+        aria-label={`Container-Area-${containerIndex}`}
         >
 
         <TouchableOpacity 
-        style={[styles.container, {borderColor: borderColor}]} 
+        style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
         onPress={handleContainerClick}>
-            {myNumbers.map((option, index) => (
+            {items.map((option, index) => (
                 <DraggableItem
                 onPress={() => handleNumberCLick(option)}
                 onDrop={() => handleNumberCLick(option)}
@@ -144,10 +138,13 @@ function Container({
                 key={`opt-${option.id}-${index}`}
                 comeBack={false}
                 style={styles.optionWrapper}
+                testID={`opt-${option.value}`}
                  >
                     <NumberDisplay
                         numberProp={option.value} 
                         size={80}
+                        numberColor={accessibilitySettings.numberColor}
+                        style={{backgroundColor: accessibilitySettings.boxColor}}
                     ></NumberDisplay>
                 </DraggableItem>
             ))}
@@ -156,8 +153,8 @@ function Container({
         {targetSum && (
             <OperacionDisplay 
                 containerColor={borderColor}
-                numbers={myNumbers} 
-                operationType="suma"
+                numbers={items} 
+                operationType={isSum ? "suma" : "resta"}
             />
         )}
 
