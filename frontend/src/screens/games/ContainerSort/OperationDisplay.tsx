@@ -20,10 +20,13 @@ const OperacionDisplay: React.FC<OperationDisplayProps> = ({ numbers, operationT
     } 
     
     if (operationType === 'resta') {
-      const initialValue = numbers[0].value;
-      const remainingNumbers = numbers.slice(1);
+      const copy = [...numbers];
+      copy.sort((a, b) => b.value - a.value);
+      
+      const initialValue = copy[0].value;
+      const remainingNumbers = copy.slice(1);
 
-      return remainingNumbers.reduce((accumulator, currentValue) => accumulator - currentValue.value, initialValue);
+      return Math.abs(remainingNumbers.reduce((accumulator, currentValue) => accumulator - currentValue.value, initialValue));
     }
 
     return 0; 

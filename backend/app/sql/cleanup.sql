@@ -15,5 +15,6 @@ DROP TABLE IF EXISTS roles CASCADE;
 DROP TABLE IF EXISTS games CASCADE;
 DROP TABLE IF EXISTS user_deletion CASCADE;
 
+
 -- Mensaje de confirmación (solo para psql)
 echo '¡Limpieza completada! Todas las tablas han sido eliminadas.'

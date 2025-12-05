@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { useGameManager } from "../utils/gameManager";
-import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions } from "../utils/gameUtils";
+import { generateEquitableAdjustmentPuzzle } from "../utils/gameUtils";
 import { View, Text, StyleSheet } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
-import GameBackButton from "../components/GameBackButton";
+import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
-import Container from "./Container";
 import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 import { useAnimatedRef, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
-import { useGameSession } from "../hooks/useGameSession";
+import Container from "../ContainerSort/Container";
 
-const GAME_ID = 3; 
+const GAME_ID = 4; 
 
 //TODO calcular puntuacion
 type Layout = { x: number; y: number; width: number; height: number; };
@@ -89,6 +88,7 @@ function ContainerSort() {
 
     const [containerStatuses, setContainerStatuses] = useState<string[]>();
     const [containerValues, setContainerValues] = useState<Option[][]>();
+    const [isSum, setIsSum] = useState<boolean>();
     
     const [options, setOptions] = useState<Option[]>([]);
     const [containers, setContainers] = useState<number>(0);
@@ -98,30 +98,34 @@ function ContainerSort() {
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
             
-        if ( sum ){
-            const result = generateEquitableFixedSizeArray(minValue, maxValue, optionsCount, numContainers);
 
-            const newItemsWithOptions = result.puzzleArray.map((value, index) => ({
-                id: `item-${index}-${Date.now()}`, 
-                value: value,
-            }));
+        const result = generateEquitableAdjustmentPuzzle(
+            minValue, maxValue, optionsCount, numContainers, !sum);
+        
 
-            setOptions(newItemsWithOptions);
+        let optionsFlatList: { id: string, value: number }[] = [];
+        const initialContainersWithIds: { id: string, value: number }[][] = 
+            result.initialContainers.map((containerArray) => {
+                
+                const containerWithIds = containerArray.map((value, indexInContainer) => {
+                    const newId = `option-${value}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+                    
+                    const itemObject = {
+                        id: newId, 
+                        value: value,
+                    };
+                    
+                    optionsFlatList.push(itemObject); 
 
-            setTargetSum(result.targetSum);
+                    return itemObject;
+                });
 
-        }
+                return containerWithIds;
+            });
 
-        else {
-            const newOptions = generateFixedRepeatedOptions(minValue, maxValue, optionsCount, numContainers);
-            
-            const newItemsWithOptions = newOptions.map((value, index) => ({
-                id: `item-${index}-${Date.now()}`, 
-                value: value,
-            }));
+        setContainerValues(initialContainersWithIds);
 
-            setOptions(newItemsWithOptions);
-        }
+        setTargetSum(result.target);
 
 
         setContainers(numContainers);
@@ -129,7 +133,7 @@ function ContainerSort() {
         setSelectedNumber(null);
         setContainerStatuses(Array(numContainers).fill(EMPTY_COLOR));
 
-        setContainerValues(Array(numContainers).fill(null).map(() => []));
+        setOptions([]);
 
 
 
@@ -138,7 +142,6 @@ function ContainerSort() {
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
-    const session = useGameSession({ gameId: GAME_ID });
 
     const handleDropOnContainer = useCallback((targetContainerIndex: number) => {
         if (!selectedNumber) return;
@@ -181,7 +184,6 @@ function ContainerSort() {
     }, [selectedNumber, handleDropOnContainer]);
 
     const handleNumberSelect = (numberValue: Option) => {
-        session.startRound();
         setSelectedNumber(numberValue);
     };
 
@@ -201,31 +203,22 @@ function ContainerSort() {
         }
 
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
-        // containerStatuses.forEach(status => console.log(status === CORRECT_COLOR? "verde":"no verde"));
-        // console.log(options.length);
-        if (options.length == 0) {
-            // console.log(allGreen);  
-            if (allGreen) {
-                const handleRoundComplete = async () => {
-                    
-                    await roundMessage.show(
-                        "¡Excelente! Has superado la ronda con éxito.", 
-                        1000,
-                        "success"
-                    );
-                    session.resolveRound();
-                    // console.log("Ronda completada con éxito");
-                    manager.advanceGame();
-                    return;
-                };
-                handleRoundComplete();
-            }else{
-                if (!session.hasErrorThisRound) {
-                    session.registerError();
-                }
-                // console.log("Fallo registrado");
-            }
+
+        if (allGreen) {
+
+            const handleRoundComplete = async () => {
                 
+                await roundMessage.show(
+                    "¡Excelente! Has superado la ronda con éxito.", 
+                    1000,
+                    "success"
+                );
+                
+                manager.advanceGame();
+                return;
+            };
+
+            handleRoundComplete();
             
         }
 
@@ -235,7 +228,6 @@ function ContainerSort() {
 
     const handlePlayAgain = () => {
         manager.resetGame();
-        session.resetSession();
     };
 
     const topZoneRef = useAnimatedRef<View>();
@@ -276,16 +268,13 @@ function ContainerSort() {
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
-                        <GameBackButton 
-                            width={215}
-                            height={76}
-                            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
-                            session={session}
-                            // En ContainerSort queremos contar el error ya marcado en la ronda actual como fallo al abandonar.
-                            countInProgressErrorAsFailure={true}
-                        />
-            <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
-            <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
+            <BackButton width={215} 
+            height={76}
+            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
+
+            </BackButton>
+            <Text style={styles.titleText} >Deja igual</Text>
+            <Text style={styles.instructionText}>Saca los que sobran para que todos tengan la misma cantidad</Text>    
             </View>
                 
 
@@ -341,7 +330,7 @@ function ContainerSort() {
                     onLayoutMeasured={handleContainerLayout}
                     aria-label={`Container-Area-${index}`}
                     accessibilitySettings={accessibilitySettings}
-                    isSum={targetSum != null}
+                    isSum={isSum}
                     />
                 ))}
             </View>
