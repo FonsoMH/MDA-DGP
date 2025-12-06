@@ -17,11 +17,11 @@ export const credentialsSchema = yup.object().shape({
         .required('El correo es obligatorio'),
 
     password: yup.string().optional()
-
-    
-    .when('$isEdit', { // '$isEdit' es el nombre de la variable que pasaremos
+    .when('$isEdit', {
         is: false,
-        then: (schema) => schema.required('La contraseña es obligatoria para crear un nuevo usuario.'),
-        otherwise: (schema) => schema.notRequired(), // Opcional en edición
-        }),
+        then: (schema) => schema
+            .required('La contraseña es obligatoria para crear un nuevo usuario.')
+            .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+        otherwise: (schema) => schema.notRequired(),
+    }),
 });
