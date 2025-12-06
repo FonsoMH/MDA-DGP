@@ -351,7 +351,7 @@ function ContainerSort() {
                     
                     //Si no hay particion correcta, buscar un valor erroneo
                     if(correctPartition === undefined){
-                        const wrongValue = containerValues[i].find((val,idx) =>{
+                        const wrongValue = containerValues[i].findLast((val,idx) =>{
                             const restOfContainer = [...currentContainerValues];
                             restOfContainer.splice(idx,1);
 
@@ -428,7 +428,7 @@ function ContainerSort() {
                 setActiveHint(true);
                 setHintData(move);
             }
-        }, 5000); 
+        }, 5000);
 
         return () => clearTimeout(timer);
         
