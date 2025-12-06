@@ -71,9 +71,11 @@ function Container({
             if (numbers.length === 1) {
                 result = numbers[0].value;
             } else {
+                const copy = [...numbers];
+                copy.sort((a, b) => b.value - a.value);
                 // Inicializa con el primer valor y resta los subsiguientes
-                const firstValue = numbers[0].value;
-                result = numbers.slice(1).reduce((diff, current) => diff - current.value, firstValue);
+                const firstValue = copy[0].value;
+                result = copy.slice(1).reduce((diff, current) => diff - current.value, firstValue);
                 result = Math.abs(result);
             }
 

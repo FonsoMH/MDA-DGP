@@ -126,7 +126,7 @@ function ContainerSort() {
             result.initialContainers.map((containerArray) => {
                 
                 const containerWithIds = containerArray.map((value, indexInContainer) => {
-                    const newId = `option-${value}-${Date.now()}`;
+                    const newId = `option-${value}-${Date.now()}-${Math.random()}`;
                     
                     const itemObject = {
                         id: newId, 
@@ -153,10 +153,6 @@ function ContainerSort() {
 
         setOptions([]);
 
-
-
-        
-        
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
