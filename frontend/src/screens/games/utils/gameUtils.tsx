@@ -348,7 +348,7 @@ export function generateEquitableAdjustmentPuzzle(
 
   if ( sum ){
     const { puzzleArray, targetSum } =  generateEquitableFixedSizeArray(
-        maxValue, minValue, arraySize - numExtraElements, numContainers
+        maxValue, minValue, arraySize, numContainers
     );
 
     target = targetSum;
@@ -370,8 +370,8 @@ export function generateEquitableAdjustmentPuzzle(
     target = targetDifference;
 
   }
-      
-  if (!solutionContainers) {
+  
+  if (!solutionContainers || solutionContainers.length == 0) {
       return { initialContainers: [], target: 0};
   }
 

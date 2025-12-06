@@ -77,9 +77,11 @@ function Container({
             if (numbers.length === 1) {
                 result = numbers[0].value;
             } else {
+                const copy = [...numbers];
+                copy.sort((a, b) => b.value - a.value);
                 // Inicializa con el primer valor y resta los subsiguientes
-                const firstValue = numbers[0].value;
-                result = numbers.slice(1).reduce((diff, current) => diff - current.value, firstValue);
+                const firstValue = copy[0].value;
+                result = copy.slice(1).reduce((diff, current) => diff - current.value, firstValue);
                 result = Math.abs(result);
             }
 
@@ -123,7 +125,6 @@ function Container({
     console.log("Hijo Animacion" + (hintActive && hintOptionId === items[2]?.id));
 
     return (
-        
         <BounceDisplay
             isBouncing={hintActive && !items.some(item => item.id === hintOptionId)}
             onAnimationEnd={() => {
@@ -141,40 +142,38 @@ function Container({
                     onLayoutMeasured(layout, containerIndex);
                 });
             }}
+            aria-label={`Container-Area-${containerIndex}`}
             >
-                <TouchableOpacity 
-                style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
-                onPress={handleContainerClick}>
-                    {items.map((option, index) => (
-                        <DraggableItem
-                            onPress={() => handleNumberCLick(option)}
-                            onDrop={() => handleNumberCLick(option)}
-                            dropZonesLayouts={topZoneLayout}
-                            isDisabled={false}
-                            key={`opt-${option.id}-${index}`}
-                            comeBack={false}
-                            style={styles.optionWrapper}                       >
-                            
-                            <NumberDisplay
-                                numberProp={option.value} 
-                                size={80}
-                                numberColor={accessibilitySettings.numberColor}
-                                style={{backgroundColor: accessibilitySettings.boxColor}}
-                                activeHint={hintActive && hintOptionId === option.id}
-                                onEndHint={() => {
-                                    if(onEndHint){
-                                        onEndHint();
-                                    }
-                                }}
-                            />
-                        </DraggableItem>
-                    ))}
-                </TouchableOpacity>
+
+            <TouchableOpacity 
+            style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
+            onPress={handleContainerClick}>
+                {items.map((option, index) => (
+                    <DraggableItem
+                    onPress={() => handleNumberCLick(option)}
+                    onDrop={() => handleNumberCLick(option)}
+                    dropZonesLayouts={topZoneLayout} 
+                    isDisabled={false} 
+                    key={`opt-${option.id}-${index}`}
+                    comeBack={false}
+                    style={styles.optionWrapper}
+                    testID={`opt-${option.value}`}
+                    >
+                        <NumberDisplay
+                            numberProp={option.value} 
+                            size={80}
+                            numberColor={accessibilitySettings.numberColor}
+                            style={{backgroundColor: accessibilitySettings.boxColor}}
+                        ></NumberDisplay>
+                    </DraggableItem>
+                ))}
+            </TouchableOpacity>
+
             {targetSum && (
                 <OperacionDisplay 
-                containerColor={borderColor}
-                numbers={items} 
-                operationType={isSum ? "suma" : "resta"}
+                    containerColor={borderColor}
+                    numbers={items} 
+                    operationType={isSum ? "suma" : "resta"}
                 />
             )}
 
