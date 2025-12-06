@@ -16,7 +16,6 @@ import DraggableItem from './DraggableItem';
 import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
-import BounceDisplay from '../../../components/common/NumberDisplays/BounceDisplay';
 
 
 type TargetElement = {
@@ -295,14 +294,14 @@ function SequenceGame() {
                             isDisabled={isSelected(num)} 
                             comeBack={true}
                         >
-                            <BounceDisplay isBouncing={!includeWrongPlacement(selectedNumbers) && num === correctSequence[selectedNumbers.length] && activeHint} onAnimationEnd={() => {setActiveHint(false)}}>
-                                <NumberDisplay
-                                    numberProp={num} 
-                                    size={120}
-                                    numberColor={accessibilitySettings.numberColor}
-                                    style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
-                                />
-                            </BounceDisplay>
+                            <NumberDisplay
+                                numberProp={num} 
+                                size={120}
+                                numberColor={accessibilitySettings.numberColor}
+                                style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
+                                activeHint={!includeWrongPlacement(selectedNumbers) && num === correctSequence[selectedNumbers.length] && activeHint}
+                                onEndHint={() => setActiveHint(false)}
+                            />
                         </DraggableItem>
                     ))}
             </View>
@@ -335,14 +334,14 @@ function SequenceGame() {
                                     isDisabled={false}
                                     comeBack={false}
                                 >
-                                    <BounceDisplay isBouncing={includeWrongPlacement(selectedNumbers) && !target.isCorrect && activeHint} onAnimationEnd={() => setActiveHint(false)}>
-                                        <NumberDisplay
-                                            numberProp={target.value} 
-                                            size={100}
-                                            numberColor={accessibilitySettings.numberColor}
-                                            style={{backgroundColor: feedbackColor}} 
-                                        />
-                                    </BounceDisplay>
+                                    <NumberDisplay
+                                        numberProp={target.value} 
+                                        size={100}
+                                        numberColor={accessibilitySettings.numberColor}
+                                        style={{backgroundColor: feedbackColor}} 
+                                        activeHint={includeWrongPlacement(selectedNumbers) && !target.isCorrect && activeHint}
+                                        onEndHint={() => setActiveHint(false)}
+                                    />
                                 </DraggableItem>
                             );
                         } else {

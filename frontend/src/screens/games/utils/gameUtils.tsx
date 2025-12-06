@@ -268,7 +268,7 @@ interface GamePuzzleResult {
  * @param targetSum Target sum for each container
  * @returns Array of arrays (the partition) or null if it fails (it shouldn't)
  */
-function findExactPartition(
+export function findExactPartition(
     nums: number[],
     numCont: number,
     targetSum: number

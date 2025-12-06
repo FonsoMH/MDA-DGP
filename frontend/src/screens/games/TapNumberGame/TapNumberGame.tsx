@@ -11,7 +11,6 @@ import { getRandomNumber, generateOptionsWithTarget } from '../utils/gameUtils';
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
-import BounceDisplay from '../../../components/common/NumberDisplays/BounceDisplay';
 
 //TODO calcular puntuacion
 const GAME_ID = 1; 
@@ -200,16 +199,16 @@ function TapNumberGame() {
                             onPress={() => handleSelection(num)}
                             style={styles.optionWrapper}
                         >
-                            <BounceDisplay isBouncing={num === targetNumber && activeHint} onAnimationEnd={() => setActiveHint(false)}>
 
-                                <NumberDisplay 
-                                    key={index}
-                                    numberProp={num} 
-                                    size={155}
-                                    numberColor={accessibilitySettings.numberColor}
-                                    style={{backgroundColor: displayColor}} 
-                                    />
-                            </BounceDisplay>
+                            <NumberDisplay 
+                                key={index}
+                                numberProp={num} 
+                                size={155}
+                                numberColor={accessibilitySettings.numberColor}
+                                style={{backgroundColor: displayColor}} 
+                                activeHint={num === targetNumber && activeHint}
+                                onEndHint={() => setActiveHint(false)}
+                            />
                         </TouchableOpacity>
                     );
                 })}

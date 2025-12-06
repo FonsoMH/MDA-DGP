@@ -7,6 +7,7 @@ import DraggableItem from "../SequenceGame/DraggableItem";
 import { SharedValue, useAnimatedRef } from "react-native-reanimated";
 import { useAccessibilitySettings } from "../../teacher/hooks/useAccessibilitySettings";
 import { AccessibilitySettingsFrontend } from "../../../types/accessibility";
+import BounceDisplay from "../../../components/common/NumberDisplays/BounceDisplay";
 
 type Layout = { x: number; y: number; width: number; height: number; };
 
@@ -23,7 +24,9 @@ interface ContainerProps{
     onLayoutMeasured?: (layout: Layout, index: number) => void;
     accessibilitySettings: AccessibilitySettingsFrontend;
     isSum: boolean
-    
+    hintActive?: boolean;
+    hintOptionId?: string;
+    onEndHint?: () => void;    
 }
 
 
@@ -37,7 +40,10 @@ function Container({
     containerIndex,
     onLayoutMeasured,
     accessibilitySettings,
-    isSum
+    isSum,
+    hintActive,
+    hintOptionId,
+    onEndHint
 }: ContainerProps) {
 
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
@@ -113,50 +119,67 @@ function Container({
 
     const containerRef = useAnimatedRef<View>();
 
+    console.log("Padre Animacion" + (hintActive && !items.some(item => item.id === hintOptionId)));
+    console.log("Hijo Animacion" + (hintActive && hintOptionId === items[2]?.id));
+
     return (
-        <View style={styles.area}
-        ref={containerRef}
-        onLayout={() => {
-            containerRef.current?.measureInWindow((x, y, width, height) => {
-                const layout: Layout = { x, y, width, height };
-                
-                onLayoutMeasured(layout, containerIndex);
-            });
-        }}
+        
+        <BounceDisplay
+            isBouncing={hintActive && !items.some(item => item.id === hintOptionId)}
+            onAnimationEnd={() => {
+                if(onEndHint){
+                    onEndHint();
+                }
+            }}
         >
-
-        <TouchableOpacity 
-        style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
-        onPress={handleContainerClick}>
-            {items.map((option, index) => (
-                <DraggableItem
-                onPress={() => handleNumberCLick(option)}
-                onDrop={() => handleNumberCLick(option)}
-                dropZonesLayouts={topZoneLayout} 
-                isDisabled={false} 
-                key={`opt-${option.id}-${index}`}
-                comeBack={false}
-                style={styles.optionWrapper}
-                 >
-                    <NumberDisplay
-                        numberProp={option.value} 
-                        size={80}
-                        numberColor={accessibilitySettings.numberColor}
-                        style={{backgroundColor: accessibilitySettings.boxColor}}
-                    ></NumberDisplay>
-                </DraggableItem>
-            ))}
-        </TouchableOpacity>
-
-        {targetSum && (
-            <OperacionDisplay 
+            <View style={styles.area}
+            ref={containerRef}
+            onLayout={() => {
+                containerRef.current?.measureInWindow((x, y, width, height) => {
+                    const layout: Layout = { x, y, width, height };
+                    
+                    onLayoutMeasured(layout, containerIndex);
+                });
+            }}
+            >
+                <TouchableOpacity 
+                style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
+                onPress={handleContainerClick}>
+                    {items.map((option, index) => (
+                        <DraggableItem
+                            onPress={() => handleNumberCLick(option)}
+                            onDrop={() => handleNumberCLick(option)}
+                            dropZonesLayouts={topZoneLayout}
+                            isDisabled={false}
+                            key={`opt-${option.id}-${index}`}
+                            comeBack={false}
+                            style={styles.optionWrapper}                       >
+                            
+                            <NumberDisplay
+                                numberProp={option.value} 
+                                size={80}
+                                numberColor={accessibilitySettings.numberColor}
+                                style={{backgroundColor: accessibilitySettings.boxColor}}
+                                activeHint={hintActive && hintOptionId === option.id}
+                                onEndHint={() => {
+                                    if(onEndHint){
+                                        onEndHint();
+                                    }
+                                }}
+                            />
+                        </DraggableItem>
+                    ))}
+                </TouchableOpacity>
+            {targetSum && (
+                <OperacionDisplay 
                 containerColor={borderColor}
                 numbers={items} 
                 operationType={isSum ? "suma" : "resta"}
-            />
-        )}
+                />
+            )}
 
-        </View>
+            </View>
+        </BounceDisplay>
 
     )
     
