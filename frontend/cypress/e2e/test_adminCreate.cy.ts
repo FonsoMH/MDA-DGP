@@ -40,7 +40,7 @@ describe('E2E Crear Administrador', () => {
     cy.get('[data-testid="teacher-password-input"]').type('Secret123');
     cy.get('[data-testid="login-submit-button"]').click();
 
-    // Verificar que accede al área de administración (por ejemplo, botón de creación visible)
+    // Verificar que accede al área de administración
     cy.get('[data-testid="creation-menu-button"]', { timeout: 15000 }).should('exist');
   });
 });
