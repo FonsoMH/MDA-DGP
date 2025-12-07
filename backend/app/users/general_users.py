@@ -6,38 +6,37 @@ users_bp = Blueprint('users', __name__, url_prefix='/api')
 
 @users_bp.route('/users', methods=['GET'])
 def get_users():
-    # filter by role
     role = request.args.get('role')
-
-    # filter by name
     name = request.args.get('name')
 
+    requester_role = request.args.get('requester_role')
+
+    if name:
+        if requester_role != 'admin':
+            return jsonify({'error': 'admin_id query parameter is required when filtering by name.'}), 400
+    
     cur = get_db_cursor()
 
-    if role:
-        cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
-            FROM users u
-            JOIN roles r ON u.role_id = r.role_id
-            WHERE r.role_name = %s
-            ORDER BY u.name
-        """, (role,))
-    elif name:
-        cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
-            FROM users u
-            JOIN roles r ON u.role_id = r.role_id
-            WHERE u.name ILIKE %s
-            ORDER BY u.name
-        """, (f'%{name}%',))
-    else:
-        cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
-            FROM users u
-            JOIN roles r ON u.role_id = r.role_id
-            ORDER BY u.name
-        """)
+    query = """
+        SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE 1=1
+    """
+    
+    params = []
 
+    if role:
+        query += " AND r.role_name = %s"
+        params.append(role)
+    
+    if name:
+        query += " AND u.name ILIKE %s"
+        params.append(f"%{name}%")
+
+    query += " ORDER BY u.name"
+
+    cur.execute(query, tuple(params))
     rows = cur.fetchall()
 
     users = []

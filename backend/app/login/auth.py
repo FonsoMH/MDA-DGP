@@ -49,7 +49,6 @@ def login():
         if check_password_hash(stored_hash, submitted_password):
             
             
-            
             response_user = {
                 'id': user_record['user_id'], 
                 'name': user_record['name'], 
