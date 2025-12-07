@@ -432,7 +432,7 @@ function ContainerSort() {
 
         return () => clearTimeout(timer);
         
-    },[options, containerValues ,activeHint, calculateNextMove, manager.isLoading]);
+    },[options, containerValues ,activeHint, calculateNextMove, manager.isLoading, selectedNumber]);
 
     return (
         <View style={styles.screenContainer}>

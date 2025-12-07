@@ -121,9 +121,6 @@ function Container({
 
     const containerRef = useAnimatedRef<View>();
 
-    console.log("Padre Animacion" + (hintActive && !items.some(item => item.id === hintOptionId)));
-    console.log("Hijo Animacion" + (hintActive && hintOptionId === items[2]?.id));
-
     return (
         <BounceDisplay
             isBouncing={hintActive && !items.some(item => item.id === hintOptionId)}
@@ -164,6 +161,8 @@ function Container({
                             size={80}
                             numberColor={accessibilitySettings.numberColor}
                             style={{backgroundColor: accessibilitySettings.boxColor}}
+                            activeHint={hintActive && hintOptionId === option.id}
+                            onEndHint={onEndHint}
                         ></NumberDisplay>
                     </DraggableItem>
                 ))}
