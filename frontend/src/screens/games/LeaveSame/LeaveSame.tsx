@@ -330,7 +330,6 @@ function ContainerSort() {
 
         const timer = setTimeout(() => {
             const move = calculateNextMove();
-            console.log(move + " <- next move in LeaveSame");
             if(move){
                 setActiveHint(true);
                 setHintData(move);
