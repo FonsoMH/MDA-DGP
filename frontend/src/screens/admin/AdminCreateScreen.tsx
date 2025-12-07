@@ -58,6 +58,7 @@ export default function AdminCreateScreen({ navigation }: Props) {
             style={[styles.btn, styles.btnPrimary, isTotalSubmitting && { opacity: 0.7 }]}
             onPress={handleSubmit(onSubmitRHF)}
             disabled={isTotalSubmitting}
+            testID="submit-create-admin"
           >
             <Text style={styles.btnText}>{isApiSubmitting ? 'Guardando...' : 'Crear Administrador'}</Text>
           </Pressable>
