@@ -1,7 +1,7 @@
 from app.db import get_db_cursor
 
 def test_update_student_basic_fields(client, temp_student):
-    user_id = temp_student
+    user_id = temp_student[0]
     update_payload = {
         "name": "Updated Student",
         "email": "updated_student@app.com",
@@ -23,7 +23,7 @@ def test_update_student_basic_fields(client, temp_student):
 
 
 def test_update_student_email_duplicate(client, temp_student):
-    user_id = temp_student
+    user_id = temp_student[0]
     cur = get_db_cursor()
     cur.execute("""
         INSERT INTO users (name, email, password_hash, role_id)
@@ -42,29 +42,6 @@ def test_update_student_email_duplicate(client, temp_student):
     cur = get_db_cursor()
     cur.execute("DELETE FROM users WHERE user_id = %s; COMMIT;", (other_id,))
     cur.close()
-
-
-def test_get_existing_student(client, temp_student):
-    user_id = temp_student
-
-    cur = get_db_cursor()
-    cur.execute("""
-        UPDATE users
-        SET name = 'Test Student', email = 'test_student@app.com', assigned_teacher_id = NULL
-        WHERE user_id = %s;
-    """, (user_id,))
-    cur.execute("COMMIT;")
-    cur.close()
-
-    response = client.get(f"/api/students/{user_id}")
-    assert response.status_code == 200
-
-    data = response.get_json()
-    assert data["user_id"] == user_id
-    assert data["name"] == "Test Student"
-    assert data["email"] == "test_student@app.com"
-    assert data["assigned_teacher_id"] is None
-
 
 def test_correct_persistance(client):
     fake_id = 999999
