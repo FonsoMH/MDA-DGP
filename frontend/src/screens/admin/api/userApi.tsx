@@ -1,5 +1,5 @@
 import axios from "axios";
-import { UserFrontend, UserApiData, CreateTeacherPayload, Student, PaginatedResponse, Teacher, CreateStudentPayload } from "../../../types/users";
+import { UserFrontend, UserApiData, CreateTeacherPayload, Student, PaginatedResponse, Teacher, CreateStudentPayload, UserDeletionData } from "../../../types/users";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
@@ -42,6 +42,30 @@ export async function fetchUsers(): Promise<UserFrontend[]> {
     return mappedUsers;
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
+    return [];
+  }
+}
+
+export async function fetchuserDeletion(): Promise<UserDeletionData[]> {
+  const endpoint = `${BASE_URL}/api/users_deletion`;
+
+  try {
+    const response = await axios.get(endpoint, {
+      timeout: API_TIMEOUT,
+    });
+    const apiData = response.data;
+
+    const mappedDeletions: UserDeletionData[] = apiData.map((d) => ({
+      deletionId: d.deletion_id,
+      adminName: d.admin_name,
+      deletedUserEmail: d.deleted_user_email,
+      deletedUserName: d.deleted_user_name,
+      deletedAt: d.deleted_at,
+    }));
+
+    return mappedDeletions;
+  } catch (error) {
+    console.error("Error al obtener el historial de eliminaciones:", error);
     return [];
   }
 }
