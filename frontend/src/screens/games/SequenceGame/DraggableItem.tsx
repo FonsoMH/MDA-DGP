@@ -21,7 +21,7 @@ interface DraggableItemProps {
     style?: StyleProp<ViewStyle>;
     isDisabled: boolean;
     children: React.ReactNode;
-    testID: string;
+    testID?: string;
     comeBack: boolean;
 }
 

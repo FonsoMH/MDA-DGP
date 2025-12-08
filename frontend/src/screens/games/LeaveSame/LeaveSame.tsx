@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { useGameManager } from "../utils/gameManager";
-import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions , findExactPartition } from "../utils/gameUtils";
+import { generateEquitableAdjustmentPuzzle } from "../utils/gameUtils";
 import { View, Text, StyleSheet } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
 import BackButton from "../../../components/common/BackButton/BackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
-import Container from "./Container";
 import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
 import { useAnimatedRef, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
+import Container from "../ContainerSort/Container";
 
-const GAME_ID = 3; 
+const GAME_ID = 4; 
 
 //TODO calcular puntuacion
 type Layout = { x: number; y: number; width: number; height: number; };
@@ -88,52 +88,71 @@ function ContainerSort() {
 
     const [containerStatuses, setContainerStatuses] = useState<string[]>();
     const [containerValues, setContainerValues] = useState<Option[][]>();
+    const [isSum, setIsSum] = useState<boolean>();
     
     const [options, setOptions] = useState<Option[]>([]);
     const [containers, setContainers] = useState<number>(0);
     const [targetSum, setTargetSum] = useState<number | null>(null);
+    const [solutionContainers, setSolutionContainers] = useState<number[][] | null>(null);
     
     
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
+        
+        setIsSum(sum);
+
+        let result: { initialContainers: number[][]; solutionContainers?: number[][]; target: number };
+
+        if (window.Cypress && window.Cypress.env('E2E_DATA') === 'FIXED_CONTAINERS') {
             
-        if ( sum ){
-            const result = generateEquitableFixedSizeArray(minValue, maxValue, optionsCount, numContainers);
+            result = {
+                initialContainers: [
+                    [4, 8, 3],
+                    [10, 2, 9],
+                    [7, 5, 1]
+                ],
+                target: 12
 
-            const newItemsWithOptions = result.puzzleArray.map((value, index) => ({
-                id: `item-${index}-${Date.now()}`, 
-                value: value,
-            }));
-
-            setOptions(newItemsWithOptions);
-
-            setTargetSum(result.targetSum);
-
+            };
+        } else {
+            result = generateEquitableAdjustmentPuzzle(
+                minValue, maxValue, optionsCount, numContainers, sum);
         }
-
-        else {
-            const newOptions = generateFixedRepeatedOptions(minValue, maxValue, optionsCount, numContainers);
             
-            const newItemsWithOptions = newOptions.map((value, index) => ({
-                id: `item-${index}-${Date.now()}`, 
-                value: value,
-            }));
 
-            setOptions(newItemsWithOptions);
-        }
+        let optionsFlatList: { id: string, value: number }[] = [];
+        const initialContainersWithIds: { id: string, value: number }[][] = 
+            result.initialContainers.map((containerArray) => {
+                
+                const containerWithIds = containerArray.map((value, indexInContainer) => {
+                    const newId = `option-${value}-${Date.now()}-${Math.random()}`;
+                    
+                    const itemObject = {
+                        id: newId, 
+                        value: value,
+                    };
+                    
+                    optionsFlatList.push(itemObject); 
 
+                    return itemObject;
+                });
+
+                return containerWithIds;
+            });
+
+        setContainerValues(initialContainersWithIds);
+
+        setTargetSum(result.target);
+
+        setSolutionContainers(result.solutionContainers || null);
 
         setContainers(numContainers);
 
         setSelectedNumber(null);
         setContainerStatuses(Array(numContainers).fill(EMPTY_COLOR));
 
-        setContainerValues(Array(numContainers).fill(null).map(() => []));
+        setOptions([]);
 
-
-
-        
-        
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
@@ -199,7 +218,7 @@ function ContainerSort() {
 
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
 
-        if (allGreen && options.length == 0) {
+        if (allGreen) {
 
             const handleRoundComplete = async () => {
                 
@@ -224,6 +243,101 @@ function ContainerSort() {
     const handlePlayAgain = () => {
         manager.resetGame();
     };
+
+
+    const sum = (numbers: number[]) => {
+        
+        let result: number;
+
+        if (targetSum != null) {
+            // Lógica de suma original
+            result = numbers.reduce((sum, current) => sum + current, 0);
+
+        } else {
+            // Lógica de resta acumulativa:
+            // Toma el primer valor y le resta el resto de los valores.
+            
+            if (numbers.length === 1) {
+                result = numbers[0];
+            } else {
+                // Inicializa con el primer valor y resta los subsiguientes
+                const firstValue = numbers[0];
+                result = numbers.slice(1).reduce((diff, current) => diff - current, firstValue);
+                result = Math.abs(result);
+            }
+
+        }
+        return result;
+    };
+
+    const [activeHint, setActiveHint] = useState<boolean>(false);
+    const [hintData, setHintData] = useState<{optionId: string, containerIndex: number} | null>(null);
+
+    const calculateNextMove = useCallback(() => {
+        if (!solutionContainers || !containerValues) {
+            return null;
+        }
+
+        for(let i = 0; i < containerValues.length; i++){    
+
+            if(sum(containerValues[i].map(item => item.value)) === targetSum){
+                continue;
+            }
+
+            const requiredValues = [...solutionContainers[i]];
+
+            const currentItems = containerValues[i];
+
+            const tempCheckList =  [...requiredValues];
+
+            for(let j = 0; j < currentItems.length; j++){
+                const item = currentItems[j];
+                const valueIndex = tempCheckList.indexOf(item.value);
+                if(valueIndex > -1){
+                    tempCheckList.splice(valueIndex, 1);
+                }else{
+                    if(item.value != 0){
+                        return { optionId: item.id, containerIndex: i };
+                    }
+                }
+            }
+
+            const currentValuesMap = currentItems.map(item => item.value);
+
+            for(let j = 0; j < requiredValues.length; j++){
+                const neededValue = requiredValues[j];
+
+                const foundIndex = currentValuesMap.indexOf(neededValue);
+
+                if(foundIndex > -1){
+                    currentValuesMap.splice(foundIndex, 1);
+                }else{
+                    const missingOption = options.find(option => option.value === neededValue);
+                    if(missingOption){
+                        return { optionId: missingOption.id, containerIndex: i };
+                    }
+                }
+            }
+        }
+
+        return null;
+        
+    }, [options, containerValues, targetSum, solutionContainers, containers]);
+
+    useEffect(() => {
+        if(manager.isLoading) return;
+        if(activeHint) return;
+
+        const timer = setTimeout(() => {
+            const move = calculateNextMove();
+            if(move){
+                setActiveHint(true);
+                setHintData(move);
+            }
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, [options, containerValues, targetSum, containers, manager.isLoading, activeHint, calculateNextMove]);
 
     const topZoneRef = useAnimatedRef<View>();
     const topZoneLayout = useSharedValue<Layout[] | null>(null);
@@ -260,180 +374,6 @@ function ContainerSort() {
         
     });
 
-
-    const sum = (numbers: number[]) => {
-        
-        let result: number;
-
-        if (targetSum != null) {
-            // Lógica de suma original
-            result = numbers.reduce((sum, current) => sum + current, 0);
-
-        } else {
-            // Lógica de resta acumulativa:
-            // Toma el primer valor y le resta el resto de los valores.
-            
-            if (numbers.length === 1) {
-                result = numbers[0];
-            } else {
-                // Inicializa con el primer valor y resta los subsiguientes
-                const firstValue = numbers[0];
-                result = numbers.slice(1).reduce((diff, current) => diff - current, firstValue);
-                result = Math.abs(result);
-            }
-
-        }
-        return result;
-    };
-
-    const correctPartition = (part: number[][], container: Option[]) => {
-        if(part.length === 0) return false;
-        if(container.length === 0) return false;
-        if(!part.find(p => p.length === container.length)) return false;
-
-        for (let i = 0; i < part.length; i++) {
-            if(part[i].length !== container.length) continue;
-            if(sum(part[i]) !== sum(container.map(option => option.value))) continue;
-
-            const allMatch = part[i].every(value => container.some(option => option.value === value));
-
-            if(allMatch) {
-                return true;
-            }
-        }
-        return false;
-
-    }
-
-    
-    const [activeHint, setActiveHint] = useState<boolean>(false);
-    const [hintData, setHintData] = useState<{optionId: string, containerIndex: number} | null>(null);
-
-    const calculateNextMove = useCallback(() => {
-
-        if(targetSum !== null){
-            
-            if(containerValues === undefined) return null;
-
-            const allOptionsValues = [...options.map(option => option.value),...containerValues.flat().map(option => option.value)];
-
-            const partition : number[][] = findExactPartition(
-                allOptionsValues,
-                containers,
-                targetSum
-            );
-
-            if(partition){
-                //Si no hay contenedores a medias insertar la primera opcion
-                if(containerValues.every(c => c.length === 0 || correctPartition(partition, c))){
-                    return {optionId: options[0].id, containerIndex: containerValues.findIndex(c => c.length === 0)};
-                }
-                //Si no, buscar un movimiento que acerque a la solucion
-                for(let i = 0; i < containers; i++){
-                    
-                    if(containerValues[i] === undefined) continue;
-                    if(containerValues[i].length === 0) continue;                 
-                    
-                    const currentContainerValues = containerValues[i].map(option => option.value);
-
-                    const correctPartition = partition.find(part =>{
-                        const tempPart = [...part];
-                        
-                        return currentContainerValues.every(value => {
-                            const index = tempPart.indexOf(value);
-                            if(index !== -1){
-                                tempPart.splice(index, 1);
-                                return true;
-                            }
-                            return false;
-                        });
-                    });
-                    
-                    //Si no hay particion correcta, buscar un valor erroneo
-                    if(correctPartition === undefined){
-                        const wrongValue = containerValues[i].findLast((val,idx) =>{
-                            const restOfContainer = [...currentContainerValues];
-                            restOfContainer.splice(idx,1);
-
-                            return partition.some(part => {
-                                const tempPart = [...part];
-                                return restOfContainer.every(value => {
-                                    const index = tempPart.indexOf(value);
-                                    if(index !== -1){
-                                        tempPart.splice(index, 1);
-                                        return true;
-                                    }
-                                    return false;
-                                });
-                            });
-                        });
-                        if(wrongValue){
-                            return { optionId: wrongValue.id, containerIndex: i };
-                        }
-                    }else{
-                        //Busca el siguiente valor necesario para completar la particion correcta
-
-                        const remainingNeeded = [...correctPartition];
-
-                        currentContainerValues.forEach(value => {
-                            const index = remainingNeeded.indexOf(value);
-                            if(index !== -1){
-                                remainingNeeded.splice(index, 1);
-                            }
-                        });
-
-                        const nextValue = remainingNeeded[0];
-
-                        if(nextValue !== undefined){
-                            const match = options.find(option => option.value === nextValue);
-                            if(match){
-                                return { optionId: match.id, containerIndex: i };
-                            }
-                        }
-                    }
-                }
-            }
-
-        }else{
-            for(let i = 0; i < containers; i++){
-                const currentValues = containerValues?.[i] || [];
-                if(currentValues.length > 0){
-                    const targetValue = currentValues[0].value;
-                    const match = options.find(option => option.value === targetValue);
-                    if(match){
-                        return { optionId: match.id, containerIndex: i };
-                    }
-                }
-            }
-            const firstOption = options[0];
-            const emptyContainerIndex = containerValues?.findIndex(c => c.length === 0);
-
-            if(firstOption && emptyContainerIndex !== -1 && emptyContainerIndex !== undefined){
-                return { optionId: firstOption.id, containerIndex: emptyContainerIndex };
-            }
-        }
-
-        return null;
-
-    }, [options, containerValues, targetSum, containers]);
-
-    useEffect(() => {
-        if(manager.isLoading) return;
-        if(activeHint) return;
-        if(options.length === 0) return;
-
-        const timer = setTimeout(() => {
-            const move = calculateNextMove();
-            if(move){
-                setActiveHint(true);
-                setHintData(move);
-            }
-        }, 5000);
-
-        return () => clearTimeout(timer);
-        
-    },[options, containerValues ,activeHint, calculateNextMove, manager.isLoading, selectedNumber]);
-
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
@@ -442,13 +382,13 @@ function ContainerSort() {
             alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
 
             </BackButton>
-            <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
-            <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
+            <Text style={styles.titleText} >Deja igual</Text>
+            <Text style={styles.instructionText}>Saca los que sobran para que todos tengan la misma cantidad</Text>    
             </View>
                 
 
             <View
-                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.containerColor}]}
+                style={[styles.gridContainer, { height: '25%' }, {backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -491,20 +431,19 @@ function ContainerSort() {
             <View style={styles.resultsContainer}>
                 {Array(containers).fill(null).map((_, index) => (
                     <Container targetSum={targetSum}
-                        key={index}
-                        onContainerClick={() => handleContainerClick(index)}
-                        items={containerValues[index] || []}
-                        onItemReturned={(option: Option) => handleItemReturnedFromContainer(option, index)}
-                        onUniformityChange={(color: string) => handleContainerStatusUpdate(color, index)}
-                        topZoneLayout={topZoneLayout}
-                        containerIndex={index}
-                        onLayoutMeasured={handleContainerLayout}
-                        aria-label={`Container-Area-${index}`}
-                        accessibilitySettings={accessibilitySettings}
-                        isSum={targetSum != null}
-                        hintActive={activeHint && hintData?.containerIndex === index}
-                        hintOptionId={hintData?.optionId}
-                        onEndHint={() => setActiveHint(false)}
+                    key={index}
+                    onContainerClick={() => handleContainerClick(index)}
+                    items={containerValues[index] || []}
+                    onItemReturned={(option: Option) => handleItemReturnedFromContainer(option, index)}
+                    onUniformityChange={(color: string) => handleContainerStatusUpdate(color, index)}
+                    topZoneLayout={topZoneLayout}
+                    containerIndex={index}
+                    onLayoutMeasured={handleContainerLayout}
+                    accessibilitySettings={accessibilitySettings}
+                    isSum={isSum}
+                    hintActive={activeHint && hintData?.containerIndex === index}
+                    hintOptionId={hintData?.optionId || null}
+                    onEndHint={() => setActiveHint(false)}
                     />
                 ))}
             </View>

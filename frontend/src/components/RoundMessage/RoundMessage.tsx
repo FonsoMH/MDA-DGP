@@ -25,7 +25,7 @@ function RoundMessage({ message, isVisible, type }: RoundProps) {
     }
 
     return (
-        <View style={styles.overlay}>
+        <View style={styles.overlay} aria-label="round-message">
             <View style={[styles.snackbar, { backgroundColor }]}>                
                 <Text style={styles.messageText}>{message}</Text>
             </View>

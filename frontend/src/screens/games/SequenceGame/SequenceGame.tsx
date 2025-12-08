@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import {
@@ -140,6 +140,24 @@ function SequenceGame() {
     
     const bottomZoneRef = useAnimatedRef<View>();
     const bottomZoneLayout = useSharedValue<Layout[] | null>(null);
+
+    const [activeHint, setActiveHint] = useState<boolean>(false);
+
+
+    useEffect(() => {
+
+        if (manager.isLoading) return;
+
+        if(activeHint) return;
+
+        const timer = setTimeout(() => {
+            setActiveHint(true);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+
+    }, [selectedNumbers, manager.isLoading, activeHint]);
+
     
     const handlePlayAgain = () => {
         manager.resetGame();
@@ -200,6 +218,15 @@ function SequenceGame() {
 
         return JSON.stringify(selected) === JSON.stringify(correctOrder);
     };
+
+    const includeWrongPlacement = (selected: number[]): boolean => {
+        for (let i = 0; i < selected.length; i++) {
+            if (selected[i] !== undefined && selected[i] !== correctSequence[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     const targetElements: TargetElement[] = correctSequence.map((correctValue, index) => {
         
@@ -272,6 +299,8 @@ function SequenceGame() {
                                 size={120}
                                 numberColor={accessibilitySettings.numberColor}
                                 style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
+                                activeHint={!includeWrongPlacement(selectedNumbers) && num === correctSequence[selectedNumbers.length] && activeHint}
+                                onEndHint={() => setActiveHint(false)}
                             />
                         </DraggableItem>
                     ))}
@@ -310,6 +339,8 @@ function SequenceGame() {
                                         size={100}
                                         numberColor={accessibilitySettings.numberColor}
                                         style={{backgroundColor: feedbackColor}} 
+                                        activeHint={includeWrongPlacement(selectedNumbers) && !target.isCorrect && activeHint}
+                                        onEndHint={() => setActiveHint(false)}
                                     />
                                 </DraggableItem>
                             );
