@@ -5,7 +5,7 @@ import AdminCreateScreen from '../AdminCreateScreen';
 
 // (global as any).__DEV__ = false;
 
-jest.mock('../src/screens/admin/hook/useCreateAdmin', () => ({
+jest.mock('../hook/useCreateAdmin', () => ({
   useCreateAdmin: () => ({
     isSubmitting: false,
     onSubmitForm: jest.fn(async () => true),
