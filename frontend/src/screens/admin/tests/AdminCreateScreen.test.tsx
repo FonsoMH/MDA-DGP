@@ -17,20 +17,18 @@ describe('AdminCreateScreen', () => {
   const route = { params: {} } as any;
 
   it('muestra errores de validación cuando se envía vacío', async () => {
-  const { getAllByText } = render(<AdminCreateScreen navigation={navigation} route={route} />);
+  const { getAllByText, getByText } = render(<AdminCreateScreen navigation={navigation} route={route} />);
 
     // En RN Web puede haber múltiples nodos con el mismo texto
     const submitBtn = getAllByText('Crear Administrador')[0];
     fireEvent.press(submitBtn);
 
     await waitFor(() => {
-      // Usar queries y lanzar si no existen
-      const { queryAllByText } = require('@testing-library/react-native');
-      const hasName = queryAllByText('El nombre es obligatorio').length > 0;
-      const hasEmail = queryAllByText('El correo es obligatorio').length > 0;
-      const hasPwd = queryAllByText('La contraseña es obligatoria para crear un nuevo usuario.').length > 0;
-      if (!hasName || !hasEmail || !hasPwd) throw new Error('Mensajes de validación no encontrados');
-    });
+      // Verificar que los mensajes de validación aparecen en el árbol renderizado
+      getByText('El nombre es obligatorio');
+      getByText('El correo es obligatorio');
+      getByText('La contraseña es obligatoria para crear un nuevo usuario.');
+    }, { timeout: 2000 });
   });
 
   it('valida longitud mínima de contraseña', async () => {
