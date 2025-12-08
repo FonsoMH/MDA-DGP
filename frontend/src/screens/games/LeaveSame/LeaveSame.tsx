@@ -93,7 +93,6 @@ function ContainerSort() {
     const [options, setOptions] = useState<Option[]>([]);
     const [containers, setContainers] = useState<number>(0);
     const [targetSum, setTargetSum] = useState<number | null>(null);
-    const [solutionContainers, setSolutionContainers] = useState<number[][] | null>(null);
     
     
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
@@ -101,10 +100,10 @@ function ContainerSort() {
         
         setIsSum(sum);
 
-        let result: { initialContainers: number[][]; solutionContainers?: number[][]; target: number };
+        let result: { initialContainers: number[][]; target: number };
 
         if (window.Cypress && window.Cypress.env('E2E_DATA') === 'FIXED_CONTAINERS') {
-            
+            console.log("Inicializando con datos fijos para E2E.");
             result = {
                 initialContainers: [
                     [4, 8, 3],
@@ -118,6 +117,8 @@ function ContainerSort() {
             result = generateEquitableAdjustmentPuzzle(
                 minValue, maxValue, optionsCount, numContainers, sum);
         }
+
+            console.log(result);
             
 
         let optionsFlatList: { id: string, value: number }[] = [];
@@ -144,7 +145,6 @@ function ContainerSort() {
 
         setTargetSum(result.target);
 
-        setSolutionContainers(result.solutionContainers || null);
 
         setContainers(numContainers);
 
@@ -244,101 +244,6 @@ function ContainerSort() {
         manager.resetGame();
     };
 
-
-    const sum = (numbers: number[]) => {
-        
-        let result: number;
-
-        if (targetSum != null) {
-            // Lógica de suma original
-            result = numbers.reduce((sum, current) => sum + current, 0);
-
-        } else {
-            // Lógica de resta acumulativa:
-            // Toma el primer valor y le resta el resto de los valores.
-            
-            if (numbers.length === 1) {
-                result = numbers[0];
-            } else {
-                // Inicializa con el primer valor y resta los subsiguientes
-                const firstValue = numbers[0];
-                result = numbers.slice(1).reduce((diff, current) => diff - current, firstValue);
-                result = Math.abs(result);
-            }
-
-        }
-        return result;
-    };
-
-    const [activeHint, setActiveHint] = useState<boolean>(false);
-    const [hintData, setHintData] = useState<{optionId: string, containerIndex: number} | null>(null);
-
-    const calculateNextMove = useCallback(() => {
-        if (!solutionContainers || !containerValues) {
-            return null;
-        }
-
-        for(let i = 0; i < containerValues.length; i++){    
-
-            if(sum(containerValues[i].map(item => item.value)) === targetSum){
-                continue;
-            }
-
-            const requiredValues = [...solutionContainers[i]];
-
-            const currentItems = containerValues[i];
-
-            const tempCheckList =  [...requiredValues];
-
-            for(let j = 0; j < currentItems.length; j++){
-                const item = currentItems[j];
-                const valueIndex = tempCheckList.indexOf(item.value);
-                if(valueIndex > -1){
-                    tempCheckList.splice(valueIndex, 1);
-                }else{
-                    if(item.value != 0){
-                        return { optionId: item.id, containerIndex: i };
-                    }
-                }
-            }
-
-            const currentValuesMap = currentItems.map(item => item.value);
-
-            for(let j = 0; j < requiredValues.length; j++){
-                const neededValue = requiredValues[j];
-
-                const foundIndex = currentValuesMap.indexOf(neededValue);
-
-                if(foundIndex > -1){
-                    currentValuesMap.splice(foundIndex, 1);
-                }else{
-                    const missingOption = options.find(option => option.value === neededValue);
-                    if(missingOption){
-                        return { optionId: missingOption.id, containerIndex: i };
-                    }
-                }
-            }
-        }
-
-        return null;
-        
-    }, [options, containerValues, targetSum, solutionContainers, containers]);
-
-    useEffect(() => {
-        if(manager.isLoading) return;
-        if(activeHint) return;
-
-        const timer = setTimeout(() => {
-            const move = calculateNextMove();
-            if(move){
-                setActiveHint(true);
-                setHintData(move);
-            }
-        }, 5000);
-
-        return () => clearTimeout(timer);
-    }, [options, containerValues, targetSum, containers, manager.isLoading, activeHint, calculateNextMove]);
-
     const topZoneRef = useAnimatedRef<View>();
     const topZoneLayout = useSharedValue<Layout[] | null>(null);
 
@@ -420,8 +325,6 @@ function ContainerSort() {
                                 size={100}
                                 numberColor={accessibilitySettings.numberColor}
                                 style={{backgroundColor: displayColor}} 
-                                activeHint={activeHint && hintData?.optionId === option.id}
-                                onEndHint={() => setActiveHint(false)}
                             />
                         </DraggableItem>
                         )
@@ -441,9 +344,6 @@ function ContainerSort() {
                     onLayoutMeasured={handleContainerLayout}
                     accessibilitySettings={accessibilitySettings}
                     isSum={isSum}
-                    hintActive={activeHint && hintData?.containerIndex === index}
-                    hintOptionId={hintData?.optionId || null}
-                    onEndHint={() => setActiveHint(false)}
                     />
                 ))}
             </View>

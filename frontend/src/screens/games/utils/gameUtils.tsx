@@ -202,7 +202,7 @@ export function generateEquitableFixedSizeArray(
     }
     
     if (attempts > 5000) {
-        console.warn("Se excedieron 5000 intentos para generar un puzzle. Podría haber un problema de lógica.");
+        console.warn("Se excedieron 5000 intentos para generar un puzle. Podría haber un problema de lógica.");
     }
   }
 
@@ -258,7 +258,6 @@ export function generateEquitableFixedSizeArrayDiff(
 
 interface GamePuzzleResult {
   initialContainers: number[][];
-  solutionContainers?: number[][];
   target: number; 
 }
 
@@ -410,7 +409,6 @@ export function generateEquitableAdjustmentPuzzle(
 
   return {
       initialContainers: initialContainers,
-      solutionContainers: solutionContainers,
       target: target,
   };
 }

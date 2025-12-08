@@ -7,7 +7,6 @@ import DraggableItem from "../SequenceGame/DraggableItem";
 import { SharedValue, useAnimatedRef } from "react-native-reanimated";
 import { useAccessibilitySettings } from "../../teacher/hooks/useAccessibilitySettings";
 import { AccessibilitySettingsFrontend } from "../../../types/accessibility";
-import BounceDisplay from "../../../components/common/NumberDisplays/BounceDisplay";
 
 type Layout = { x: number; y: number; width: number; height: number; };
 
@@ -24,9 +23,7 @@ interface ContainerProps{
     onLayoutMeasured?: (layout: Layout, index: number) => void;
     accessibilitySettings: AccessibilitySettingsFrontend;
     isSum: boolean
-    hintActive?: boolean;
-    hintOptionId?: string;
-    onEndHint?: () => void;    
+    
 }
 
 
@@ -40,10 +37,7 @@ function Container({
     containerIndex,
     onLayoutMeasured,
     accessibilitySettings,
-    isSum,
-    hintActive,
-    hintOptionId,
-    onEndHint
+    isSum
 }: ContainerProps) {
 
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
@@ -122,62 +116,51 @@ function Container({
     const containerRef = useAnimatedRef<View>();
 
     return (
-        <BounceDisplay
-            isBouncing={hintActive && !items.some(item => item.id === hintOptionId)}
-            onAnimationEnd={() => {
-                if(onEndHint){
-                    onEndHint();
-                }
-            }}
+        <View style={styles.area}
+        ref={containerRef}
+        onLayout={() => {
+            containerRef.current?.measureInWindow((x, y, width, height) => {
+                const layout: Layout = { x, y, width, height };
+                
+                onLayoutMeasured(layout, containerIndex);
+            });
+        }}
+        aria-label={`Container-Area-${containerIndex}`}
         >
-            <View style={styles.area}
-            ref={containerRef}
-            onLayout={() => {
-                containerRef.current?.measureInWindow((x, y, width, height) => {
-                    const layout: Layout = { x, y, width, height };
-                    
-                    onLayoutMeasured(layout, containerIndex);
-                });
-            }}
-            aria-label={`Container-Area-${containerIndex}`}
-            >
 
-            <TouchableOpacity 
-            style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
-            onPress={handleContainerClick}>
-                {items.map((option, index) => (
-                    <DraggableItem
-                    onPress={() => handleNumberCLick(option)}
-                    onDrop={() => handleNumberCLick(option)}
-                    dropZonesLayouts={topZoneLayout} 
-                    isDisabled={false} 
-                    key={`opt-${option.id}-${index}`}
-                    comeBack={false}
-                    style={styles.optionWrapper}
-                    testID={`opt-${option.value}`}
-                    >
-                        <NumberDisplay
-                            numberProp={option.value} 
-                            size={80}
-                            numberColor={accessibilitySettings.numberColor}
-                            style={{backgroundColor: accessibilitySettings.boxColor}}
-                            activeHint={hintActive && hintOptionId === option.id}
-                            onEndHint={onEndHint}
-                        ></NumberDisplay>
-                    </DraggableItem>
-                ))}
-            </TouchableOpacity>
+        <TouchableOpacity 
+        style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
+        onPress={handleContainerClick}>
+            {items.map((option, index) => (
+                <DraggableItem
+                onPress={() => handleNumberCLick(option)}
+                onDrop={() => handleNumberCLick(option)}
+                dropZonesLayouts={topZoneLayout} 
+                isDisabled={false} 
+                key={`opt-${option.id}-${index}`}
+                comeBack={false}
+                style={styles.optionWrapper}
+                testID={`opt-${option.value}`}
+                 >
+                    <NumberDisplay
+                        numberProp={option.value} 
+                        size={80}
+                        numberColor={accessibilitySettings.numberColor}
+                        style={{backgroundColor: accessibilitySettings.boxColor}}
+                    ></NumberDisplay>
+                </DraggableItem>
+            ))}
+        </TouchableOpacity>
 
-            {targetSum && (
-                <OperacionDisplay 
-                    containerColor={borderColor}
-                    numbers={items} 
-                    operationType={isSum ? "suma" : "resta"}
-                />
-            )}
+        {targetSum && (
+            <OperacionDisplay 
+                containerColor={borderColor}
+                numbers={items} 
+                operationType={isSum ? "suma" : "resta"}
+            />
+        )}
 
-            </View>
-        </BounceDisplay>
+        </View>
 
     )
     
