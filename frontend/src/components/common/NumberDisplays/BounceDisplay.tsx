@@ -1,14 +1,15 @@
 import React from 'react';
-import { Animated, Easing } from 'react-native';
+import { Animated, Easing, ViewStyle } from 'react-native';
 
 type BounceDisplayProps = {
     isBouncing: boolean;
     loop?: boolean;
+    size?: number; 
     children: React.ReactNode;
     onAnimationEnd: () => void;
 };
 
-export default function BounceDisplay({ isBouncing, loop = false, children, onAnimationEnd }: BounceDisplayProps) {
+export default function BounceDisplay({ isBouncing, loop = false, children, onAnimationEnd, size}: BounceDisplayProps) {
 
     const scaleValue = React.useRef(new Animated.Value(1)).current;
 
@@ -52,8 +53,21 @@ export default function BounceDisplay({ isBouncing, loop = false, children, onAn
         };
     }, [isBouncing, loop, scaleValue]);
 
+    const containerStyle: ViewStyle = React.useMemo(() => {
+        if (size) {
+            return {
+                width: size,
+                height: size,
+            };
+        }
+        
+        return {
+            flex: 1,
+        };
+    }, [size]);
+
     return (
-        <Animated.View style={{ transform: [{ scale: scaleValue }], flex: 1 }}>
+        <Animated.View style={[containerStyle, { transform: [{ scale: scaleValue }] }]}>
             {children}
         </Animated.View>
     );
