@@ -15,7 +15,7 @@ function NumberDisplay({ numberProp, size = 100, numberColor, style, activeHint,
     const dynamicFontSize = size * 0.3;
 
     return (
-        <BounceDisplay isBouncing={activeHint} onAnimationEnd={onEndHint}>
+        <BounceDisplay isBouncing={activeHint} onAnimationEnd={onEndHint} size={size}>
             <View style={[styles.container, { width: size, height: size }, style]}>        
                 <Text style={[styles.numberText, { fontSize: dynamicFontSize, color: numberColor }]}>
                     {numberProp}
@@ -32,8 +32,7 @@ const styles = StyleSheet.create({
         borderWidth: 2.21, 
         borderColor: '#101828',
         borderRadius: 8, 
-        padding: 16,
-        margin: 5,
+
 
         justifyContent: 'center',
         alignItems: 'center',
