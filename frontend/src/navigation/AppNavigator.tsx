@@ -8,6 +8,7 @@ import AdminNavigator from './AdminNavigator';
 import GameMenuScreen from '../screens/games/gameMenuScreen';
 import LoginScreen from '../screens/auth/screens/LoginScreen';
 import TeacherNavigator from './TeacherNavigator';
+import StudentNavigator from './StudentNavigator';
 
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +31,11 @@ export default function AppNavigator() {
       <Stack.Screen 
         name="Games" 
         component={GameNavigator}
+      />
+
+      <Stack.Screen
+        name="Student"
+        component={StudentNavigator}
       />
       
       <Stack.Screen
