@@ -117,6 +117,7 @@ export default function StudentStatisticsScreen({route}: Props) {
                     <GameSelector 
                         selectedGameId={selectedGameId}
                         onGameChange={setSelectedGameId}
+                        style={{ flexDirection: 'column'}}
                     />
                     <Pressable
                         onPress={toggleFilters}

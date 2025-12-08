@@ -1,12 +1,13 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import StudentStatisticsScreen from '../screens/student/StudentStatisticsScreen';
+import { StudentLogin } from '../types/login';
 
 // Stack de navegación para el área del alumno
 export type StudentStackParamList = {
 
     // Estadísticas del estudiante
-    StudentStatistics: { studentId: number };
+    StudentStatistics: { student: StudentLogin };
 
     
 };
