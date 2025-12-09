@@ -58,7 +58,6 @@ export const useUpdateGameConfig = (studentId: number, gameId: number) => {
           exact: true // asegura que solo se refresque esta clave exacta
       });
       
-      console.log(`Cache invalidada y refetch solicitado para ${queryKeyToInvalidate}`);
     },
     
   });
