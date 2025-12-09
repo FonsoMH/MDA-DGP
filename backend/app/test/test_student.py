@@ -51,16 +51,21 @@ def test_correct_persistance(client):
     assert response.status_code == 404
     assert "Student not found" in response.get_json()["error"]
 
-def test_user_deletion_only_by_admin(client, temp_teacher, temp_student):
-    teacher_id, _ = temp_teacher
+def test_update_student_forbidden_by_teacher(client, temp_teacher, temp_student):
+    """Verifica que un Profesor (rol NO-Admin) NO puede editar a un estudiante."""
     student_id, _ = temp_student
-
-
-    print("Test: Eliminación intentada por un Profesor (No-Admin)")
-    response = client.delete(f"/api/users/{student_id}?admin_id={teacher_id}")
+    teacher_id, _ = temp_teacher 
     
+    update_payload = {"name": "Intento de Edición por Profesor"}
+
+    response = client.put(f"/api/students/{student_id}?auth_user_id={teacher_id}", json=update_payload)
+    
+    assert response.status_code == 403 
+    assert "Authorization required" in response.get_json().get("error", "")
+
     cur = get_db_cursor()
-    cur.execute("SELECT user_id FROM users WHERE user_id = %s;", (student_id,))
-    if response.status_code != 200:
-        assert cur.fetchone() is not None
+    cur.execute("SELECT name FROM users WHERE user_id = %s;", (student_id,))
+    row = cur.fetchone()
+
+    assert row["name"] != "Intento de Edición por Profesor"
     cur.close()
