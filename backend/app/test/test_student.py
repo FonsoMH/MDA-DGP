@@ -52,7 +52,6 @@ def test_correct_persistance(client):
     assert "Student not found" in response.get_json()["error"]
 
 def test_update_student_forbidden_by_teacher(client, temp_teacher, temp_student):
-    """Verifica que un Profesor (rol NO-Admin) NO puede editar a un estudiante."""
     student_id, _ = temp_student
     teacher_id, _ = temp_teacher 
     
