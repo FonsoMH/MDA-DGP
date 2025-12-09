@@ -61,13 +61,8 @@ def get_admins():
         cur.close()
 
 # Update an admin
-@admin_bp.route('/admins/<int:user_id>', methods=['PUT', 'PATCH'])
+@admin_bp.route('/admins/<int:user_id>', methods=['PUT'])
 def update_admin(user_id):
-    requester_role = request.args.get('requester_role')
-
-    if requester_role != 'admin':
-        return jsonify({'error': 'Only admins can update admin users.'}), 403
-
     data = request.get_json() or {}
     name = data.get('name').strip() if 'name' in data and data.get('name') else None
     email = data.get('email').strip().lower() if 'email' in data and data.get('email') else None
