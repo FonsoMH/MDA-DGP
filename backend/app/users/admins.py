@@ -61,12 +61,17 @@ def get_admins():
         cur.close()
 
 # Update an admin
-@admin_bp.route('/admins/<int:user_id>', methods=['PUT'])
+@admin_bp.route('/admins/<int:user_id>', methods=['PUT', 'PATCH'])
 def update_admin(user_id):
+    requester_role = request.args.get('requester_role')
+
+    if requester_role != 'admin':
+        return jsonify({'error': 'Only admins can update admin users.'}), 403
+
     data = request.get_json() or {}
-    name = (data.get('name') or '').strip()
-    email = (data.get('email') or '').strip().lower()
-    password = (data.get('password') or '').strip()
+    name = data.get('name').strip() if 'name' in data and data.get('name') else None
+    email = data.get('email').strip().lower() if 'email' in data and data.get('email') else None
+    password = data.get('password').strip() if 'password' in data and data.get('password') else None
     password_hash = None
 
     if password:
@@ -83,7 +88,7 @@ def update_admin(user_id):
         fields, values = check_basic_values(cur, name, email, password_hash, user_id)
 
         if isinstance(fields, dict) and 'error' in fields:
-            return jsonify(fields), values  # values contains the status code in this case
+            return jsonify(fields), fields  # values contains the status code in this case
 
         if fields:
             query = f"UPDATE users SET {', '.join(fields)} WHERE user_id = %s"
