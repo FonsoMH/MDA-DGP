@@ -185,17 +185,17 @@ describe('E2E flujo completo de la configuracion de rangos', () => {
 
   cy.get('[data-testid="container-item"]').should('have.length', config_dejaIgual.num_containers);
 
-  cy.get('[data-testid="item-in-container"]').each(($item) => {
-   cy.wrap($item) 
-    .invoke('text')
-    .then((text) => {
-     const cleanedText = text.trim(); 
-     const num = Number(cleanedText);
-     
-     expect(cleanedText).to.not.be.empty;
-     expect(num).to.be.within(config_dejaIgual.min_value, config_dejaIgual.max_value);
-    });
-  }); 
+  cy.get('[data-testid^="opt-"]').each(($item) => {
+    cy.wrap($item)
+      .invoke('text')
+      .then((text) => {
+        const cleanedText = text.trim(); 
+        const num = Number(cleanedText);
+      
+        expect(cleanedText).to.not.be.empty;
+        expect(num).to.be.within(config_dejaIgual.min_value, config_dejaIgual.max_value);
+      });
+  });
 
   cy.wait(1000);
 
