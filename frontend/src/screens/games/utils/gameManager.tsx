@@ -56,6 +56,7 @@ export const useGameManager = (
     const numContainers = (config?.numContainers ?? 2) as number;
     const haveToSum = (config?.sum ?? false) as boolean;
 
+
     /**
      * Effect to initialize the first game round.
      * This runs once the configuration is successfully loaded (`!isLoading && config`)

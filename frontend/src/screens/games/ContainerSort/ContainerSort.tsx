@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useGameManager } from "../utils/gameManager";
-import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions } from "../utils/gameUtils";
+import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions , findExactPartition } from "../utils/gameUtils";
 import { View, Text, StyleSheet } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
 import BackButton from "../../../components/common/BackButton/BackButton";
@@ -260,6 +260,180 @@ function ContainerSort() {
         
     });
 
+
+    const sum = (numbers: number[]) => {
+        
+        let result: number;
+
+        if (targetSum != null) {
+            // Lógica de suma original
+            result = numbers.reduce((sum, current) => sum + current, 0);
+
+        } else {
+            // Lógica de resta acumulativa:
+            // Toma el primer valor y le resta el resto de los valores.
+            
+            if (numbers.length === 1) {
+                result = numbers[0];
+            } else {
+                // Inicializa con el primer valor y resta los subsiguientes
+                const firstValue = numbers[0];
+                result = numbers.slice(1).reduce((diff, current) => diff - current, firstValue);
+                result = Math.abs(result);
+            }
+
+        }
+        return result;
+    };
+
+    const correctPartition = (part: number[][], container: Option[]) => {
+        if(part.length === 0) return false;
+        if(container.length === 0) return false;
+        if(!part.find(p => p.length === container.length)) return false;
+
+        for (let i = 0; i < part.length; i++) {
+            if(part[i].length !== container.length) continue;
+            if(sum(part[i]) !== sum(container.map(option => option.value))) continue;
+
+            const allMatch = part[i].every(value => container.some(option => option.value === value));
+
+            if(allMatch) {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+    
+    const [activeHint, setActiveHint] = useState<boolean>(false);
+    const [hintData, setHintData] = useState<{optionId: string, containerIndex: number} | null>(null);
+
+    const calculateNextMove = useCallback(() => {
+
+        if(targetSum !== null){
+            
+            if(containerValues === undefined) return null;
+
+            const allOptionsValues = [...options.map(option => option.value),...containerValues.flat().map(option => option.value)];
+
+            const partition : number[][] = findExactPartition(
+                allOptionsValues,
+                containers,
+                targetSum
+            );
+
+            if(partition){
+                //Si no hay contenedores a medias insertar la primera opcion
+                if(containerValues.every(c => c.length === 0 || correctPartition(partition, c))){
+                    return {optionId: options[0].id, containerIndex: containerValues.findIndex(c => c.length === 0)};
+                }
+                //Si no, buscar un movimiento que acerque a la solucion
+                for(let i = 0; i < containers; i++){
+                    
+                    if(containerValues[i] === undefined) continue;
+                    if(containerValues[i].length === 0) continue;                 
+                    
+                    const currentContainerValues = containerValues[i].map(option => option.value);
+
+                    const correctPartition = partition.find(part =>{
+                        const tempPart = [...part];
+                        
+                        return currentContainerValues.every(value => {
+                            const index = tempPart.indexOf(value);
+                            if(index !== -1){
+                                tempPart.splice(index, 1);
+                                return true;
+                            }
+                            return false;
+                        });
+                    });
+                    
+                    //Si no hay particion correcta, buscar un valor erroneo
+                    if(correctPartition === undefined){
+                        const wrongValue = containerValues[i].findLast((val,idx) =>{
+                            const restOfContainer = [...currentContainerValues];
+                            restOfContainer.splice(idx,1);
+
+                            return partition.some(part => {
+                                const tempPart = [...part];
+                                return restOfContainer.every(value => {
+                                    const index = tempPart.indexOf(value);
+                                    if(index !== -1){
+                                        tempPart.splice(index, 1);
+                                        return true;
+                                    }
+                                    return false;
+                                });
+                            });
+                        });
+                        if(wrongValue){
+                            return { optionId: wrongValue.id, containerIndex: i };
+                        }
+                    }else{
+                        //Busca el siguiente valor necesario para completar la particion correcta
+
+                        const remainingNeeded = [...correctPartition];
+
+                        currentContainerValues.forEach(value => {
+                            const index = remainingNeeded.indexOf(value);
+                            if(index !== -1){
+                                remainingNeeded.splice(index, 1);
+                            }
+                        });
+
+                        const nextValue = remainingNeeded[0];
+
+                        if(nextValue !== undefined){
+                            const match = options.find(option => option.value === nextValue);
+                            if(match){
+                                return { optionId: match.id, containerIndex: i };
+                            }
+                        }
+                    }
+                }
+            }
+
+        }else{
+            for(let i = 0; i < containers; i++){
+                const currentValues = containerValues?.[i] || [];
+                if(currentValues.length > 0){
+                    const targetValue = currentValues[0].value;
+                    const match = options.find(option => option.value === targetValue);
+                    if(match){
+                        return { optionId: match.id, containerIndex: i };
+                    }
+                }
+            }
+            const firstOption = options[0];
+            const emptyContainerIndex = containerValues?.findIndex(c => c.length === 0);
+
+            if(firstOption && emptyContainerIndex !== -1 && emptyContainerIndex !== undefined){
+                return { optionId: firstOption.id, containerIndex: emptyContainerIndex };
+            }
+        }
+
+        return null;
+
+    }, [options, containerValues, targetSum, containers]);
+
+    useEffect(() => {
+        if(manager.isLoading) return;
+        if(activeHint) return;
+        if(options.length === 0) return;
+
+        const timer = setTimeout(() => {
+            const move = calculateNextMove();
+            if(move){
+                setActiveHint(true);
+                setHintData(move);
+            }
+        }, 5000);
+
+        return () => clearTimeout(timer);
+        
+    },[options, containerValues ,activeHint, calculateNextMove, manager.isLoading, selectedNumber]);
+
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
@@ -306,6 +480,8 @@ function ContainerSort() {
                                 size={100}
                                 numberColor={accessibilitySettings.numberColor}
                                 style={{backgroundColor: displayColor}} 
+                                activeHint={activeHint && hintData?.optionId === option.id}
+                                onEndHint={() => setActiveHint(false)}
                             />
                         </DraggableItem>
                         )
@@ -315,17 +491,20 @@ function ContainerSort() {
             <View style={styles.resultsContainer}>
                 {Array(containers).fill(null).map((_, index) => (
                     <Container targetSum={targetSum}
-                    key={index}
-                    onContainerClick={() => handleContainerClick(index)}
-                    items={containerValues[index] || []}
-                    onItemReturned={(option: Option) => handleItemReturnedFromContainer(option, index)}
-                    onUniformityChange={(color: string) => handleContainerStatusUpdate(color, index)}
-                    topZoneLayout={topZoneLayout}
-                    containerIndex={index}
-                    onLayoutMeasured={handleContainerLayout}
-                    aria-label={`Container-Area-${index}`}
-                    accessibilitySettings={accessibilitySettings}
-                    isSum={targetSum != null}
+                        key={index}
+                        onContainerClick={() => handleContainerClick(index)}
+                        items={containerValues[index] || []}
+                        onItemReturned={(option: Option) => handleItemReturnedFromContainer(option, index)}
+                        onUniformityChange={(color: string) => handleContainerStatusUpdate(color, index)}
+                        topZoneLayout={topZoneLayout}
+                        containerIndex={index}
+                        onLayoutMeasured={handleContainerLayout}
+                        aria-label={`Container-Area-${index}`}
+                        accessibilitySettings={accessibilitySettings}
+                        isSum={targetSum != null}
+                        hintActive={activeHint && hintData?.containerIndex === index}
+                        hintOptionId={hintData?.optionId}
+                        onEndHint={() => setActiveHint(false)}
                     />
                 ))}
             </View>

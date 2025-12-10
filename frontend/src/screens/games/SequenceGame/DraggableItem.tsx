@@ -22,7 +22,7 @@ interface DraggableItemProps {
     isDisabled: boolean;
     children: React.ReactNode;
     testID?: string;
-    comeBack?: boolean;
+    comeBack: boolean;
 }
 
 const DraggableItem: React.FC<DraggableItemProps> = ({ 

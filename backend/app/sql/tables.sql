@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS student_game_configuration (
 
 -- Game Results
 CREATE TABLE IF NOT EXISTS game_results (
-    result_id SERIAL PRIMARY KEY,
+    result_id SERIAL,
     student_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE RESTRICT,
     abandoned BOOLEAN NOT NULL DEFAULT false,
@@ -66,7 +66,9 @@ CREATE TABLE IF NOT EXISTS game_results (
     played_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     time_seconds INTEGER NOT NULL,
 
-    played_parameters JSONB NOT NULL -- New column to store game parameters as JSONB for historical results
+    played_parameters JSONB NOT NULL, -- New column to store game parameters as JSONB for historical results
+
+    PRIMARY KEY (student_id, game_id, played_at)
 );
 
 -- 
@@ -151,13 +153,7 @@ VALUES
     (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
     0, 10, 15, 3, true, true -- sum=true significa que 'reparte' (suma) está activo
 )
-ON CONFLICT (student_id, game_id) DO UPDATE SET
-    min_value = EXCLUDED.min_value,
-    max_value = EXCLUDED.max_value,
-    num_elements = EXCLUDED.num_elements,
-    num_containers = EXCLUDED.num_containers,
-    upward = EXCLUDED.upward,
-    sum = EXCLUDED.sum;
+ON CONFLICT (student_id, game_id) DO NOTHING;
 
 -- 6. Populate Game Results (valid columns)
 -- Inserta varias partidas para Eva Student en dos fechas distintas para pruebas de estadísticas
@@ -197,5 +193,5 @@ VALUES
     55,
     '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
 )
-ON CONFLICT DO NOTHING;
 
+ON CONFLICT (student_id, game_id, played_at) DO NOTHING;
