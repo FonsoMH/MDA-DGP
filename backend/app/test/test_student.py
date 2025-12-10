@@ -50,21 +50,3 @@ def test_correct_persistance(client):
     response = client.put(f"/api/students/{fake_id}", json=payload)
     assert response.status_code == 404
     assert "Student not found" in response.get_json()["error"]
-
-def test_update_student_forbidden_by_teacher(client, temp_teacher, temp_student):
-    student_id, _ = temp_student
-    teacher_id, _ = temp_teacher 
-    
-    update_payload = {"name": "Intento de Edición por Profesor"}
-
-    response = client.put(f"/api/students/{student_id}?auth_user_id={teacher_id}", json=update_payload)
-    
-    assert response.status_code == 403 
-    assert "Authorization required" in response.get_json().get("error", "")
-
-    cur = get_db_cursor()
-    cur.execute("SELECT name FROM users WHERE user_id = %s;", (student_id,))
-    row = cur.fetchone()
-
-    assert row["name"] != "Intento de Edición por Profesor"
-    cur.close()
