@@ -78,6 +78,8 @@ export default function BasicCredentialsForm({
                 onChangeText={onChange}
                 placeholderTextColor={placeholderColor}
                 style={[localStyles.input, passwordError && localStyles.inputError]}
+                placeholder="Contraseña"
+                testID='password-input'
               />
             )}
           />

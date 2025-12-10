@@ -12,10 +12,6 @@ import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
 
-
-
-
-
 //TODO calcular puntuacion
 const GAME_ID = 1; 
 
@@ -99,6 +95,8 @@ function TapNumberGame() {
     const [selectedDisplay, setSelectedDisplay] = useState<number | null>(null);
     const [resultColor, setResultColor] = useState<string>();
 
+    const [activeHint, setActiveHint] = useState<boolean>(false);
+
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number) => {    
         
         const newTarget = getRandomNumber(minValue, maxValue);
@@ -107,11 +105,26 @@ function TapNumberGame() {
         setTargetNumber(newTarget);
         setOptions(newOptions);
         setSelectedDisplay(null);
+        setActiveHint(false);
         
         playTTS(newTarget.toString());
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
+
+    useEffect(() => {
+
+        if (manager.isLoading) return;
+
+        if(activeHint) return;
+
+        const timer = setTimeout(() => {
+            setActiveHint(true);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+
+    }, [targetNumber, selectedDisplay, manager.isLoading, activeHint]);
 
     const handlePlayAgain = () => {
         manager.resetGame();
@@ -128,6 +141,7 @@ function TapNumberGame() {
                 1000,
                 "success"
             );
+            setActiveHint(false);
             manager.advanceGame();
             return;
         }
@@ -146,7 +160,9 @@ function TapNumberGame() {
     return (
         
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}></BackButton>
+            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%' }}>
+                <BackButton width={215} height={76}></BackButton>
+            </View>
             <TouchableOpacity 
                 testID="tts-button" 
                 onPress={() => playTTS(targetNumber.toString())}  
@@ -183,12 +199,15 @@ function TapNumberGame() {
                             onPress={() => handleSelection(num)}
                             style={styles.optionWrapper}
                         >
+
                             <NumberDisplay 
                                 key={index}
                                 numberProp={num} 
                                 size={155}
                                 numberColor={accessibilitySettings.numberColor}
                                 style={{backgroundColor: displayColor}} 
+                                activeHint={num === targetNumber && activeHint}
+                                onEndHint={() => setActiveHint(false)}
                             />
                         </TouchableOpacity>
                     );

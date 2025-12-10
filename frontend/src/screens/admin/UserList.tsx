@@ -90,7 +90,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
     <View style={styles.container} >
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
-        <BackButton width={130} height={50} />
+        <BackButton width={130} height={50} testID='back-button' />
       </View>
 
       <View style={styles.statsRow}>
@@ -147,7 +147,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
       
       {showMenu && (
           <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }}>
+      <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }} testID='create-admin-button'>
               <Text style={styles.menuText}>Crear Administrador</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate');

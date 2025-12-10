@@ -84,7 +84,8 @@ export default function UserCard({ user, onUserDeleted, onEdit, navigation, admi
 
         {/* Email */}
         <View style={[styles.cell, { flex: 2, justifyContent: 'center', alignItems: 'center' }]}>
-          <Text style={styles.email}>{user.email}</Text>
+          <Text style={styles.email} testID={`user-email-${user.email}`}>{user.email}</Text>
+
         </View>
 
         {/* Role */}
