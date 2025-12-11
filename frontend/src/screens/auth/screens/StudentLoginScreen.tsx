@@ -36,7 +36,8 @@ export default function StudentLoginScreen({ navigation }: StudentLoginProps){
                             key={user.id} 
                             id={user.id} 
                             user={user.name} 
-                            onPress={() => handleSubmit(user)} 
+                            onPress={() => handleSubmit(user)}
+                            
                         />
                     ))
                 }
