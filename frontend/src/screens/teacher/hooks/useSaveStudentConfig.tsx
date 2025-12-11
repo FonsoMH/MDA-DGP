@@ -15,7 +15,8 @@ export function useSaveStudentConfig(studentId: number, configs: any) {
       const queryKeyToInvalidate = ['gameConfig', studentId, Number(variables.gameId)];
       
       queryClient.invalidateQueries({ 
-          queryKey: queryKeyToInvalidate
+          queryKey: queryKeyToInvalidate,
+          refetchType: 'active'
       });
       
     },
