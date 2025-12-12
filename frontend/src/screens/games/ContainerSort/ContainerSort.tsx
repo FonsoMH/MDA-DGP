@@ -465,6 +465,7 @@ function ContainerSort() {
 
                         return( 
                         <DraggableItem
+                            testID={`option-item`}
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
                             isDisabled={false} 
@@ -473,7 +474,6 @@ function ContainerSort() {
                             key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
-                            testID={"option-item"}
                         >
                             <NumberDisplay
                                 numberProp={option.value} 

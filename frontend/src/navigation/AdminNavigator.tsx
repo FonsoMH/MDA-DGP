@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import UserList from '../screens/admin/UserList';
 import StudentCreateScreen from '../screens/admin/StudentCreateScreen';
 import TeacherCreateScreen from '../screens/admin/TeacherCreateScreen';
+import AdminCreateScreen from '../screens/admin/AdminCreateScreen';
 import { UserApiData } from '../types/users';
 import UserDeletionListScreen from '../screens/admin/UserDeletionListScreen';
 
@@ -31,6 +32,8 @@ function AdminNavigator() {
 
       <AdminStack.Screen name="UserDeletion" component={UserDeletionListScreen}/>
 
+
+      <AdminStack.Screen name="AdminCreate" component={AdminCreateScreen}/>
 
       <AdminStack.Screen name="TeacherCreate" component={TeacherCreateScreen}/>
       

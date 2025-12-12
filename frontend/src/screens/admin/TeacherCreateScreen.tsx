@@ -62,16 +62,23 @@ export default function TeacherCreateScreen({ navigation, route }: Props) {
 
   const isTotalSubmitting = isFormValidating || isApiSubmitting; 
 
-  const onSubmitRHF = (data: CredentialsData) => {
+  const onSubmitRHF = async (data: CredentialsData) => {
       const payload = {
           name: data.name,
           email: data.email,
           password: data.password ?? '',
           assigned_students_ids: selectedIds,
       };
-
-      teacherToEdit ? saveUser(teacherToEdit, payload) : onSubmitFrom(payload); 
-      navigation.goBack();
+      let ok = false;
+      if (teacherToEdit) {
+        ok = await saveUser(teacherToEdit, payload);
+      } else {
+        ok = await onSubmitFrom(payload);
+      }
+      if (ok) {
+        // Volver para que UserList recupere foco y refresque (useFocusEffect)
+        navigation.goBack();
+      }
   };
 
   const buttonLabel: string = teacherToEdit ? 'Editar Tutor' : 'Crear Tutor'
@@ -143,6 +150,7 @@ export default function TeacherCreateScreen({ navigation, route }: Props) {
             style={[styles.btn, styles.btnPrimary, isTotalSubmitting && { opacity: 0.7 }]}
             onPress={handleSubmit(onSubmitRHF)}
             disabled={isTotalSubmitting}
+            testID='submit-create-teacher'
           >
           <Text style={styles.btnText}>{isApiSubmitting ? 'Guardando...' : buttonLabel}</Text>    
           
