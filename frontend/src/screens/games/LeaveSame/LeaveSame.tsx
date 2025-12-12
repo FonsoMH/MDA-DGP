@@ -19,7 +19,7 @@ const GAME_ID = 4;
 type Layout = { x: number; y: number; width: number; height: number; };
 
 
-function ContainerSort() {
+function LeaveSame() {
 
     const accessibilitySettings = useAccessibilitySettings();
     const roundMessage = useRoundMessage();
@@ -93,22 +93,39 @@ function ContainerSort() {
     const [options, setOptions] = useState<Option[]>([]);
     const [containers, setContainers] = useState<number>(0);
     const [targetSum, setTargetSum] = useState<number | null>(null);
+    const [solutionContainers, setSolutionContainers] = useState<number[][] | null>(null);
     
     
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number, 
         numContainers: number, sum: boolean) => {  
-            
-
-        const result = generateEquitableAdjustmentPuzzle(
-            minValue, maxValue, optionsCount, numContainers, !sum);
         
+        setIsSum(sum);
+
+        let result: { initialContainers: number[][]; solutionContainers?: number[][]; target: number };
+
+        if (window.Cypress && window.Cypress.env('E2E_DATA') === 'FIXED_CONTAINERS') {
+            
+            result = {
+                initialContainers: [
+                    [4, 8, 3],
+                    [10, 2, 9],
+                    [7, 5, 1]
+                ],
+                target: 12
+
+            };
+        } else {
+            result = generateEquitableAdjustmentPuzzle(
+                minValue, maxValue, optionsCount, numContainers, sum);
+        }
+            
 
         let optionsFlatList: { id: string, value: number }[] = [];
         const initialContainersWithIds: { id: string, value: number }[][] = 
             result.initialContainers.map((containerArray) => {
                 
                 const containerWithIds = containerArray.map((value, indexInContainer) => {
-                    const newId = `option-${value}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+                    const newId = `option-${value}-${Date.now()}-${Math.random()}`;
                     
                     const itemObject = {
                         id: newId, 
@@ -127,6 +144,7 @@ function ContainerSort() {
 
         setTargetSum(result.target);
 
+        setSolutionContainers(result.solutionContainers || null);
 
         setContainers(numContainers);
 
@@ -135,10 +153,6 @@ function ContainerSort() {
 
         setOptions([]);
 
-
-
-        
-        
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
@@ -230,6 +244,101 @@ function ContainerSort() {
         manager.resetGame();
     };
 
+
+    const sum = (numbers: number[]) => {
+        
+        let result: number;
+
+        if (targetSum != null) {
+            // Lógica de suma original
+            result = numbers.reduce((sum, current) => sum + current, 0);
+
+        } else {
+            // Lógica de resta acumulativa:
+            // Toma el primer valor y le resta el resto de los valores.
+            
+            if (numbers.length === 1) {
+                result = numbers[0];
+            } else {
+                // Inicializa con el primer valor y resta los subsiguientes
+                const firstValue = numbers[0];
+                result = numbers.slice(1).reduce((diff, current) => diff - current, firstValue);
+                result = Math.abs(result);
+            }
+
+        }
+        return result;
+    };
+
+    const [activeHint, setActiveHint] = useState<boolean>(false);
+    const [hintData, setHintData] = useState<{optionId: string, containerIndex: number} | null>(null);
+
+    const calculateNextMove = useCallback(() => {
+        if (!solutionContainers || !containerValues) {
+            return null;
+        }
+
+        for(let i = 0; i < containerValues.length; i++){    
+
+            if(sum(containerValues[i].map(item => item.value)) === targetSum){
+                continue;
+            }
+
+            const requiredValues = [...solutionContainers[i]];
+
+            const currentItems = containerValues[i];
+
+            const tempCheckList =  [...requiredValues];
+
+            for(let j = 0; j < currentItems.length; j++){
+                const item = currentItems[j];
+                const valueIndex = tempCheckList.indexOf(item.value);
+                if(valueIndex > -1){
+                    tempCheckList.splice(valueIndex, 1);
+                }else{
+                    if(item.value != 0){
+                        return { optionId: item.id, containerIndex: i };
+                    }
+                }
+            }
+
+            const currentValuesMap = currentItems.map(item => item.value);
+
+            for(let j = 0; j < requiredValues.length; j++){
+                const neededValue = requiredValues[j];
+
+                const foundIndex = currentValuesMap.indexOf(neededValue);
+
+                if(foundIndex > -1){
+                    currentValuesMap.splice(foundIndex, 1);
+                }else{
+                    const missingOption = options.find(option => option.value === neededValue);
+                    if(missingOption){
+                        return { optionId: missingOption.id, containerIndex: i };
+                    }
+                }
+            }
+        }
+
+        return null;
+        
+    }, [options, containerValues, targetSum, solutionContainers, containers]);
+
+    useEffect(() => {
+        if(manager.isLoading) return;
+        if(activeHint) return;
+
+        const timer = setTimeout(() => {
+            const move = calculateNextMove();
+            if(move){
+                setActiveHint(true);
+                setHintData(move);
+            }
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, [options, containerValues, targetSum, containers, manager.isLoading, activeHint, calculateNextMove]);
+
     const topZoneRef = useAnimatedRef<View>();
     const topZoneLayout = useSharedValue<Layout[] | null>(null);
 
@@ -279,7 +388,7 @@ function ContainerSort() {
                 
 
             <View
-                style={[styles.gridContainer, { height: '35%' }, {backgroundColor: accessibilitySettings.containerColor}]}
+                style={[styles.gridContainer, { height: '25%' }, {backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}
                 onLayout={() => {
                     topZoneRef.current?.measureInWindow((x, y, width, height) => {
@@ -296,6 +405,7 @@ function ContainerSort() {
 
                         return( 
                         <DraggableItem
+                            testID={`option-item`}
                             onPress={() => handleNumberSelect(option)}
                             dropZonesLayouts={bottomZoneLayouts} 
                             isDisabled={false} 
@@ -304,13 +414,14 @@ function ContainerSort() {
                             key={`option-${option.id}-${index}`}
                             comeBack={false}
                             style={styles.optionWrapper}
-                            testID={"option-item"}
-                        >
+                            >
                             <NumberDisplay
                                 numberProp={option.value} 
                                 size={100}
                                 numberColor={accessibilitySettings.numberColor}
                                 style={{backgroundColor: displayColor}} 
+                                activeHint={activeHint && hintData?.optionId === option.id}
+                                onEndHint={() => setActiveHint(false)}
                             />
                         </DraggableItem>
                         )
@@ -328,9 +439,11 @@ function ContainerSort() {
                     topZoneLayout={topZoneLayout}
                     containerIndex={index}
                     onLayoutMeasured={handleContainerLayout}
-                    aria-label={`Container-Area-${index}`}
                     accessibilitySettings={accessibilitySettings}
                     isSum={isSum}
+                    hintActive={activeHint && hintData?.containerIndex === index}
+                    hintOptionId={hintData?.optionId || null}
+                    onEndHint={() => setActiveHint(false)}
                     />
                 ))}
             </View>
@@ -349,4 +462,4 @@ function ContainerSort() {
 }
 
 
-export default ContainerSort;
+export default LeaveSame;

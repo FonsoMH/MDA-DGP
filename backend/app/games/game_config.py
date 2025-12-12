@@ -1,6 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request
 from ..db import get_db_cursor, get_db
-from .games import get_config_from_db, _get_game_id_by_slug, _validate_and_normalize
+from .games import get_config_from_db, _validate_and_normalize
 
 config_bp = Blueprint('config_bp', __name__, url_prefix='/api')
 
@@ -32,10 +32,9 @@ def get_game_config(student_id, game_id):
 def get_all_configs(student_id: int):
     cur = get_db_cursor()
     try:
-        # Join all games with student configuration (if any)
         cur.execute(
             """
-            SELECT g.slug, g.name,
+            SELECT g.game_id, g.name,
                    c.min_value, c.max_value, c.num_elements, c.num_containers, c.upward, c.sum
             FROM games g
             LEFT JOIN student_game_configuration c
@@ -55,21 +54,25 @@ def get_all_configs(student_id: int):
                 'upward': r['upward'] if r['upward'] is not None else DEFAULTS['upward'],
                 'sum': r['sum'] if r['sum'] is not None else DEFAULTS['sum'],
             }
-            result[r['slug']] = {
+
+            result[r['game_id']] = {
                 'name': r['name'],
-                'enabled': True,  # no hay columna enabled; asumimos activo si existe el juego
+                'enabled': True,
                 'settings': settings,
             }
+
         return jsonify({
             'student_id': student_id,
             'games': result
         })
     finally:
         cur.close()
+        
+@config_bp.put('/students/<int:student_id>/config/<int:game_id>')
+def update_one_config(student_id: int, game_id: int):
 
-@config_bp.put('/students/<int:student_id>/config/<string:slug>')
-def update_one_config(student_id: int, slug: str):
     payload = request.get_json(silent=True) or {}
+
     # Filtrar solo campos permitidos
     filtered = {k: v for k, v in payload.items() if k in ALLOWED_FIELDS}
     data, errors = _validate_and_normalize(filtered)
@@ -78,11 +81,8 @@ def update_one_config(student_id: int, slug: str):
 
     cur = get_db_cursor()
     conn = get_db()
+
     try:
-        game = _get_game_id_by_slug(cur, slug)
-        if not game:
-            return jsonify({'error': 'Juego no encontrado'}), 404
-        game_id = game['game_id']
 
         # Obtener valores previos (si existen) para merge con defaults
         cur.execute(
@@ -94,6 +94,8 @@ def update_one_config(student_id: int, slug: str):
             (student_id, game_id)
         )
         prev = cur.fetchone() or {}
+
+        
         merged = {
             'min_value': prev.get('min_value') if prev.get('min_value') is not None else DEFAULTS['min_value'],
             'max_value': prev.get('max_value') if prev.get('max_value') is not None else DEFAULTS['max_value'],
@@ -129,11 +131,18 @@ def update_one_config(student_id: int, slug: str):
                 merged['sum'],
             )
         )
+
         conn.commit()
-        return jsonify({'ok': True, 'student_id': student_id, 'slug': slug, 'settings': merged})
+        return jsonify({
+            'ok': True, 
+            'student_id': student_id,
+            'game_id': game_id, 
+            'settings': merged})
+
     except Exception as e:
         conn.rollback()
         return jsonify({'error': str(e)}), 500
+
     finally:
         cur.close()
 

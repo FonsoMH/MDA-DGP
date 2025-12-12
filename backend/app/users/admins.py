@@ -21,16 +21,28 @@ def create_admin():
 
     cur = get_db_cursor()
     try:
+        # Validar email único
         if email_in_use(cur, email):
             return jsonify({'error': 'Email is already in use.'}), 400
 
+        # Obtener role_id del rol "admin" para evitar hardcodeos
+        cur.execute("SELECT role_id FROM roles WHERE role_name = %s", ('admin',))
+        role_row = cur.fetchone()
+        if not role_row:
+            return jsonify({'error': 'admin role not found in the database.'}), 500
+        admin_role_id = role_row['role_id']
+
+        # Hashear password y crear el usuario admin
         password_hash = generate_password_hash(password)
 
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO users (name, email, password_hash, role_id)
             VALUES (%s, %s, %s, %s)
             RETURNING user_id
-        """, (name, email, password_hash, '3'))
+            """,
+            (name, email, password_hash, admin_role_id)
+        )
 
         new_user_id = cur.fetchone()['user_id']
 

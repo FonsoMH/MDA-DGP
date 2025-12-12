@@ -1,32 +1,43 @@
 import * as React from 'react';
 import { updateConfig } from '../../../api/studentConfig'; // Asegúrate de que la ruta sea correcta
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-/**
- * Hook personalizado para manejar el guardado de la configuración de un juego
- * específico para un estudiante.
- * @param studentId El ID del estudiante.
- * @param configs El objeto de configuración completo del estudiante.
- */
+
 export function useSaveStudentConfig(studentId: number, configs: any) {
-  const [saving, setSaving] = React.useState(false);
+  
+  const queryClient = useQueryClient();
 
-  const saveOne = React.useCallback(async (slug: string) => {
-    if (saving) return; 
+  const mutation = useMutation({
+    mutationFn: ({ gameId, payload }: { gameId: number , payload: any }) => 
+        updateConfig(studentId, Number(gameId), payload),
 
-    try {
-      setSaving(true);
-
-      const payload = configs[slug]?.settings || {};
+    onSuccess: (data, variables) => {
+      const queryKeyToInvalidate = ['gameConfig', studentId, Number(variables.gameId)];
       
-      await updateConfig(studentId, slug, payload);
+      queryClient.invalidateQueries({ 
+          queryKey: queryKeyToInvalidate,
+          refetchType: 'active'
+      });
       
-    } catch (error) {
-      console.error(`Error al guardar la configuración del juego ${slug}:`, error);
-      
-    } finally {
-      setSaving(false);
+    },
+    
+    onError: (error) => {
+        console.error("Fallo la mutación del juego:", error);
     }
-  }, [studentId, configs, saving]); 
+  });
 
-  return { saveOne, saving };
+  const saveOne = React.useCallback(async (gameId: number ) => {
+    
+    const payload = configs[gameId]?.settings || {};
+
+    mutation.mutate({ gameId, payload });
+
+  }, [studentId, configs, mutation.mutate]); 
+  
+  return { 
+    saveOne, 
+    saving: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError
+  };
 }
