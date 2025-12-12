@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 
 import BackButton from '../../components/common/BackButton/BackButton';
 import StateCard from '../../components/users/StateCard';
@@ -22,11 +22,10 @@ export default function UserListScreen({ navigation }: UserListProps) {
   const {user} = useUser();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(''); // <-- 2. Nuevo estado para búsqueda
   
-  // 'users' ya viene tipado como PaginatedUsersResponse desde el hook
-  const { users, isLoading, refetch } = useUsers(currentPage, ITEMS_PER_PAGE);
+  const { users, isLoading, refetch } = useUsers(currentPage, ITEMS_PER_PAGE, searchTerm);
 
-  // MANTENEMOS EL TIPO: El estado sigue siendo un PaginatedUsersResponse
   const [filteredUsers, setFilteredUsers] = useState<PaginatedUsersResponse>({ 
       items: [], 
       total_count: 0, 
@@ -47,6 +46,27 @@ export default function UserListScreen({ navigation }: UserListProps) {
   const handleNavigation = (screen: keyof AdminStackParamList) => {
     navigation.navigate('Admin', { screen: screen });
   }
+
+  useEffect(() => {
+    if (searchTerm === '') {
+      return
+    }
+
+    const handler = setTimeout(() => {
+
+        setCurrentPage(1);
+        refetch(); 
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+    
+  }, [searchTerm, refetch]);
+
+  const handleInputTextChange = (text: string) => {
+      setSearchTerm(text);
+  };
 
   const roleMap: Record<FilterOption, string | null> = {
     todos: null,
@@ -98,6 +118,14 @@ export default function UserListScreen({ navigation }: UserListProps) {
         <StateCard title="Tutores" count={countByRole('teacher')} emoji="👨‍🏫" color="blue" />
         <StateCard title="Estudiantes" count={countByRole('student')} emoji="👨‍🎓" color="green" />
       </View>
+
+      <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar por nombre..."
+          value={searchTerm}
+          onChangeText={handleInputTextChange}
+          testID="search-input"
+      />
 
       <FilterButtons onFilterChange={(f) => setFilter(f)} />
 
@@ -184,6 +212,18 @@ const styles = StyleSheet.create({
   headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   headerTitle: { fontSize: 24, fontWeight: '700', color: '#101828' },
   statsRow: { flexDirection: 'row', marginBottom: 16, flexWrap: 'wrap' },
+
+  searchInput: {
+      height: 40,
+      borderColor: '#D0D5DD',
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingHorizontal: 15,
+      marginBottom: 16,
+      backgroundColor: 'white',
+      fontSize: 16,
+  },
+
   listHeader: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -12,7 +12,7 @@ const sleep = (ms: number) => {
  * Obtiene todos los usuarios y los mapea al formato frontend.
  * @returns {Promise<PaginatedUsersResponse>} Lista de usuarios adaptados.
  */
-export async function fetchUsers(page: number, offset: number, limit: number): Promise<PaginatedUsersResponse> {
+export async function fetchUsers(page: number, offset: number, limit: number, name: string = ''): Promise<PaginatedUsersResponse> {
   const endpoint = `${BASE_URL}/api/users`;
 
   try {
@@ -28,6 +28,7 @@ export async function fetchUsers(page: number, offset: number, limit: number): P
         offset: offset,
         page_size: limit,
         t: Date.now(),
+        name: name
       }
     });
     const apiData = response.data;
