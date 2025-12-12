@@ -24,17 +24,17 @@ services:
     depends_on:
       - db
 
-  # web-frontend:
-  #   build: ./frontend
-  #   container_name: tato-frontend
-  #   command: npm run start
-  #   volumes:
-  #     - ./frontend:/app 
-  #     - /app/node_modules
-  #   ports:
-  #     - "8081:8081"
-  #   depends_on:
-  #     - web-backend
+  web-frontend:
+    build: ./frontend
+    container_name: tato-frontend
+    command: npm run start
+    volumes:
+      - ./frontend:/app 
+      - /app/node_modules
+    ports:
+      - "8081:8081"
+    depends_on:
+      - web-backend
 
 volumes:
   pgdata:
