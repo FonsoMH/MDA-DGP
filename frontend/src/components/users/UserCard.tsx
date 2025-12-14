@@ -5,6 +5,7 @@ import { DeleteUserHook } from './hook/DeleteUserHook';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 import { AdminStackParamList } from '../../navigation/AdminNavigator';
+import { useUser } from '../../hooks/useUser';
 
 
 type UserListScreenProps = NativeStackScreenProps<any, 'UserList'>;
@@ -29,8 +30,8 @@ const roleColors = {
 
 export default function UserCard({ user, onUserDeleted, onEdit, navigation, adminId }: UserCardProps) {
   const [expanded, setExpanded] = useState(false);
-
   const { isDeleting, error, deleteUser } = DeleteUserHook();
+  const { user: currentUser } = useUser();
 
   const roleColor = roleColors[user.role];
   const showStudentCount = user.role === 'teacher' && user.studentsCount !== undefined;
@@ -56,6 +57,14 @@ export default function UserCard({ user, onUserDeleted, onEdit, navigation, admi
   };
 
   const handleEditClick = () => {
+
+    if (user.role == 'admin'){
+      if (currentUser.role !== 'admin') {
+        Alert.alert('Error', 'No tienes permisos para editar administradores.');
+        return;
+      }
+      navigation.navigate('AdminEdit', { admin: user })
+    }
 
     if (user.role == 'teacher'){
       navigation.navigate('TeacherCreate', { teacher: user })

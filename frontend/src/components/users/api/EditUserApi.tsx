@@ -26,7 +26,7 @@ export const EditUserApi = async (user: UserApiData, data: UpdateUserPayload)  =
             url = `${BASE_URL}/api/teachers/${userId}`; 
             break;
         case 'admin':
-            url = `${BASE_URL}/api/admins/${userId}`;
+            url = `${BASE_URL}/api/admins/${userId}?requester_role=admin`;
             break;
         default:
             break;
