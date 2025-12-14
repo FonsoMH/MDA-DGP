@@ -125,3 +125,17 @@ export async function createStudentApi(payload: CreateStudentPayload): Promise<v
 
   }
 }
+
+export async function createAdminApi(payload: { name: string; email: string; password: string }, token?: string): Promise<void> {
+  const endpoint = `${BASE_URL}/api/admins`;
+
+  try {
+    await axios.post<any>(endpoint, payload, {
+      timeout: API_TIMEOUT,
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+  } catch (error) {
+    console.error('Error creando administrador:', error);
+    throw error;
+  }
+}
