@@ -43,11 +43,6 @@ export async function fetchUsers(page: number, offset: number, limit: number, na
       assignedTeacherId: u.assignedTeacherId ?? null,
     }));
 
-    console.log("asdfhjiosdfjkahsdfhjklasdfhjkl");
-    
-    console.log(mappedUsers);
-    
-
     return {
       items: mappedUsers,
       total_count: apiData.total_count,
