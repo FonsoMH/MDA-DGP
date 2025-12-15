@@ -71,13 +71,14 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
 
     return (
         <View style={styles.safe}>
+            
             <BackButton width={215} height={76} />
             <View style={styles.header}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>¡Selecciona tu contraseña {userParam.name}!</Text>
                 <Text style={{ fontSize: 16, color: '#666' }}>Elige {maxPasswordLength} pictogramas en orden</Text>
             </View>
             
-            <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
+            <View style={styles.passwordElementsContent} >
                 <View style={styles.passwordElements}>
                     {
                         availableIcons.map((item, index) => {
@@ -93,7 +94,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                         })
                     }
                 </View>
-            </ScrollView>
+            </View>
             
             <View style={styles.passwordBox}>
                 <Text style={styles.passwordHeader}>
@@ -249,8 +250,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center', 
-        gap: 15, 
+        gap: 20, 
         rowGap: 20, 
-        padding: 5,
+        paddingLeft: 150,
+        paddingRight: 150,
     },
 });
