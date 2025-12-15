@@ -77,8 +77,6 @@ def get_students():
     
     try:
         cur = get_db_cursor()
-
-        cur = get_db_cursor()
         
         cur.execute("SELECT role_id FROM roles WHERE role_name = 'student';")
         role_record = cur.fetchone()

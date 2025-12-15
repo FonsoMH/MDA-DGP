@@ -6,15 +6,19 @@ CREATE TABLE IF NOT EXISTS roles (
     role_name VARCHAR(50) NOT NULL UNIQUE
 );
 
+CREATE TABLE IF NOT EXISTS classes (
+    class_id SERIAL PRIMARY KEY,
+    class_name VARCHAR(100) NOT NULL UNIQUE
+);
+
 -- Users Table (Central)
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    
+    class_id INTEGER REFERENCES classes(class_id) NULL,
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
-    
     -- Relationship Teacher -> Student (only for students)
     assigned_teacher_id INTEGER REFERENCES users(user_id) NULL
 );
@@ -91,6 +95,12 @@ INSERT INTO roles (role_name) VALUES
 ('admin')
 ON CONFLICT (role_name) DO NOTHING;
 
+-- Populate Classes
+INSERT INTO classes (class_name) VALUES
+('Class 1A'),
+('Class 2B')
+ON CONFLICT (class_name) DO NOTHING;
+
 -- 2. Populate Games
 INSERT INTO games (slug, name, description) VALUES
 ('toca-numero', 'Toca el número que suena', 'Se escucha un número y se escoge el correspondiente de entre los mostrados en pantalla.'),
@@ -108,10 +118,10 @@ INSERT INTO users (name, email, password_hash, role_id)
 VALUES ('Professor Paul', 'paul@app.com', 'scrypt:32768:8:1$5IjCMocVblg07UqT$9ff5d3058a93e927c45f62a5658eaa251d14dde68a58ec84b0d2e928a060ed41d493f5e3d41c8122a8d773fcafe6e91b5c3a45301f57f6fce1bcdff417978ebe', (SELECT role_id FROM roles WHERE role_name = 'teacher'))
 ON CONFLICT (email) DO NOTHING;
 
-INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id) 
+INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id, class_id) 
 VALUES 
-('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$cqwOvGPYlW6TdyuQ$b1717df1f28a0d52b08fb2a1ee5599ddadd3e1a9c98be3d02accd368b1975ae1994c247a81da01ad4d89d606c6479c4f79032876a70d57af3fd8da343aab8e6a', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com')),
-('Leo Reader', 'leo@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'))
+('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$cqwOvGPYlW6TdyuQ$b1717df1f28a0d52b08fb2a1ee5599ddadd3e1a9c98be3d02accd368b1975ae1994c247a81da01ad4d89d606c6479c4f79032876a70d57af3fd8da343aab8e6a', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 1A')),
+('Leo Reader', 'leo@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 2B'))
 ON CONFLICT (email) DO NOTHING;
 
 -- 4. Populate Settings for 1 student (Eva)
