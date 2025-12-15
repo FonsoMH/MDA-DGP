@@ -1,6 +1,5 @@
 import axios from "axios";
 import { StudentLogin, LoginCredentials, AuthResponse, Classes, ClassesLogin } from "../../../types/login";
-
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
 
@@ -16,6 +15,8 @@ export async function fetchStudentsByClass(idClass:number): Promise<StudentLogin
 
     const endpoint = `${BASE_URL}/api/classes/${idClass}/students`; 
     
+    console.log(endpoint);
+    
     
     try {
         const response = await axios.get<ClassesLogin>(endpoint, { 
@@ -23,7 +24,8 @@ export async function fetchStudentsByClass(idClass:number): Promise<StudentLogin
         });
 
         const data: ClassesLogin = response.data;
-
+        console.log(data);
+        
         return data.students;
 
     } catch (error) {
@@ -49,12 +51,7 @@ export async function fetchClasses(): Promise<Classes[]> {
         return data;
 
     } catch (error) {
-        return {
-            items: [],
-            total_count: 0,
-            total_pages: 0,
-            current_page: 0
-        };
+        return []
     }
 }
 

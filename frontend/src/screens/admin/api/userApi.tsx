@@ -1,5 +1,5 @@
 import axios from "axios";
-import { UserFrontend, UserApiData, CreateTeacherPayload, Student, PaginatedResponse, Teacher, CreateStudentPayload, UserDeletionData, PaginatedUsersResponse } from "../../../types/users";
+import { UserFrontend, UserApiData, CreateTeacherPayload, Student, PaginatedResponse, Teacher, CreateStudentPayload, UserDeletionData, PaginatedUsersResponse, PaginatedUsersApiResponse } from "../../../types/users";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
@@ -16,7 +16,7 @@ export async function fetchUsers(page: number, offset: number, limit: number, na
   const endpoint = `${BASE_URL}/api/users`;
 
   try {
-    const response = await axios.get<PaginatedUsersResponse>(endpoint, {
+    const response = await axios.get<PaginatedUsersApiResponse>(endpoint, {
       timeout: API_TIMEOUT,
       headers: {
         "Cache-Control": "no-cache",
@@ -34,7 +34,7 @@ export async function fetchUsers(page: number, offset: number, limit: number, na
     const apiData = response.data;
 
     const mappedUsers: UserFrontend[] = apiData.items.map((u) => ({
-      userId: u.userId,
+      userId: u.id,
       name: u.name,
       email: u.email,
       role: u.role,
@@ -42,6 +42,11 @@ export async function fetchUsers(page: number, offset: number, limit: number, na
       studentsCount: u.studentsCount ?? 0,
       assignedTeacherId: u.assignedTeacherId ?? null,
     }));
+
+    console.log("asdfhjiosdfjkahsdfhjklasdfhjkl");
+    
+    console.log(mappedUsers);
+    
 
     return {
       items: mappedUsers,
