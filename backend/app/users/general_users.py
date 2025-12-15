@@ -34,17 +34,24 @@ def get_users():
 
         count_query = "SELECT COUNT(*) AS count FROM users u JOIN roles r ON u.role_id = r.role_id"
         where_clause = []
+        where_clause_parts = []
         params = []
 
         if role:
-            where_clause.append("WHERE r.role_name = %s")
+            where_clause_parts.append("r.role_name = %s")
             params.append(role)
-        elif name:
-            where_clause.append("WHERE u.name ILIKE %s")
+        
+        # 2. Filtro por Nombre (ILIKE)
+        if name:
+            where_clause_parts.append("u.name ILIKE %s")
             params.append(f"%{name}%")
+
+        # 3. Construir la cláusula WHERE final
+        if where_clause_parts:
+            # Unimos las condiciones con " AND " y le añadimos " WHERE " al inicio
+            where_clause = " WHERE " + " AND ".join(where_clause_parts)
         else:
             where_clause = ""
-            params = []
 
         cur.execute(count_query + where_clause, params)
         total_row = cur.fetchone()
