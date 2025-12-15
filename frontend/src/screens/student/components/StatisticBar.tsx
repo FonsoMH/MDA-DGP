@@ -9,9 +9,10 @@ type Props = {
     icon: any;
     label: string;
     value: number;
+    maxValue: number;
 };
 
-export default function StatisticBar({width, height, accessibilitySettings, icon, label, value}: Props) {
+export default function StatisticBar({width, height, accessibilitySettings, icon, label, value, maxValue = 20}: Props) {
     
     const iconSize = width / 2 - 3;
 
@@ -34,8 +35,8 @@ export default function StatisticBar({width, height, accessibilitySettings, icon
 });
 
     const iconsToRender = Math.min(
-        20, 
-        Math.ceil((value / 100) * 20)
+        maxValue, 
+        Math.ceil((value / 100) * maxValue)
     );
 
     return (
