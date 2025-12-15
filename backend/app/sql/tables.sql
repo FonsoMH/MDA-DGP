@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS game_results (
 CREATE TABLE IF NOT EXISTS user_deletion (
     deletion_id SERIAL PRIMARY KEY,
     delete_admin_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    delete_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    delete_user_id INTEGER NOT NULL,
     deleted_user_email VARCHAR(255),
     deleted_user_name VARCHAR(255),
     deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -193,4 +193,5 @@ VALUES
     55,
     '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
 )
+
 ON CONFLICT (student_id, game_id, played_at) DO NOTHING;

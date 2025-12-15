@@ -12,7 +12,7 @@ export type StudentRowProps = {
 
 export default function StudentRow({ id, name, email, onConfigure, onAccessibility, onStats }: StudentRowProps) {
   return (
-    <View style={styles.row}>
+    <View style={styles.row} data-testid={`student-row-${id}`} >
       <View style={[styles.cell, { flex: 2 }]}>
         <Text style={styles.name}>{name}</Text>
       </View>
@@ -25,6 +25,7 @@ export default function StudentRow({ id, name, email, onConfigure, onAccessibili
           onPress={() => onConfigure(id)}
           accessibilityRole="button"
           accessibilityLabel={`Configurar juegos de ${name}`}
+          testID={'configure-student-button'}
         >
           <Text style={styles.actionIcon}>⚙️</Text>
           <Text style={styles.actionTextConfig}>Configurar Juegos</Text>

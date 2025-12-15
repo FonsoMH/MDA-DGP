@@ -5,6 +5,13 @@ export interface StudentLogin {
   role: string
 };
 
+export interface PaginatedStudentsResponse {
+    items: StudentLogin[];
+    total_count: number;
+    total_pages: number;
+    current_page: number;
+}
+
 export type StudentLoginCardProps = {
   user: string;
   onPress: () => void;

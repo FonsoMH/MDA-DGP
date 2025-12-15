@@ -31,18 +31,19 @@ export default function StudentLoginScreen({ navigation }: StudentLoginProps){
             
             <View style={styles.cardsContainer}>
                 {
-                    users.map((user) => (
+                    users.items.map((user) => (
                         <StudentLoginCard 
                             key={user.id} 
                             id={user.id} 
                             user={user.name} 
-                            onPress={() => handleSubmit(user)} 
+                            onPress={() => handleSubmit(user)}
+                            
                         />
                     ))
                 }
             </View>
             
-            {users.length === 0 && (
+            {users.items.length === 0 && (
                 <View style={{ marginTop: 50 }}>
                     <Text style={styles.messageText}>No hay perfiles de estudiantes disponibles.</Text>
                     <Button title="Recargar" onPress={refetch} color="#4A90E2" />

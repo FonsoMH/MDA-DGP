@@ -18,6 +18,14 @@ export interface UserFrontend {
   assignedTeacherId?: number | null;  
 }
 
+export interface PaginatedUsersResponse {
+  items: UserFrontend[]; 
+  total_count: number;
+  total_pages: number;
+  current_page: number;
+  page_size?: number;
+}
+
 export interface UpdateUserPayload {
   name?: string;
   email?: string;
@@ -49,4 +57,12 @@ export interface PaginatedResponse<T> {
   items: T[];
   total_count: number;
   total_pages: number;
+}
+
+export interface UserDeletionData {
+    deletionId: number;
+    adminName: number;
+    deletedUserEmail: string;
+    deletedUserName: string;
+    deletedAt: string;
 }
