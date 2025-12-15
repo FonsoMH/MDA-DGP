@@ -5,12 +5,14 @@ import StudentCreateScreen from '../screens/admin/StudentCreateScreen';
 import TeacherCreateScreen from '../screens/admin/TeacherCreateScreen';
 import AdminCreateScreen from '../screens/admin/AdminCreateScreen';
 import { UserApiData } from '../types/users';
+import UserDeletionListScreen from '../screens/admin/UserDeletionListScreen';
 
 
 
 
 export type AdminStackParamList = {
     UserList: undefined;
+    UserDeletion: undefined;
     AdminCreate: undefined;
     TeacherCreate: undefined | {teacher : UserApiData};
     StudentCreate: undefined | {student : UserApiData};
@@ -27,6 +29,9 @@ function AdminNavigator() {
         }}
     >
       <AdminStack.Screen name="UserList" component={UserList}/>
+
+      <AdminStack.Screen name="UserDeletion" component={UserDeletionListScreen}/>
+
 
       <AdminStack.Screen name="AdminCreate" component={AdminCreateScreen}/>
 
