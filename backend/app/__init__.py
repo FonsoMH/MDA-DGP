@@ -54,6 +54,7 @@ def create_app():
     from .accessibility.accessibilitySettings import accessibility_settings_bp
     app.register_blueprint(accessibility_settings_bp)
 
+
     from .users.teachers import teacher_bp
     app.register_blueprint(teacher_bp)
 
@@ -71,6 +72,9 @@ def create_app():
 
     from .resources.resources_general import resources_bp
     app.register_blueprint(resources_bp)
+    
+    from .classes.classes import classes_bp
+    app.register_blueprint(classes_bp)
 
     # Statistics endpoints
     from .users.statistics import statistics_bp
