@@ -12,6 +12,7 @@ import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useA
 import BackButton from '../../components/common/BackButton/BackButton';
 import { GameStackParamList } from '../../navigation/GameNavigator';
 import { RootStackParamList } from '../../types/navigation';
+import { useUser } from '../../hooks/useUser';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;
 
@@ -47,6 +48,7 @@ const GAMES: Game[] = [
 export default function GameMenuScreen({ navigation }: Props) {
     
     const accessibilitySettings = useAccessibilitySettings();   
+    const student = useUser().user;
 
     
     const styles = StyleSheet.create({
@@ -100,12 +102,24 @@ export default function GameMenuScreen({ navigation }: Props) {
 
     return (
         <View style={styles.safe}>
-			<BackButton
-                width={215}
-                height={76}
-                alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
-                testID="back-button"
-            />
+            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%' }}>
+                        
+                <BackButton
+                    width={215}
+                    height={76}
+                    testID="back-button"
+                />
+                <Pressable
+                    onPress={() => navigation.navigate('Student', { screen: 'StudentStatistics', params: { student: student } })}
+                    accessibilityRole="button"
+                    accessibilityLabel="Ver estadísticas del estudiante"
+                >
+                    <Image
+                        source={require('../../../assets/icons/stats.png')}
+                        style={{ width: 76, height: 76 }}
+                    />
+                </Pressable>
+            </View>
                 <View style={styles.gridContainer}>
                     {GAMES.map((item) => (
                         <Pressable
