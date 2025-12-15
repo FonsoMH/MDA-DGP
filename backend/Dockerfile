@@ -4,8 +4,11 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt \
+    && pip install --upgrade google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib
+
+
 
 COPY . .
 

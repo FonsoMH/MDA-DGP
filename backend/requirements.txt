@@ -5,3 +5,8 @@ psycopg2-binary
 python-dotenv
 Flask-JWT-Extended
 pytest
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
+Pillow

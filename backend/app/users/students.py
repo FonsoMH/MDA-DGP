@@ -3,21 +3,22 @@ from ..db import get_db_cursor
 from psycopg2 import sql
 from werkzeug.security import generate_password_hash
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
+from app.google_drive.google_drive_utils import create_student_drive_structure
+print(">>> STUDENTS ROUTE LOADED <<<")
+
 
 students_bp = Blueprint('students', __name__, url_prefix='/api')
 
 # Implement CRUD operations for students users and other student-related endpoints
-
-# Create a new student
 @students_bp.route('/students', methods=['POST'])
 def create_student():
     data = request.get_json() or {}
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip().lower()
-    pictogram_password = (data.get('password') or '').strip()
+    password = (data.get('password') or '').strip()
     assigned_teacher_id = data.get('assigned_teacher')
 
-    password_hash = generate_password_hash(pictogram_password)
+    password_hash = generate_password_hash(password)
 
     if not name or not email:
         return jsonify({'error': 'Name and email are required.'}), 400
@@ -29,6 +30,7 @@ def create_student():
         role_row = cur.fetchone()
         if not role_row:
             return jsonify({'error': 'Student role not found in the database.'}), 500
+        
         role_id = role_row['role_id']
 
         # Check for existing email
@@ -45,17 +47,32 @@ def create_student():
         cur.execute(insert_query, (name, email, password_hash or '', role_id, assigned_teacher_id))
         new_id = cur.fetchone()['user_id']
 
-        # Insert default settings in accessibility_settings
+        print(f"Created new student with ID: {new_id}")
+        # === Create Google Drive structure ===
+        try:
+            root_folder_id, subfolders = create_student_drive_structure(new_id)
+        except Exception as drive_err:
+            cur.execute("ROLLBACK;")
+            return jsonify({'error': 'Error creating Google Drive structure', 'detail': str(drive_err)}), 500
+
+        print(f"Created Google Drive structure for student ID: {new_id} with root folder ID: {root_folder_id}")
+
+        # Insert default accessibility settings
         cur.execute("""
-                    INSERT INTO accessibility_settings (student_id)
-                    VALUES (%s)
-                    ON CONFLICT (student_id) DO NOTHING;
-                    """, (new_id,))
+            INSERT INTO accessibility_settings (student_id)
+            VALUES (%s)
+            ON CONFLICT (student_id) DO NOTHING;
+        """, (new_id,))
         
-        # Commit the transaction
+        # Commit
         cur.execute("COMMIT;")
 
-        return jsonify({'id': new_id, 'name': name, 'email': email}), 201
+        return jsonify({
+            'id': new_id,
+            'name': name,
+            'email': email,
+            'drive_folder': root_folder_id
+        }), 201
     
     except Exception as e:
         try:
