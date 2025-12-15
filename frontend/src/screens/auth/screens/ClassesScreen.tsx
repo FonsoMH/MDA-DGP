@@ -5,18 +5,17 @@ import StudentLoginCard from '../components/StudentLoginCard';
 import BackButton from '../../../components/common/BackButton/BackButton';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { Classes, StudentLogin } from '../../../types/login';
-import { useStudentsData } from '../hook/usersList';
+import { useClassesData, useStudentsData } from '../hook/usersList';
 
 
-type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
+type ClassesScreenProps = NativeStackScreenProps<any, 'StudentLogin'>;
 
-export default function StudentLoginScreen({ route, navigation }: StudentLoginProps){
+export default function ClassesScreen({ navigation }: ClassesScreenProps){
 
-    const classParam: Classes = route.params.clasParam; 
-    const { users, isLoading, refetch } = useStudentsData(classParam.id);
+    const { classes, isLoading, refetch } = useClassesData();
 
-    const handleSubmit = (user: StudentLogin) => {
-        navigation.navigate('StudentPassword', { userParam: user });
+    const handle = (clas: Classes) => {
+        navigation.navigate('StudentLogin', { clasParam: clas });
     }
     
     if (isLoading) {
@@ -28,25 +27,24 @@ export default function StudentLoginScreen({ route, navigation }: StudentLoginPr
     return (
         <View style={styles.safe}>
             <BackButton width={215} height={76} />
-            <Text style={styles.title}>¡Elige tu perfil!</Text>
+            <Text style={styles.title}>¡Elige la clase!</Text>
             
             <View style={styles.cardsContainer}>
                 {
-                    users.items.map((user) => (
+                    classes.map((clas) => (
                         <StudentLoginCard 
-                            key={user.id} 
-                            id={user.id} 
-                            user={user.name} 
-                            onPress={() => handleSubmit(user)}
-                            
+                            key={clas.id} 
+                            id={clas.id} 
+                            user={clas.name} 
+                            onPress={() => handle(clas)} 
                         />
                     ))
                 }
             </View>
             
-            {users.items.length === 0 && (
+            {classes.length === 0 && (
                 <View style={{ marginTop: 50 }}>
-                    <Text style={styles.messageText}>No hay perfiles de estudiantes disponibles.</Text>
+                    <Text style={styles.messageText}>No hay clases disponibles.</Text>
                     <Button title="Recargar" onPress={refetch} color="#4A90E2" />
                 </View>
             )}

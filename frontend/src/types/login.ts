@@ -1,8 +1,17 @@
+export interface Classes {
+  name: string;
+  id: number;
+};
+
 export interface StudentLogin {
   name: string;
   email: string
   id: number;
-  role: string
+};
+
+export interface ClassesLogin {
+  id: number;
+  students: StudentLogin[]
 };
 
 export interface PaginatedStudentsResponse {
