@@ -6,65 +6,90 @@ users_bp = Blueprint('users', __name__, url_prefix='/api')
 
 @users_bp.route('/users', methods=['GET'])
 def get_users():
-    # filter by role
-    role = request.args.get('role')
+    try:
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 10))
+        offset = int(request.args.get('offset', default=0))
 
-    # filter by name
-    name = request.args.get('name')
+        if page_size < 1: page_size = 10
+        if page < 1: page = 1
 
-    cur = get_db_cursor()
+        if offset is not None:
+            offset = max(0, int(offset))
+        else:
+            offset = (page - 1) * page_size
 
-    if role:
-        cur.execute("""
+        # filter by role
+        role = request.args.get('role')
+        # filter by name
+        name = request.args.get('name')
+
+        cur = get_db_cursor()
+
+        base_query = """
             SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
             FROM users u
             JOIN roles r ON u.role_id = r.role_id
-            WHERE r.role_name = %s
-            ORDER BY u.name
-        """, (role,))
-    elif name:
-        cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
-            FROM users u
-            JOIN roles r ON u.role_id = r.role_id
-            WHERE u.name ILIKE %s
-            ORDER BY u.name
-        """, (f'%{name}%',))
-    else:
-        cur.execute("""
-            SELECT u.user_id, u.name, u.email, r.role_name, u.assigned_teacher_id
-            FROM users u
-            JOIN roles r ON u.role_id = r.role_id
-            ORDER BY u.name
-        """)
+        """
 
-    rows = cur.fetchall()
+        count_query = "SELECT COUNT(*) AS count FROM users u JOIN roles r ON u.role_id = r.role_id"
+        where_clause = []
+        params = []
 
-    users = []
-    for row in rows:
-        user_dict = {
-            'id': row['user_id'],
-            'name': row['name'],
-            'email': row['email'],
-            'role': row['role_name'],
-            'assignedTeacherId': row['assigned_teacher_id']
-        }
+        if role:
+            where_clause.append("WHERE r.role_name = %s")
+            params.append(role)
+        elif name:
+            where_clause.append("WHERE u.name ILIKE %s")
+            params.append(f"%{name}%")
+        else:
+            where_clause = ""
+            params = []
 
-        # If user is a teacher, fetch assigned students
-        if row['role_name'] == 'teacher':
-            cur.execute("""
-                SELECT name FROM users
-                WHERE assigned_teacher_id = %s
-                ORDER BY name
-            """, (row['user_id'],))
-            students = cur.fetchall()
-            user_dict['assignedStudents'] = [s['name'] for s in students]
-            user_dict['studentsCount'] = len(students)
+        cur.execute(count_query + where_clause, params)
+        total_row = cur.fetchone()
+        total_count = total_row['count'] if total_row else 0
 
-        users.append(user_dict)
-    
-    cur.close()
-    return jsonify(users)
+        final_query = base_query + where_clause + " ORDER BY u.name ASC LIMIT %s OFFSET %s"
+        params.extend([page_size, offset])
+        cur.execute(final_query, params)
+        rows = cur.fetchall()
+
+        users = []
+        for row in rows:
+                user_dict = {
+                    'id': row['user_id'],
+                    'name': row['name'],
+                    'email': row['email'],
+                    'role': row['role_name'],
+                    'assignedTeacherId': row['assigned_teacher_id']
+                }
+
+                if row['role_name'] == 'teacher':
+                    cur.execute("""
+                        SELECT name FROM users
+                        WHERE assigned_teacher_id = %s
+                        ORDER BY name
+                    """, (row['user_id'],))
+                    students = cur.fetchall()
+                    user_dict['assignedStudents'] = [s['name'] for s in students]
+                    user_dict['studentsCount'] = len(students)
+                
+                users.append(user_dict)
+
+        total_pages = (total_count + page_size - 1) // page_size if total_count else 0
+        cur.close()
+        return jsonify({
+            'items': users,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'current_page': page,
+            'page_size': page_size
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching users: {e}")
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
 
 
 @users_bp.route('/users/<int:user_id>', methods=['DELETE'])

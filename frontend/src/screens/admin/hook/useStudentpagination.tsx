@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { loadStudentsApi } from '../api/userApi';
 import { Student } from '../../../types/users';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export function useStudentPagination() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -17,7 +17,8 @@ export function useStudentPagination() {
     setCurrentPage(p);
 
     try {
-      const response = await loadStudentsApi(p, PAGE_SIZE);
+      const offset = (p-1) * PAGE_SIZE;
+      const response = await loadStudentsApi(p, PAGE_SIZE, offset);
 
       const studentsData: Student[] = response.items.map((u: Student) => ({
         id: u.id,
