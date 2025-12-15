@@ -8,14 +8,14 @@ import { Classes, StudentLogin } from '../../../types/login';
 import { useClassesData, useStudentsData } from '../hook/usersList';
 
 
-type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
+type ClassesScreenProps = NativeStackScreenProps<any, 'StudentLogin'>;
 
-export default function ClassesScreen({ navigation }: StudentLoginProps){
+export default function ClassesScreen({ navigation }: ClassesScreenProps){
 
     const { classes, isLoading, refetch } = useClassesData();
 
-    const handleSubmit = (clas: Classes) => {
-        navigation.navigate('StudentLoginScreen', { clasParam: clas });
+    const handle = (clas: Classes) => {
+        navigation.navigate('StudentLogin', { clasParam: clas });
     }
     
     if (isLoading) {
@@ -36,7 +36,7 @@ export default function ClassesScreen({ navigation }: StudentLoginProps){
                             key={clas.id} 
                             id={clas.id} 
                             user={clas.name} 
-                            onPress={() => handleSubmit(clas)} 
+                            onPress={() => handle(clas)} 
                         />
                     ))
                 }

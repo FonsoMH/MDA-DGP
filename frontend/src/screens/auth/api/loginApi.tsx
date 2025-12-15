@@ -1,5 +1,5 @@
 import axios from "axios";
-import { StudentLogin, LoginCredentials, AuthResponse, Classes } from "../../../types/login";
+import { StudentLogin, LoginCredentials, AuthResponse, Classes, ClassesLogin } from "../../../types/login";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_TIMEOUT = process.env.API_TIMEOUT;
@@ -18,13 +18,13 @@ export async function fetchStudentsByClass(idClass:number): Promise<StudentLogin
     
     
     try {
-        const response = await axios.get<StudentLogin[]>(endpoint, { 
+        const response = await axios.get<ClassesLogin>(endpoint, { 
             timeout: API_TIMEOUT 
         });
 
-        
-        const data: StudentLogin[] = response.data;
-        return data;
+        const data: ClassesLogin = response.data;
+
+        return data.students;
 
     } catch (error) {
         return [];

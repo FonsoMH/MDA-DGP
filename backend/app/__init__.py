@@ -58,6 +58,9 @@ def create_app():
     from .users.user_deletion import users_deletion_bp
     app.register_blueprint(users_deletion_bp)
 
+    from .classes.classes import classes_bp
+    app.register_blueprint(classes_bp)
+
     # Statistics endpoints
     from .users.statistics import statistics_bp
     app.register_blueprint(statistics_bp)

@@ -12,7 +12,7 @@ type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
 
 export default function StudentLoginScreen({ route, navigation }: StudentLoginProps){
 
-    const classParam: Classes = route.params.classParam; 
+    const classParam: Classes = route.params.clasParam; 
     const { users, isLoading, refetch } = useStudentsData(classParam.id);
 
     const handleSubmit = (user: StudentLogin) => {

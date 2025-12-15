@@ -26,8 +26,8 @@ function LoginNavigator() {
             headerShown: false
         }}
     >
-        <LoginStack.Screen name="StudentLogin" component={StudentLoginScreen} />
         <LoginStack.Screen name="Classeslogin" component={ClassesScreen} />
+        <LoginStack.Screen name="StudentLogin" component={StudentLoginScreen} />
         <LoginStack.Screen name="StudentPassword" component={StudentPasswordScreen} />
         <LoginStack.Screen name="TeacherLogin" component={TeacherLoginScreen} />
 
