@@ -8,6 +8,7 @@ import type { TeacherStackParamList } from '../../navigation/TeacherNavigator';
 import { useTeacherStudents } from './hooks/useTeacherStudents';
 import StudentRow from '../../components/users/StudentRow';
 import { useUser } from '../../hooks/useUser';
+import AdvancedPagination from '../../components/common/Pagination/Pagination';
 
 export default function TeacherStudentListScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<TeacherStackParamList>>();
@@ -20,14 +21,19 @@ export default function TeacherStudentListScreen() {
     return undefined;
   }, [route?.params?.teacherId, user]);
 
-  const { students, loading, error, refetch } = useTeacherStudents(teacherId);
+  const { students,
+        loading,
+        totalPages,
+        currentPage,
+        error,
+        changePage } = useTeacherStudents(teacherId);
 
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      refetch();
-    });
-    return unsubscribe;
-  }, [navigation, refetch]);
+  // React.useEffect(() => {
+  //   const unsubscribe = navigation.addListener('focus', () => {
+  //     refetch();
+  //   });
+  //   return unsubscribe;
+  // }, [navigation, refetch]);
 
   const onConfigure = (studentId: number) => {
     navigation.navigate('StudentGameConfig', { studentId });
@@ -88,6 +94,13 @@ export default function TeacherStudentListScreen() {
           </ScrollView>
         </View>
       )}
+
+      <AdvancedPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={changePage}
+        pageLimit={totalPages}
+      />
     </View>
   );
 }

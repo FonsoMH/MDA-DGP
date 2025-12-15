@@ -32,7 +32,7 @@ export default function StudentLoginScreen({ route, navigation }: StudentLoginPr
             
             <View style={styles.cardsContainer}>
                 {
-                    users.map((user) => (
+                    users.items.map((user) => (
                         <StudentLoginCard 
                             key={user.id} 
                             id={user.id} 
@@ -44,7 +44,7 @@ export default function StudentLoginScreen({ route, navigation }: StudentLoginPr
                 }
             </View>
             
-            {users.length === 0 && (
+            {users.items.length === 0 && (
                 <View style={{ marginTop: 50 }}>
                     <Text style={styles.messageText}>No hay perfiles de estudiantes disponibles.</Text>
                     <Button title="Recargar" onPress={refetch} color="#4A90E2" />

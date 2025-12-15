@@ -49,7 +49,12 @@ export async function fetchClasses(): Promise<Classes[]> {
         return data;
 
     } catch (error) {
-        return [];
+        return {
+            items: [],
+            total_count: 0,
+            total_pages: 0,
+            current_page: 0
+        };
     }
 }
 
