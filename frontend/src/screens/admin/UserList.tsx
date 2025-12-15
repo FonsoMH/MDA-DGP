@@ -182,9 +182,9 @@ export default function UserListScreen({ navigation }: UserListProps) {
               <Text style={styles.menuText}>Crear Administrador</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate');
-                                                                      setTimeout(() => {
+                                                                     setTimeout(() => {
                                                                           refetch();
-                                                                      }, 500);;
+                                                                      }, 500);
            }} testID='create-teacher-button'>
 
               <Text style={styles.menuText}>Crear Tutor</Text>
