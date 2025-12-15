@@ -22,6 +22,7 @@ export const useStudentStatistics = (studentId: number, gameId: number): Student
 
         try {
             const today = new Date();
+            today.setHours(1, 0, 0, 0);
 
             const fetchedAllStats = await fetchStudentStatistics(
                 studentId,
@@ -29,7 +30,7 @@ export const useStudentStatistics = (studentId: number, gameId: number): Student
                 null,
                 null
             );
-            
+                       
             const fetchedTodayStats = await fetchStudentStatistics(
                 studentId,
                 gameId,
