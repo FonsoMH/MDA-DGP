@@ -91,8 +91,8 @@ export default function StudentStatisticsScreen({route}: Props) {
 
     const { todayStats, allStats, isLoading, error } = useStudentStatistics(student.id, selectedGameId);
 
-    const maxIconsToday = todayStats ? Math.max(todayStats.successfulPlays, todayStats.failedPlays, todayStats.abandonPlays) : 1;
-    const maxIconsAll = allStats ? Math.max(allStats.successfulPlays, allStats.failedPlays, allStats.abandonPlays) : 1;
+    const maxIconsToday = todayStats ? Math.max(todayStats.successfulPlays, todayStats.failedPlays, todayStats.abandonPlays, 20) : 1;
+    const maxIconsAll = allStats ? Math.max(allStats.successfulPlays, allStats.failedPlays, allStats.abandonPlays, 20) : 1;
 
     return (
         <View style={styles.container}>
@@ -130,7 +130,7 @@ export default function StudentStatisticsScreen({route}: Props) {
                                 width={50}
                                 height={250}
                                 accessibilitySettings={accessibilitySettings}
-                                icon={icons['Success']}
+                                icon={icons['Fail']}
                                 label="Errores"
                                 value={todayStats ? todayStats.failedPlays : 0}
                                 maxValue={maxIconsToday}
@@ -139,7 +139,7 @@ export default function StudentStatisticsScreen({route}: Props) {
                                 width={50}
                                 height={250}
                                 accessibilitySettings={accessibilitySettings}
-                                icon={icons['Success']}
+                                icon={icons['Abandon']}
                                 label="Omisiones"
                                 value={todayStats ? todayStats.abandonPlays : 0}
                                 maxValue={maxIconsToday}
@@ -154,14 +154,14 @@ export default function StudentStatisticsScreen({route}: Props) {
                                 accessibilitySettings={accessibilitySettings}
                                 icon={icons['Success']}
                                 label="Aciertos"
-                                value={20}
+                                value={allStats ? allStats.successfulPlays : 0}
                                 maxValue={maxIconsAll}
                             />
                             <StatisticBar
                                 width={50}
                                 height={250}
                                 accessibilitySettings={accessibilitySettings}
-                                icon={icons['Success']}
+                                icon={icons['Fail']}
                                 label="Errores"
                                 value={allStats ? allStats.failedPlays : 0}
                                 maxValue={maxIconsAll}
@@ -170,7 +170,7 @@ export default function StudentStatisticsScreen({route}: Props) {
                                 width={50}
                                 height={250}
                                 accessibilitySettings={accessibilitySettings}
-                                icon={icons['Success']}
+                                icon={icons['Abandon']}
                                 label="Omisiones"
                                 value={allStats ? allStats.abandonPlays : 0}
                                 maxValue={maxIconsAll}
@@ -178,7 +178,6 @@ export default function StudentStatisticsScreen({route}: Props) {
                         </View>
                     </View>
                 </View>
-
             </View>
         </View>
     );

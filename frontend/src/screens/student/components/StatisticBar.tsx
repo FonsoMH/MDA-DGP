@@ -16,6 +16,8 @@ export default function StatisticBar({width, height, accessibilitySettings, icon
     
     const iconSize = width / 2 - 3;
 
+    const MAX_ICONS = 20;
+
     const styles = StyleSheet.create({
         container : {
             flexDirection: 'row',
@@ -35,8 +37,8 @@ export default function StatisticBar({width, height, accessibilitySettings, icon
 });
 
     const iconsToRender = Math.min(
-        maxValue, 
-        Math.ceil((value / 100) * maxValue)
+        MAX_ICONS, 
+        Math.round((value / maxValue) * MAX_ICONS)
     );
 
     return (
