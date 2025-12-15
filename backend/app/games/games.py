@@ -17,11 +17,6 @@ def get_config_from_db(student_id, game_id):
 
     return configuration
 
-def _get_game_id_by_slug(cur, slug: str):
-    cur.execute("SELECT game_id, slug, name FROM games WHERE slug = %s", (slug,))
-    row = cur.fetchone()
-    return row
-
 def _validate_and_normalize(payload: dict):
     data = {}
     errors = {}

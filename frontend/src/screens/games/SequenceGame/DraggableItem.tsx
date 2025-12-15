@@ -21,7 +21,8 @@ interface DraggableItemProps {
     style?: StyleProp<ViewStyle>;
     isDisabled: boolean;
     children: React.ReactNode;
-    testID: string;
+    testID?: string;
+    comeBack: boolean;
 }
 
 const DraggableItem: React.FC<DraggableItemProps> = ({ 
@@ -32,7 +33,8 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
     style,
     isDisabled,
     children,
-    testID
+    testID,
+    comeBack = true,
 }) => {
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);

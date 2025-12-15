@@ -202,9 +202,215 @@ export function generateEquitableFixedSizeArray(
     }
     
     if (attempts > 5000) {
-        console.warn("Se excedieron 5000 intentos para generar un puzle. Podría haber un problema de lógica.");
+        console.warn("Se excedieron 5000 intentos para generar un puzzle. Podría haber un problema de lógica.");
     }
   }
 
   return { puzzleArray: [], targetSum: 0 }; 
+}
+
+interface EquitableArrayResultDiff {
+  puzzleSolution: number[][];
+  targetDifference: number;
+}
+
+/**
+ * Generates a solution (an array of pairs) where the subtraction (difference) 
+ * between the elements of each pair equals a randomly chosen TargetDifference.
+ *
+ * @param maxValue Maximum value for the generated numbers.
+ * @param minValue Minimum value for the generated numbers.
+ * @param arraySize This value is ignored; the output array size is 2 * numContainers.
+ * @param numContainers Number of pairs (groups) to be formed.
+ */
+export function generateEquitableFixedSizeArrayDiff(
+  maxValue: number,
+  minValue: number,
+  numContainers: number
+): EquitableArrayResultDiff { 
+
+  
+  if (numContainers <= 0 || (maxValue - minValue) < 1) {
+    return { puzzleSolution: [], targetDifference: 0 };
+  }
+  
+  const maxViableDifference = maxValue - minValue;
+  const targetDifference = getRandomNumber(1, maxViableDifference);
+
+  const solution: number[][] = [];
+  
+  for (let i = 0; i < numContainers; i++) {
+    
+    const maxPossibleMin = maxValue - targetDifference;
+    
+    const minElement = getRandomNumber(minValue, maxPossibleMin);
+    
+    const maxElement = minElement + targetDifference;
+    
+    solution.push([minElement, maxElement]);
+  }
+
+  return {
+    puzzleSolution: solution,
+    targetDifference: targetDifference
+  };
+}
+
+interface GamePuzzleResult {
+  initialContainers: number[][];
+  solutionContainers?: number[][];
+  target: number; 
+}
+
+/**
+ * Auxiliary function to find the exact partition of the puzzleArray into N containers.
+ * @param nums Array of numbers (the puzzleArray)
+ * @param numCont Number of containers
+ * @param targetSum Target sum for each container
+ * @returns Array of arrays (the partition) or null if it fails (it shouldn't)
+ */
+export function findExactPartition(
+    nums: number[],
+    numCont: number,
+    targetSum: number
+): number[][] | null {
+    const containers: number[][] = Array(numCont).fill(0).map(() => []);
+    const containerSums: number[] = Array(numCont).fill(0);
+    const used: boolean[] = Array(nums.length).fill(false);
+    
+    const sortedNums = [...nums].sort((a, b) => b - a);
+
+    function backtrack(k: number = 0): boolean {
+        if (containerSums.every(s => s === targetSum)) {
+            return true;
+        }
+
+        let nextIndex = -1;
+        for (let i = k; i < sortedNums.length; i++) {
+            if (!used[i]) {
+                nextIndex = i;
+                break;
+            }
+        }
+        
+        if (nextIndex === -1) {
+             return containerSums.every(s => s === targetSum);
+        }
+        
+        const currentNum = sortedNums[nextIndex];
+        
+        for (let i = 0; i < numCont; i++) {
+            if (containerSums[i] + currentNum <= targetSum) {
+                containerSums[i] += currentNum;
+                containers[i].push(currentNum);
+                used[nextIndex] = true;
+
+                if (backtrack(nextIndex + 1)) {
+                    return true;
+                }
+
+                used[nextIndex] = false;
+                containers[i].pop();
+                containerSums[i] -= currentNum;
+            }
+        }
+        return false;
+    }
+
+    if (backtrack()) {
+        return containers;
+    }
+    return null;
+}
+
+/**
+ * Main function that generates the initial state of the puzzle, 
+ * including the required adjustment (addition or subtraction).
+ * * @param arraySize The size of the SOLUTION array (numbers that should remain).
+ * @param numContainers The number of recipients (containers).
+ * @param numExtraElements The number of "distractor" or "extra" elements initially.
+ * @param minValue Minimum value of the generated numbers.
+ * @param maxValue Maximum value of the generated numbers.
+ */
+export function generateEquitableAdjustmentPuzzle(
+  minValue: number,
+    maxValue: number,
+    arraySize: number, 
+    numContainers: number,
+    sum: boolean
+): GamePuzzleResult {
+  
+
+  const numExtraElements = (numContainers * 2);
+
+  let solutionContainers: number[] | number[][];
+
+  let target = 0;
+
+  if ( sum ){
+    const { puzzleArray, targetSum } =  generateEquitableFixedSizeArray(
+        maxValue, minValue, arraySize, numContainers
+    );
+
+    target = targetSum;
+    
+    if (puzzleArray.length === 0) {
+        return { initialContainers: [], target: 0 };
+    }
+    
+    solutionContainers = findExactPartition(puzzleArray, numContainers, targetSum);
+
+  }
+
+  else {
+    const {puzzleSolution, targetDifference} = 
+    generateEquitableFixedSizeArrayDiff(maxValue, minValue, numContainers);
+
+    solutionContainers = puzzleSolution;
+
+    target = targetDifference;
+
+  }
+  
+  if (!solutionContainers || solutionContainers.length == 0) {
+      return { initialContainers: [], target: 0};
+  }
+
+  const extraElements: number[] = [];
+  let totalExtraSum = 0;
+
+  
+  for (let i = 0; i < numExtraElements; i++) {
+
+      const extraNum = 
+      sum ?
+      getRandomNumber(minValue, maxValue)
+      :
+      getRandomNumber(minValue, target/2)
+
+
+      ;
+      extraElements.push(extraNum);
+      totalExtraSum += extraNum;
+  }
+
+  const initialContainers: number[][] = solutionContainers.map(c => [...c]);
+  
+  extraElements.forEach((num, index) => {
+      const containerIndex = index % numContainers;
+      initialContainers[containerIndex].push(num);
+  });
+  
+  initialContainers.forEach(container => {
+      for (let i = container.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [container[i], container[j]] = [container[j], container[i]];
+      }
+  });
+
+  return {
+      initialContainers: initialContainers,
+      solutionContainers: solutionContainers,
+      target: target,
+  };
 }

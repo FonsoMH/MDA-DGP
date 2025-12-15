@@ -7,6 +7,7 @@ import DraggableItem from "../SequenceGame/DraggableItem";
 import { SharedValue, useAnimatedRef } from "react-native-reanimated";
 import { useAccessibilitySettings } from "../../teacher/hooks/useAccessibilitySettings";
 import { AccessibilitySettingsFrontend } from "../../../types/accessibility";
+import BounceDisplay from "../../../components/common/NumberDisplays/BounceDisplay";
 
 type Layout = { x: number; y: number; width: number; height: number; };
 
@@ -22,7 +23,10 @@ interface ContainerProps{
     containerIndex: number;
     onLayoutMeasured?: (layout: Layout, index: number) => void;
     accessibilitySettings: AccessibilitySettingsFrontend;
-    
+    isSum: boolean
+    hintActive?: boolean;
+    hintOptionId?: string;
+    onEndHint?: () => void;    
 }
 
 
@@ -36,6 +40,10 @@ function Container({
     containerIndex,
     onLayoutMeasured,
     accessibilitySettings,
+    isSum,
+    hintActive,
+    hintOptionId,
+    onEndHint
 }: ContainerProps) {
 
     const [borderColor, setBorderColor] = useState(EMPTY_COLOR); 
@@ -52,14 +60,36 @@ function Container({
     };
 
     const checkSum = (numbers: Option[]): string => {
-        
         if (numbers.length === 0) {
             return EMPTY_COLOR;
         }
         
-        const totalSum = numbers.reduce((sum, current) => sum + current.value, 0);
+        let result: number;
 
-        return totalSum === targetSum ? CORRECT_COLOR : ERROR_COLOR;
+        if (isSum) {
+            // Lógica de suma original
+            result = numbers.reduce((sum, current) => sum + current.value, 0);
+
+        } else {
+            // Lógica de resta acumulativa:
+            // Toma el primer valor y le resta el resto de los valores.
+            
+            if (numbers.length === 1) {
+                result = numbers[0].value;
+            } else {
+                const copy = [...numbers];
+                copy.sort((a, b) => b.value - a.value);
+                // Inicializa con el primer valor y resta los subsiguientes
+                const firstValue = copy[0].value;
+                result = copy.slice(1).reduce((diff, current) => diff - current.value, firstValue);
+                result = Math.abs(result);
+            }
+
+        }
+
+        // Comprobación final
+        // Usamos Math.abs(result) si la resta puede dar negativo, pero el target siempre es positivo.
+        return result === targetSum ? CORRECT_COLOR : ERROR_COLOR;
     };
 
     useEffect(() => {
@@ -92,49 +122,64 @@ function Container({
     const containerRef = useAnimatedRef<View>();
 
     return (
-        <View style={styles.area}
-        ref={containerRef}
-        onLayout={() => {
-            containerRef.current?.measureInWindow((x, y, width, height) => {
-                const layout: Layout = { x, y, width, height };
-                
-                onLayoutMeasured(layout, containerIndex);
-            });
-        }}
+        <BounceDisplay
+            isBouncing={hintActive && !items.some(item => item.id === hintOptionId)}
+            onAnimationEnd={() => {
+                if(onEndHint){
+                    onEndHint();
+                }
+            }}
         >
+            <View style={styles.area}
+            ref={containerRef}
+            onLayout={() => {
+                containerRef.current?.measureInWindow((x, y, width, height) => {
+                    const layout: Layout = { x, y, width, height };
+                    
+                    onLayoutMeasured(layout, containerIndex);
+                });
+            }}
+            aria-label={`Container-Area-${containerIndex}`}
+            >
 
-        <TouchableOpacity 
-        style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
-        onPress={handleContainerClick}>
-            {items.map((option, index) => (
-                <DraggableItem
-                onPress={() => handleNumberCLick(option)}
-                onDrop={() => handleNumberCLick(option)}
-                dropZonesLayouts={topZoneLayout} 
-                isDisabled={false} 
-                key={`opt-${option.id}-${index}`}
-                comeBack={false}
-                style={styles.optionWrapper}
-                 >
-                    <NumberDisplay
-                        numberProp={option.value} 
-                        size={80}
-                        numberColor={accessibilitySettings.numberColor}
-                        style={{backgroundColor: accessibilitySettings.boxColor}}
-                    ></NumberDisplay>
-                </DraggableItem>
-            ))}
-        </TouchableOpacity>
+            <TouchableOpacity 
+            style={[styles.container, {borderColor: borderColor ,backgroundColor: accessibilitySettings.containerColor}]} 
+            onPress={handleContainerClick}
+            testID={`container-item`}
+            >
+                {items.map((option, index) => (
+                    <DraggableItem
+                    onPress={() => handleNumberCLick(option)}
+                    onDrop={() => handleNumberCLick(option)}
+                    dropZonesLayouts={topZoneLayout} 
+                    isDisabled={false} 
+                    key={`opt-${option.id}-${index}`}
+                    comeBack={false}
+                    style={styles.optionWrapper}
+                    testID={`opt-${option.value}`}
+                    >
+                        <NumberDisplay
+                            numberProp={option.value} 
+                            size={80}
+                            numberColor={accessibilitySettings.numberColor}
+                            style={{backgroundColor: accessibilitySettings.boxColor}}
+                            activeHint={hintActive && hintOptionId === option.id}
+                            onEndHint={onEndHint}
+                        ></NumberDisplay>
+                    </DraggableItem>
+                ))}
+            </TouchableOpacity>
 
-        {targetSum && (
-            <OperacionDisplay 
-                containerColor={borderColor}
-                numbers={items} 
-                operationType="suma"
-            />
-        )}
+            {targetSum && (
+                <OperacionDisplay 
+                    containerColor={borderColor}
+                    numbers={items} 
+                    operationType={isSum ? "suma" : "resta"}
+                />
+            )}
 
-        </View>
+            </View>
+        </BounceDisplay>
 
     )
     

@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS accessibility_settings (
     student_id INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     background_color VARCHAR(9) DEFAULT '#F7F8FA',
     foreground_color VARCHAR(9) DEFAULT '#000000',
+    container_color VARCHAR(9) DEFAULT '#FFFFFF',
     number_color VARCHAR(9) DEFAULT '#000000', 
     box_color VARCHAR(9) DEFAULT '#D9D9D9', 
     icon_position VARCHAR(10) DEFAULT 'izquierda' CHECK (icon_position IN ('izquierda', 'derecha')),
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS student_game_configuration (
 
 -- Game Results
 CREATE TABLE IF NOT EXISTS game_results (
-    result_id SERIAL PRIMARY KEY,
+    result_id SERIAL,
     student_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE RESTRICT,
     abandoned BOOLEAN NOT NULL DEFAULT false,
@@ -69,14 +70,16 @@ CREATE TABLE IF NOT EXISTS game_results (
     played_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     time_seconds INTEGER NOT NULL,
 
-    played_parameters JSONB NOT NULL -- New column to store game parameters as JSONB for historical results
+    played_parameters JSONB NOT NULL, -- New column to store game parameters as JSONB for historical results
+
+    PRIMARY KEY (student_id, game_id, played_at)
 );
 
 -- 
 CREATE TABLE IF NOT EXISTS user_deletion (
     deletion_id SERIAL PRIMARY KEY,
     delete_admin_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    delete_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    delete_user_id INTEGER NOT NULL,
     deleted_user_email VARCHAR(255),
     deleted_user_name VARCHAR(255),
     deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -120,8 +123,8 @@ ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id, class_id) 
 VALUES 
-('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$cqwOvGPYlW6TdyuQ$b1717df1f28a0d52b08fb2a1ee5599ddadd3e1a9c98be3d02accd368b1975ae1994c247a81da01ad4d89d606c6479c4f79032876a70d57af3fd8da343aab8e6a', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 1A')),
-('Leo Reader', 'leo@app.com', 'fake_hash_123', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 2B'))
+('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$rBvclRmeu1UqPMP6$ced8eefdf634683cf43a15afbb285b41b2e01fe80d8953ac3be17b4a03775aa743303010b41c971ce48231df15c40659062b41b9f47fd48b9117156a1ac9b1eb', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 1A')),
+('Leo Reader', 'leo@app.com', 'scrypt:32768:8:1$HzRP2dGZaRn7HUUY$2faba6ea80ed475c04241e5e3079ad91889e21dd361e904e48c1b6182511cd77fa7622e9fe9d50aefa5639f6a70246fa9a50c1fcf7d1586d6c12f99b447f3c0d', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 2B'))
 ON CONFLICT (email) DO NOTHING;
 
 -- 4. Populate Settings for 1 student (Eva)
@@ -160,13 +163,7 @@ VALUES
     (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
     0, 10, 15, 3, true, true -- sum=true significa que 'reparte' (suma) está activo
 )
-ON CONFLICT (student_id, game_id) DO UPDATE SET
-    min_value = EXCLUDED.min_value,
-    max_value = EXCLUDED.max_value,
-    num_elements = EXCLUDED.num_elements,
-    num_containers = EXCLUDED.num_containers,
-    upward = EXCLUDED.upward,
-    sum = EXCLUDED.sum;
+ON CONFLICT (student_id, game_id) DO NOTHING;
 
 -- 6. Populate Game Results (valid columns)
 -- Inserta varias partidas para Eva Student en dos fechas distintas para pruebas de estadísticas
@@ -205,5 +202,6 @@ VALUES
     '2025-11-21T15:45:00+00:00',
     55,
     '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
-);
+)
 
+ON CONFLICT (student_id, game_id, played_at) DO NOTHING;

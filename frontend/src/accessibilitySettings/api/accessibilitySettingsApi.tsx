@@ -42,6 +42,9 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
             showNumbersMode: configData.show_numbers_mode,
             fontSize: configData.font_size,
         };
+
+        console.log(mappedConfig);
+        
         
         
         return mappedConfig;

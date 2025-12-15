@@ -22,28 +22,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
   const [filter, setFilter] = useState<FilterOption>('todos');
 
   const [showMenu, setShowMenu] = useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [selectedUserForEdit, setSelectedUserForEdit] = useState<UserApiData | null>(null);
-
   
-
-  const handleOpenEditModal = (user: UserApiData) => {
-    setSelectedUserForEdit(user);
-    setIsEditModalVisible(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setSelectedUserForEdit(null);
-    setIsEditModalVisible(false);
-  };
-
-  const handleSavedUser = () => {
-    setIsEditModalVisible(false);
-    setSelectedUserForEdit(null);
-    // refresh user list
-    refetch();
-  };
-
   const handleNavigation = (screen: keyof AdminStackParamList) => {
     navigation.navigate('Admin', {
         screen: screen,
@@ -74,7 +53,7 @@ export default function UserListScreen({ navigation }: UserListProps) {
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
-        <BackButton width={130} height={50} />
+        <BackButton width={130} height={50} testID='back-button' />
       </View>
 
       {/* Stats */}
@@ -83,6 +62,15 @@ export default function UserListScreen({ navigation }: UserListProps) {
         <StateCard title="Tutores" count={countByRole('teacher')} emoji="👨‍🏫" color="blue" />
         <StateCard title="Estudiantes" count={countByRole('student')} emoji="👨‍🎓" color="green" />
       </View>
+
+      <TouchableOpacity 
+          style={styles.deletionHistoryButton}
+          onPress={() => { 
+              handleNavigation('UserDeletion')
+          }}
+      >
+          <Text style={styles.deletionHistoryButtonText}>Historial 🗑️</Text>
+      </TouchableOpacity>
 
       {/* Filters */}
       <FilterButtons onFilterChange={(f) => setFilter(f)} />
@@ -118,7 +106,6 @@ export default function UserListScreen({ navigation }: UserListProps) {
               <UserCard
                   key={u.userId || index}
                   user={userApiData}
-                  onEdit={handleOpenEditModal}
                   onUserDeleted={() => {
                     refetch();
                   }}
@@ -132,13 +119,18 @@ export default function UserListScreen({ navigation }: UserListProps) {
 
       {showMenu && (
           <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }}>
+      <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('AdminCreate'); }} testID='create-admin-button'>
               <Text style={styles.menuText}>Crear Administrador</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate'); }}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('TeacherCreate');
+                                                                      refetch();
+           }} testID='create-teacher-button'>
+
               <Text style={styles.menuText}>Crear Tutor</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); }} testID='create-student-button'>
+          <TouchableOpacity style={styles.menuItem} onPress={() => { handleNavigation('StudentCreate'); 
+                                                                      refetch();
+          }} testID='create-student-button'>
               <Text style={styles.menuText}>Crear Estudiante</Text>
           </TouchableOpacity>
       </View>
@@ -170,6 +162,20 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7F8FA', padding: 30 },
   headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   headerTitle: { fontSize: 24, fontWeight: '700', color: '#101828' },
+  deletionHistoryButton: { 
+      backgroundColor: '#FF450015',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      marginBottom: 10,
+      borderRadius: 8,
+      marginRight: 10,
+      width: '9%'
+  },
+  deletionHistoryButtonText: { 
+      color: '#FF4500',
+      fontWeight: '600',
+      fontSize: 14,
+  },
   statsRow: { flexDirection: 'row', marginBottom: 16, flexWrap: 'wrap' },
   listHeader: {
     flexDirection: 'row',

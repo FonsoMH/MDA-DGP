@@ -43,6 +43,7 @@ def create_app():
     from .accessibility.accessibilitySettings import accessibility_settings_bp
     app.register_blueprint(accessibility_settings_bp)
 
+
     from .users.teachers import teacher_bp
     app.register_blueprint(teacher_bp)
 
