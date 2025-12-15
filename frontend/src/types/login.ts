@@ -1,3 +1,8 @@
+export interface Classes {
+  name: string;
+  id: number;
+};
+
 export interface StudentLogin {
   name: string;
   email: string
