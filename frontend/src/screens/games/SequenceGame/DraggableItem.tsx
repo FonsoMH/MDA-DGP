@@ -33,8 +33,8 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
     style,
     isDisabled,
     children,
-    testID, 
-    comeBack
+    testID,
+    comeBack = true,
 }) => {
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);

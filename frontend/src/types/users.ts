@@ -58,3 +58,11 @@ export interface PaginatedResponse<T> {
   total_count: number;
   total_pages: number;
 }
+
+export interface UserDeletionData {
+    deletionId: number;
+    adminName: number;
+    deletedUserEmail: string;
+    deletedUserName: string;
+    deletedAt: string;
+}
