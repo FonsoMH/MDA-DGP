@@ -5,6 +5,9 @@ import { StudentStackParamList } from '../../navigation/StudentNavigator';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useAccessibilitySettings';
 import GameSelector from '../teacher/components/GameSelector';
+import StatisticBar from './components/StatisticBar';
+import { icons } from '../../types/studentStatsIcons';
+import { useStudentStatistics } from './hooks/useStudentStatistics';
 
 type Props = NativeStackScreenProps<StudentStackParamList, 'StudentStatistics'>;
 
@@ -12,7 +15,6 @@ export default function StudentStatisticsScreen({route}: Props) {
 
     const {student} = route.params;
     const accessibilitySettings = useAccessibilitySettings();
-
 
     const styles = StyleSheet.create({
 
@@ -22,7 +24,6 @@ export default function StudentStatisticsScreen({route}: Props) {
             paddingTop: 32,
             alignSelf: 'center',
             width: '100%',
-            maxWidth: 1100,
             backgroundColor: accessibilitySettings.backgroundColor,
         },
 
@@ -78,12 +79,20 @@ export default function StudentStatisticsScreen({route}: Props) {
             color: accessibilitySettings.foregroundColor,
             marginBottom: 10,
         },
+        statsBarsContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            width: '100%',
+            alignItems: 'flex-end',
+        },  
     });
 
     const [selectedGameId, setSelectedGameId] = React.useState<number>(-1);
 
+    const { todayStats, allStats, isLoading, error } = useStudentStatistics(student.id, selectedGameId);
 
-
+    const [maxIconsToday, setMaxIconsToday] = React.useState<number>(1);
+    const [maxIconsAll, setMaxIconsAll] = React.useState<number>(1);
 
     return (
         <View style={styles.container}>
@@ -107,9 +116,60 @@ export default function StudentStatisticsScreen({route}: Props) {
                 <View style={styles.statsContainers}>
                     <View style={styles.statCard}>
                         <Text style={styles.statTitle}>Extadísticas de hoy</Text>
+                        <View style={styles.statsBarsContainer}>
+                            <StatisticBar
+                                width={50}
+                                height={250}
+                                accessibilitySettings={accessibilitySettings}
+                                icon={icons['Success']}
+                                label="Aciertos"
+                                value={todayStats ? todayStats.successfulPlays : 0}
+                            />
+                            <StatisticBar
+                                width={50}
+                                height={250}
+                                accessibilitySettings={accessibilitySettings}
+                                icon={icons['Success']}
+                                label="Errores"
+                                value={todayStats ? todayStats.failedPlays : 0}
+                            />
+                            <StatisticBar
+                                width={50}
+                                height={250}
+                                accessibilitySettings={accessibilitySettings}
+                                icon={icons['Success']}
+                                label="Omisiones"
+                                value={todayStats ? todayStats.abandonPlays : 0}
+                            />
+                        </View>
                     </View>
                     <View style={styles.statCard}>
-                        <Text style={styles.statTitle}>Estadísticas totales</Text>
+                        <Text style={styles.statTitle}>Estadísticas totales</Text><View style={styles.statsBarsContainer}>
+                            <StatisticBar
+                                width={50}
+                                height={250}
+                                accessibilitySettings={accessibilitySettings}
+                                icon={icons['Success']}
+                                label="Aciertos"
+                                value={20}
+                            />
+                            <StatisticBar
+                                width={50}
+                                height={250}
+                                accessibilitySettings={accessibilitySettings}
+                                icon={icons['Success']}
+                                label="Errores"
+                                value={allStats ? allStats.failedPlays : 0}
+                            />
+                            <StatisticBar
+                                width={50}
+                                height={250}
+                                accessibilitySettings={accessibilitySettings}
+                                icon={icons['Success']}
+                                label="Omisiones"
+                                value={allStats ? allStats.abandonPlays : 0}
+                            />
+                        </View>
                     </View>
                 </View>
 
