@@ -203,7 +203,6 @@ function LeaveSame() {
                     if (targetSum != null && current !== targetSum) {
                         if (!session.hasErrorThisRound) {
                             session.registerError();
-                            console.log('Registrado fallo');
                         }
                         // Cerrar la ronda por fallo
                     }
@@ -287,13 +286,11 @@ function LeaveSame() {
 
         if (targetSum != null && isSum) {
             // Lógica de suma original
-            console.log('Suma');
             result = numbers.reduce((sum, current) => sum + current, 0);
 
         } else {
             // Lógica de resta acumulativa:
             // Toma el primer valor y le resta el resto de los valores.
-            console.log('Resta acumulativa');
             if (numbers.length === 1) {
                 result = numbers[0];
             } else {
