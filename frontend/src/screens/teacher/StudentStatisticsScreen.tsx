@@ -9,12 +9,9 @@ import DateSelector from './components/DateSelector';
 import GameSelector from './components/GameSelector';
 import StatsPieChart from './components/StatsPieChart';
 import StatsLineChart from './components/StatsLineChart';
-<<<<<<< HEAD
 import { useEffect, useState } from 'react';
 import Alert from '../../components/FeedBack/Alert';
-=======
 import { exportStudentGameStatisticsCsv } from './api/studentStatisticsApi';
->>>>>>> Develop
 
 const ALL_GAMES_ID = -1;
 

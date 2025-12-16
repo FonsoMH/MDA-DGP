@@ -51,11 +51,7 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
                 times: [],
                 initialDate: initialDate ? initialDate.toISOString() : null,
                 finalDate: finalDate ? finalDate.toISOString() : null,
-<<<<<<< HEAD
             }
-=======
-            };
->>>>>>> Develop
         }
 
         const statsData = response.data;

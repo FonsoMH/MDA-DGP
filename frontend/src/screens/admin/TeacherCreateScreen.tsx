@@ -16,6 +16,8 @@ import { CredentialsData, credentialsSchema } from '../../types/validationSchema
 import { yupResolver } from '@hookform/resolvers/yup';
 import { EditUserHook } from '../../components/users/hook/EditUserHook';
 import AdvancedPagination from '../../components/common/Pagination/Pagination';
+import { useEffect, useState } from 'react';
+import Alert from '../../components/FeedBack/Alert';
 
 
 type Props = NativeStackScreenProps<any, 'TeacherCreate'>;
@@ -48,7 +50,7 @@ export default function TeacherCreateScreen({ navigation, route }: Props) {
       currentPage,
       totalPages, 
       changePage,
-      error 
+      error: paginationError 
   } = useStudentPagination();
 
 
@@ -58,10 +60,19 @@ export default function TeacherCreateScreen({ navigation, route }: Props) {
     );
   };
 
-  const { isSubmitting: isApiSubmitting, onSubmitFrom } = useCreateTeacher();
-  const { isSaving , saveUser } = EditUserHook();
+  const { isSubmitting: isApiSubmitting, error: createError, onSubmitFrom} = useCreateTeacher();
+  const { isSaving , saveUser , error: editError } = EditUserHook();
 
-  const isTotalSubmitting = isFormValidating || isApiSubmitting; 
+  const isTotalSubmitting = isFormValidating || isApiSubmitting;
+  
+  
+  const [alertVisible, setAlertVisible] = React.useState(false);
+  
+  const [alert, setAlert] = useState({
+      message: 'Administrador creado con éxito',
+      success: true,
+      onEnd: () => { navigation.goBack(); }
+  });
 
   const onSubmitRHF = async (data: CredentialsData) => {
       const payload = {
@@ -72,15 +83,54 @@ export default function TeacherCreateScreen({ navigation, route }: Props) {
       };
       let ok = false;
       if (teacherToEdit) {
+        console.log('Editing teacher with payload:', payload);
         ok = await saveUser(teacherToEdit, payload);
       } else {
+        console.log('Creating teacher with payload:', payload);
         ok = await onSubmitFrom(payload);
       }
       if (ok) {
-        // Volver para que UserList recupere foco y refresque (useFocusEffect)
-        navigation.goBack();
+        setAlert({
+          message: teacherToEdit ? 'Tutor editado con éxito' : 'Tutor creado con éxito',
+          success: true,
+          onEnd: () => { navigation.goBack(); }
+        });
+        setAlertVisible(true);
       }
   };
+
+  useEffect(() => {
+    if (paginationError) {
+        setAlert({
+            message: paginationError.message ? paginationError.message : String(paginationError),
+            success: false,
+            onEnd: () => {}
+        });
+        setAlertVisible(true);
+    }
+  }, [paginationError]);
+
+  useEffect(() => {
+    if (createError) {
+        setAlert({
+            message: createError.message ? createError.message : String(createError),
+            success: false,
+            onEnd: () => {}
+        });
+        setAlertVisible(true);
+    }
+  }, [createError]);
+
+  useEffect(() => {
+    if (editError) {
+        setAlert({
+            message: editError.message ? editError.message : String(editError),
+            success: false,
+            onEnd: () => {}
+        });
+        setAlertVisible(true);
+    }
+  }, [editError]);
 
   const buttonLabel: string = teacherToEdit ? 'Editar Tutor' : 'Crear Tutor'
 
@@ -145,6 +195,16 @@ export default function TeacherCreateScreen({ navigation, route }: Props) {
           </Pressable>
         </View>
       </ScrollView>
+      <Alert
+        visible={alertVisible}
+        message={alert.message}
+        success={alert.success}
+        duration={1000} 
+        onHide={() => {
+          setAlertVisible(false);
+          alert.onEnd();
+        }}
+      />
     </View>
   );
 }

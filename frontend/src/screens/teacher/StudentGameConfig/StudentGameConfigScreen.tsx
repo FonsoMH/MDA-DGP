@@ -6,13 +6,10 @@ import BackButton from '../../../components/common/BackButton/BackButton';
 import { CONFIG_COMPONENTS_JSX } from './ConfigGameComponent';
 import { useSaveStudentConfig } from '../hooks/useSaveStudentConfig';
 import { useStudentConfigs } from '../hooks/useStudentConfig';
-<<<<<<< HEAD
 import { useEffect , useState} from 'react';
 import Alert from '../../../components/FeedBack/Alert';
-=======
 import { updateStudentPermission } from '../../../api/studentConfig';
 import { number } from 'yup';
->>>>>>> Develop
 
 // Add route type in navigation types: StudentGameConfig: { studentId: number, isStudentView?: boolean }
 type Props = NativeStackScreenProps<TeacherStackParamList, 'StudentGameConfig'>;
@@ -36,7 +33,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
   const { configs, loading, error, setConfigs, studentCanConfigure, setStudentCanConfigure } = useStudentConfigs(studentId);
   const [updatingPermission, setUpdatingPermission] = React.useState(false);
 
-<<<<<<< HEAD
   const { saveOne, saving , errorSaving } = useSaveStudentConfig(studentId, configs);
 
   const [isAlertVisible, setIsAlertVisible] = React.useState(false);
@@ -66,10 +62,8 @@ export default function StudentGameConfigScreen({ route }: Props) {
     }
   }, [errorSaving]);
 
-  const handleChange = React.useCallback((slug: string, key: string, value: string) => {
-=======
   const handleChange = React.useCallback((gameId: number, key: string, value: string) => {
->>>>>>> Develop
+
     
     const rawValue = value.trim() === '' ? '0' : value;
 
@@ -94,9 +88,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
     });
   };
 
-<<<<<<< HEAD
-=======
-  const { saveOne, saving } = useSaveStudentConfig(studentId, configs);
 
   const handlePermissionToggle = async (value: boolean) => {
     try {
@@ -110,7 +101,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
     }
   };
 
->>>>>>> Develop
   if (loading) {
     return (
       <View style={styles.center}> 
@@ -174,14 +164,9 @@ export default function StudentGameConfigScreen({ route }: Props) {
               })}
 
               <View style={[styles.actions, { marginTop: 'auto' }]}>
-<<<<<<< HEAD
-                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={async () => { await saveOne(slug); setIsAlertVisible(true); }} disabled={saving}
-                  accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name || slug}`}
-=======
-                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => saveOne(Number(gameId))} disabled={saving}
+                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() =>{ saveOne(Number(gameId)); setIsAlertVisible(true); }} disabled={saving}
                   accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name }`}
                   testID={`save-config-${gameId}`}
->>>>>>> Develop
                 >
                   <Text style={styles.btnText}>{saving ? 'Guardando…' : 'Guardar'}</Text>
                 </Pressable>

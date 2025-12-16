@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { CredentialsData, credentialsSchema } from '../../types/validationSchemas';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useCreateAdmin } from './hook/useCreateAdmin';
+import { useEffect, useState } from 'react';
+import Alert from '../../components/FeedBack/Alert';
 
 type Props = NativeStackScreenProps<any, 'AdminCreate'>;
 
@@ -21,8 +23,16 @@ export default function AdminCreateScreen({ navigation }: Props) {
     mode: 'onBlur',
   });
 
-  const { isSubmitting: isApiSubmitting, onSubmitForm } = useCreateAdmin();
+  const { isSubmitting: isApiSubmitting, onSubmitForm , error } = useCreateAdmin();
   const isTotalSubmitting = isFormValidating || isApiSubmitting;
+
+  const [alertVisible, setAlertVisible] = React.useState(false);
+  
+  const [alert, setAlert] = useState({
+      message: 'Administrador creado con éxito',
+      success: true,
+      onEnd: () => { navigation.goBack(); }
+  });
 
   const onSubmitRHF = async (data: any) => {
     const payload = {
@@ -32,10 +42,25 @@ export default function AdminCreateScreen({ navigation }: Props) {
     };
     const ok = await onSubmitForm(payload);
     if (ok) {
-      // Volver para que UserList recupere foco y refresque (useFocusEffect)
-      navigation.goBack();
+      setAlert({
+        message: 'Administrador creado con éxito',
+        success: true,
+        onEnd: () => { navigation.goBack(); }
+      });
+      setAlertVisible(true);
     }
   };
+
+  useEffect(() => {
+    if (error) {
+        setAlert({
+            message: error.message ? error.message : String(error),
+            success: false,
+            onEnd: () => {}
+        });
+        setAlertVisible(true);
+    }
+  }, [error]);
 
   return (
     <View style={styles.safe}>
@@ -64,6 +89,16 @@ export default function AdminCreateScreen({ navigation }: Props) {
           </Pressable>
         </View>
       </ScrollView>
+      <Alert
+        visible={alertVisible}
+        message={alert.message}
+        success={alert.success}
+        duration={1000} 
+        onHide={() => {
+          setAlertVisible(false);
+          alert.onEnd();
+        }}
+      />
     </View>
   );
 }

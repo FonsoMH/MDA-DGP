@@ -22,6 +22,8 @@ import TextImageButton from '../auth/components/TextImageButton';
 import trashCanIcon from '../../../assets/trash_can.png';
 import { EditUserHook } from '../../components/users/hook/EditUserHook';
 import AdvancedPagination from '../../components/common/Pagination/Pagination';
+import { useEffect, useState } from 'react';
+import Alert from '../../components/FeedBack/Alert';
 
 
 type Props = NativeStackScreenProps<AdminStackParamList, 'StudentCreate'>;
@@ -66,13 +68,23 @@ export default function StudentCreateScreen({ navigation, route }: Props) {
         totalPages,
         currentPage,
         changePage,
+        error: paginationError
     } = useTeacherPagination();
 
-  const { isSubmitting: isApiSubmitting, onSubmitFrom } = useCreateStudent();
+     
+  const [alertVisible, setAlertVisible] = React.useState(false);
+  
+  const [alert, setAlert] = useState({
+      message: 'Administrador creado con éxito',
+      success: true,
+      onEnd: () => { navigation.goBack(); }
+  });
+
+  const { isSubmitting: isApiSubmitting, onSubmitFrom , error : createError } = useCreateStudent();
 
   const isTotalSubmitting = isFormValidating || isApiSubmitting; 
 
-  const { isSaving , saveUser } = EditUserHook();
+  const { isSaving , saveUser ,  error : editError} = EditUserHook();
     
   const onSubmitRHF = async (data: CredentialsData) => {
       const pictogramPassword = getPasswordSequence();
@@ -92,10 +104,49 @@ export default function StudentCreateScreen({ navigation, route }: Props) {
       }
 
       if (ok) {
-        // Volver una pantalla (UserList recupera el foco y hace refetch por useFocusEffect)
-        navigation.goBack();
+        setAlert({
+          message: requiredPassword ? 'Estudiante creado con éxito' : 'Estudiante editado con éxito',
+          success: true,
+          onEnd: () => { navigation.goBack(); }
+        });
+        setAlertVisible(true);
       }
   };
+
+  useEffect(() => {
+    if (paginationError) {
+      setAlert({
+        message: paginationError.message || 'Error cargando tutores',
+        success: false,
+        onEnd: () => {}
+      });
+      setAlertVisible(true);
+    }
+  }, [paginationError]);
+
+  useEffect(() => {
+    if (createError) {
+      setAlert({
+        message: createError.message || 'Error creando estudiante',
+        success: false,
+        onEnd: () => {}
+      });
+      setAlertVisible(true);
+    }
+  }, [createError]);
+
+  useEffect(() => {
+    if (editError) {
+      setAlert({
+        message: editError.message || 'Error editando estudiante',
+        success: false,
+        onEnd: () => {}
+      });
+      setAlertVisible(true);
+    }
+  }, [editError]);
+
+  
 
   return (
     <View style={styles.safe}>
@@ -213,6 +264,16 @@ export default function StudentCreateScreen({ navigation, route }: Props) {
           </Pressable>
         </View>
       </ScrollView>
+      <Alert
+        visible={alertVisible}
+        message={alert.message}
+        success={alert.success}
+        duration={1000} 
+        onHide={() => {
+          setAlertVisible(false);
+          alert.onEnd();
+        }}
+      />  
     </View>
   );
 }

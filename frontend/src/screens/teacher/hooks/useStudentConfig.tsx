@@ -18,11 +18,8 @@ export function useStudentConfigs(studentId : number) {
   React.useEffect(() => {
     if (!studentId) {
         setConfigs({});
-<<<<<<< HEAD
         setError(new Error("ID de estudiante no recibido"));
-=======
         setStudentCanConfigure(false);
->>>>>>> Develop
         setLoading(false);
         return;
     }

@@ -106,6 +106,7 @@ export async function loadStudentsApi(page :number, pageSize : number, offset: n
 
             throw new Error(message);
         }
+    throw error;
   }
 }
 
@@ -127,6 +128,7 @@ export async function loadTeachersApi(page :number, pageSize : number, offset: n
 
             throw new Error(message);
         }
+        throw error;
   }
 }
 
@@ -146,6 +148,7 @@ export async function createTeacherApi(payload: CreateTeacherPayload): Promise<v
 
             throw new Error(message);
         }
+    throw error;
   }
 }
 
@@ -159,8 +162,13 @@ export async function createStudentApi(payload: CreateStudentPayload): Promise<v
 
 
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
 
+            throw new Error(message);   
+
+    }
+    throw error;
   }
 }
 
@@ -173,7 +181,11 @@ export async function createAdminApi(payload: { name: string; email: string; pas
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
   } catch (error) {
-    console.error('Error creando administrador:', error);
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
     throw error;
   }
 }
