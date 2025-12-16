@@ -29,6 +29,7 @@ export const GameBackButton: React.FC<GameBackButtonProps> = ({ width, height, a
   const handlePress = useCallback(async () => {
     // Si no hay rondas resueltas y no hay error en la ronda actual, no enviamos resultados.
     const resolvedRounds = session.stats.successfulPlays + session.stats.failedPlays;
+
     //console.log(`Volviendo atrás. Rondas resueltas: ${resolvedRounds}, Error en ronda actual: ${session.hasErrorThisRound}`);
     if (countInProgressErrorAsFailure && session.hasErrorThisRound) {
       // Contar la ronda en curso con error como fallo al abandonar.
