@@ -82,7 +82,22 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                 <View style={styles.passwordElements}>
                     {
                         availableIcons.map((item, index) => {
-                            return <PasswordItem 
+                            return (index >= availableIcons.length / 2) ? null : <PasswordItem 
+                            key={index} 
+                            icon={item.icon} 
+                            text={item.name} 
+                            testID={`pictogram-${item.name}`}
+                            onPress={() => addPictogram(item)}
+                            height={130}
+                            width={175}
+                            />
+                        })
+                    }
+                </View>
+                <View style={styles.passwordElements}>
+                    {
+                        availableIcons.map((item, index) => {
+                            return (index < availableIcons.length / 2) ? null : <PasswordItem 
                             key={index} 
                             icon={item.icon} 
                             text={item.name} 
@@ -243,16 +258,18 @@ const styles = StyleSheet.create({
     passwordElementsContent: {
         paddingVertical: 10,
         paddingBottom: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        rowGap: 20,
     },
 
     passwordElements:{
         width: '100%',
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        alignItems: 'center',
         justifyContent: 'center', 
         gap: 20, 
-        rowGap: 20, 
-        paddingLeft: 150,
-        paddingRight: 150,
+        
     },
 });
