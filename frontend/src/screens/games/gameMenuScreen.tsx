@@ -13,7 +13,7 @@ import BackButton from '../../components/common/BackButton/BackButton';
 import { GameStackParamList } from '../../navigation/GameNavigator';
 import { RootStackParamList } from '../../types/navigation';
 import { UserContext } from '../auth/contexts/UserContext';
-import { getStudentPermission} from '../../api/studentConfig';
+import { useStudentPermission } from './hooks/useGameConfig';
 import { useUser } from '../../hooks/useUser';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;
@@ -53,19 +53,15 @@ export default function GameMenuScreen({ navigation }: Props) {
     const userContext = React.useContext(UserContext);
     const [canConfigure, setCanConfigure] = React.useState(false);
     
+    const studentId = userContext?.user?.id;
+    const { data: permissionData } = useStudentPermission(studentId);
     React.useEffect(() => {
-        const fetchPermission = async () => {
-            if (userContext?.user?.role === 'student' && userContext?.user?.id) {
-                try {
-                    const data = await getStudentPermission(userContext.user.id);
-                    setCanConfigure(data.student_can_configure || false);
-                } catch (err) {
-                    console.error('Error fetching student permission:', err);
-                }
-            }
-        };
-        fetchPermission();
-    }, [userContext?.user]);
+        if (permissionData) {
+            setCanConfigure(permissionData.student_can_configure || false);
+        } else {
+            setCanConfigure(false);
+        }
+    }, [permissionData]);
 
     const handleConfigPress = () => {
         if (userContext?.user?.id) {

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchGameConfiguration } from '../api/gameConfigApi';
+import { getStudentPermission } from '../../../api/studentConfig';
 
 /**
  * A custom React hook to fetch the configuration for a specific game and student.
@@ -29,5 +30,17 @@ export const useGameConfig = (studentId: number, gameId: number) => {
         queryFn: () => fetchGameConfiguration(studentId, gameId),
 
         enabled: !!studentId && !!gameId,
+    });
+};
+
+export const useStudentPermission = (studentId: number) => {
+    
+    return useQuery({
+        
+        queryKey: ['studentPermission', studentId],
+        
+        queryFn: () => getStudentPermission(studentId),
+
+        enabled: !!studentId,
     });
 };
