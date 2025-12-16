@@ -41,6 +41,14 @@ export const useStudentPermission = (studentId: number) => {
         
         queryFn: () => getStudentPermission(studentId),
 
+        // Solo ejecutar si hay studentId válido
         enabled: !!studentId,
+
+        staleTime: 0,
+        cacheTime: 0,
+        
+        refetchOnMount: 'always',
+        refetchOnWindowFocus: 'always',
+        refetchOnReconnect: 'always',
     });
 };
