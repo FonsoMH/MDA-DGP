@@ -5,14 +5,16 @@ const ALL_GAMES_ID = -1;
 
 export default function GameSelector({ 
     selectedGameId, 
-    onGameChange 
+    onGameChange,
+    style
 }: { 
     selectedGameId: number; 
-    onGameChange: (gameId: number) => void 
+    onGameChange: (gameId: number) => void,
+    style?: object
 }) {
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <View style={[styles.pickerContainer, selectedGameId === 1 && styles.selected]}>
                 <Pressable onPress={() => onGameChange(1)} style={styles.pressable}>
                     <Image source={require('../../../../assets/icons/games_icons/icon_game1.png')} style={styles.icon} />
@@ -45,7 +47,6 @@ export default function GameSelector({
 const styles = StyleSheet.create({
     container: {
         padding: 10,
-        flexDirection: 'column',
         justifyContent: 'space-around',
         alignItems: 'center',
         gap: 10,

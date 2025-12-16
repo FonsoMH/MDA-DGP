@@ -3,7 +3,7 @@ import { useGameManager } from "../utils/gameManager";
 import { generateEquitableFixedSizeArray, generateFixedRepeatedOptions , findExactPartition } from "../utils/gameUtils";
 import { View, Text, StyleSheet } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
-import BackButton from "../../../components/common/BackButton/BackButton";
+import GameBackButton from "../components/GameBackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import Container from "./Container";
 import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
@@ -12,6 +12,7 @@ import { useAnimatedRef, useSharedValue } from "react-native-reanimated";
 import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
+import { useGameSession } from "../hooks/useGameSession";
 
 const GAME_ID = 3; 
 
@@ -137,6 +138,7 @@ function ContainerSort() {
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
+    const session = useGameSession({ gameId: GAME_ID });
 
     const handleDropOnContainer = useCallback((targetContainerIndex: number) => {
         if (!selectedNumber) return;
@@ -179,6 +181,7 @@ function ContainerSort() {
     }, [selectedNumber, handleDropOnContainer]);
 
     const handleNumberSelect = (numberValue: Option) => {
+        session.startRound();
         setSelectedNumber(numberValue);
     };
 
@@ -198,22 +201,31 @@ function ContainerSort() {
         }
 
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
-
-        if (allGreen && options.length == 0) {
-
-            const handleRoundComplete = async () => {
+        // containerStatuses.forEach(status => console.log(status === CORRECT_COLOR? "verde":"no verde"));
+        // console.log(options.length);
+        if (options.length == 0) {
+            // console.log(allGreen);  
+            if (allGreen) {
+                const handleRoundComplete = async () => {
+                    
+                    await roundMessage.show(
+                        "¡Excelente! Has superado la ronda con éxito.", 
+                        1000,
+                        "success"
+                    );
+                    session.resolveRound();
+                    // console.log("Ronda completada con éxito");
+                    manager.advanceGame();
+                    return;
+                };
+                handleRoundComplete();
+            }else{
+                if (!session.hasErrorThisRound) {
+                    session.registerError();
+                }
+                // console.log("Fallo registrado");
+            }
                 
-                await roundMessage.show(
-                    "¡Excelente! Has superado la ronda con éxito.", 
-                    1000,
-                    "success"
-                );
-                
-                manager.advanceGame();
-                return;
-            };
-
-            handleRoundComplete();
             
         }
 
@@ -223,6 +235,7 @@ function ContainerSort() {
 
     const handlePlayAgain = () => {
         manager.resetGame();
+        session.resetSession();
     };
 
     const topZoneRef = useAnimatedRef<View>();
@@ -437,11 +450,14 @@ function ContainerSort() {
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
-            <BackButton width={215} 
-            height={76}
-            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
-
-            </BackButton>
+                        <GameBackButton 
+                            width={215}
+                            height={76}
+                            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
+                            session={session}
+                            // En ContainerSort queremos contar el error ya marcado en la ronda actual como fallo al abandonar.
+                            countInProgressErrorAsFailure={true}
+                        />
             <Text style={styles.titleText} >Reparte el mismo número en cada recipiente</Text>
             <Text style={styles.instructionText}>Arrastra los números a los recipientes para que todos tengan la misma cantidad</Text>    
             </View>

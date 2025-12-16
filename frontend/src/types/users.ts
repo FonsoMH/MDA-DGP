@@ -18,6 +18,14 @@ export interface UserFrontend {
   assignedTeacherId?: number | null;  
 }
 
+export interface PaginatedUsersApiResponse {
+  items: UserApiData[]; 
+  total_count: number;
+  total_pages: number;
+  current_page: number;
+  page_size?: number;
+}
+
 export interface PaginatedUsersResponse {
   items: UserFrontend[]; 
   total_count: number;
