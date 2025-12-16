@@ -12,6 +12,7 @@ import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
 import Container from "../ContainerSort/Container";
+import ShowVideoButton from "../../../components/common/ShowVideo/ShowVideo";
 
 const GAME_ID = 4; 
 
@@ -344,6 +345,10 @@ function LeaveSame() {
 
     const bottomZoneLayouts = useSharedValue<Layout[]>([]);
 
+    const HELP_VIDEO_URI = manager.config?.sum
+        ? { uri: require('../../../../assets/videos/LeaveSame.mp4') }
+        : { uri: require('../../../../assets/videos/LeaveSameV2.mp4') }; 
+
     //TODO revisar
     const handleContainerLayout = ((layout: Layout, index: number) => {
         'worklet';
@@ -377,11 +382,10 @@ function LeaveSame() {
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
-            <BackButton width={215} 
-            height={76}
-            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
-
-            </BackButton>
+            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%', gap: 200 }}>
+                <BackButton width={215} height={76}></BackButton>
+                <ShowVideoButton width={120} height={45} videoSource={HELP_VIDEO_URI} ></ShowVideoButton>
+            </View>
             <Text style={styles.titleText} >Deja igual</Text>
             <Text style={styles.instructionText}>Saca los que sobran para que todos tengan la misma cantidad</Text>    
             </View>

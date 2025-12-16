@@ -16,6 +16,7 @@ import DraggableItem from './DraggableItem';
 import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
+import ShowVideoButton from '../../../components/common/ShowVideo/ShowVideo';
 
 
 type TargetElement = {
@@ -135,6 +136,8 @@ function SequenceGame() {
 
     const manager = useGameManager(GAME_ID, initializeGame);
 
+    
+
     const topZoneRef = useAnimatedRef<View>();
     const topZoneLayout = useSharedValue<Layout[] | null>(null);
     
@@ -248,6 +251,10 @@ function SequenceGame() {
         return <LoadingSpinner />; 
     }
 
+    const HELP_VIDEO_URI = manager.config?.upward
+        ? { uri: require('../../../../assets/videos/SequenceGame.mp4') }
+        : { uri: require('../../../../assets/videos/SequenceGameV2.mp4') }; 
+
     const title = manager.config?.upward 
         ? "Ordena del pequeño al grande" 
         : "Ordena del grande al pequeño";
@@ -268,7 +275,10 @@ function SequenceGame() {
 
     return (
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'} />
+            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%', gap: 200 }}>
+                <BackButton width={215} height={76}></BackButton>
+                <ShowVideoButton width={120} height={45} videoSource={HELP_VIDEO_URI} ></ShowVideoButton>
+            </View>
             <View style={styles.header}>
                 <Text style={styles.title}>{title}</Text>
                 {visualIcon}

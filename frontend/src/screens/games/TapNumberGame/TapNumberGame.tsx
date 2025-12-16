@@ -11,11 +11,11 @@ import { getRandomNumber, generateOptionsWithTarget } from '../utils/gameUtils';
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
-
+import ShowVideoButton from '../../../components/common/ShowVideo/ShowVideo';
 //TODO calcular puntuacion
 const GAME_ID = 1; 
 
-
+const HELP_VIDEO_URI = { uri: require('../../../../assets/videos/TapNumberGame.mp4') };
 
 function TapNumberGame() {
 
@@ -160,8 +160,9 @@ function TapNumberGame() {
     return (
         
         <View style={styles.screenContainer}>
-            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%' }}>
+            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%', gap: 200 }}>
                 <BackButton width={215} height={76}></BackButton>
+                <ShowVideoButton width={120} height={45} videoSource={HELP_VIDEO_URI} ></ShowVideoButton>
             </View>
             <TouchableOpacity 
                 testID="tts-button" 
