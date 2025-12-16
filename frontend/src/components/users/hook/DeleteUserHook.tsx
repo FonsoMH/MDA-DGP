@@ -5,7 +5,6 @@ import { UserApiData } from '../../../types/users';
 
 const askConfirm = (): Promise<boolean> => {
     return new Promise((resolve) => {
-        console.log("Pronosticando plataforma:", Platform.OS); // CHIVATO
 
         if (Platform.OS === 'web') {
             const confirmed = window.confirm('¿Seguro que desea eliminar este usuario?');

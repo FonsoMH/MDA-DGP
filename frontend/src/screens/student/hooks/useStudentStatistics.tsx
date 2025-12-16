@@ -20,11 +20,9 @@ export const useStudentStatistics = (studentId: number, gameId: number): Student
         setIsLoading(true);
         setError(null);
 
-        console.log('Loading statistics for studentId:', studentId, 'gameId:', gameId);
-
         try {
             const today = new Date();
-            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            today.setHours(1, 0, 0, 0);
 
             const fetchedAllStats = await fetchStudentStatistics(
                 studentId,
@@ -32,15 +30,13 @@ export const useStudentStatistics = (studentId: number, gameId: number): Student
                 null,
                 null
             );
-            
+                       
             const fetchedTodayStats = await fetchStudentStatistics(
                 studentId,
                 gameId,
                 today,
                 today
             );
-
-            console.log('Fetched today stats:', fetchedTodayStats);
 
             setTodayStats(fetchedTodayStats);
             setAllStats(fetchedAllStats);

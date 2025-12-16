@@ -115,7 +115,7 @@ export default function StudentStatisticsScreen({route}: Props) {
                 />
                 <View style={styles.statsContainers}>
                     <View style={styles.statCard}>
-                        <Text style={styles.statTitle}>Extadísticas de hoy</Text>
+                        <Text style={styles.statTitle}>Estadísticas de hoy</Text>
                         <View style={styles.statsBarsContainer}>
                             <StatisticBar
                                 width={50}

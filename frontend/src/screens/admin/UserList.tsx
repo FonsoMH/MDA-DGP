@@ -81,9 +81,6 @@ export default function UserListScreen({ navigation }: UserListProps) {
       newItems = originalItems.filter(u => u.role === role);
     }
 
-    console.log(users);
-    
-
     setFilteredUsers({
         ...users,
         items: newItems

@@ -15,16 +15,12 @@ export async function fetchStudentsByClass(idClass:number): Promise<StudentLogin
 
     const endpoint = `${BASE_URL}/api/classes/${idClass}/students`; 
     
-    console.log(endpoint);
-    
-    
     try {
         const response = await axios.get<ClassesLogin>(endpoint, { 
             timeout: API_TIMEOUT 
         });
 
         const data: ClassesLogin = response.data;
-        console.log(data);
         
         return data.students;
 
