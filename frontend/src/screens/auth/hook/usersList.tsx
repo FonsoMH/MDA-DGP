@@ -4,7 +4,7 @@ import { Classes, StudentLogin } from '../../../types/login';
 
 
 interface UseStudentsDataResult {
-    users: PaginatedStudentsResponse;
+    users: StudentLogin[];
     isLoading: boolean;
     refetch: () => void;
 }

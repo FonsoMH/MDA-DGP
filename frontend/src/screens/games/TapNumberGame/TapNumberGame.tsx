@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useAccessibilitySettings } from '../../../accessibilitySettings/hooks/useAccessibilitySettings';
-import BackButton from '../../../components/common/BackButton/BackButton';
+import GameBackButton from '../components/GameBackButton';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
 import FeedbackScreen from '../../../components/FeedBack/Feedback';
 import { playTTS } from '../../../components/ttsListener';
 import { useGameManager } from '../utils/gameManager';
+import { useGameSession } from '../hooks/useGameSession';
 import { getRandomNumber, generateOptionsWithTarget } from '../utils/gameUtils';
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
@@ -111,6 +112,7 @@ function TapNumberGame() {
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
+    const session = useGameSession({ gameId: GAME_ID });
 
     useEffect(() => {
 
@@ -127,11 +129,14 @@ function TapNumberGame() {
     }, [targetNumber, selectedDisplay, manager.isLoading, activeHint]);
 
     const handlePlayAgain = () => {
+        // Reiniciar lógica de juego y sesión.
         manager.resetGame();
+        session.resetSession();
     };
 
     const handleSelection = async (selectedNumber: number) => {
-
+        // Asegurar inicio de ronda (idempotente)
+        session.startRound();
         setSelectedDisplay(selectedNumber);
 
         if (selectedNumber === targetNumber) {
@@ -141,15 +146,20 @@ function TapNumberGame() {
                 1000,
                 "success"
             );
+            // Finaliza la ronda registrando éxito/fallo según errores previos
+            session.resolveRound();
             setActiveHint(false);
             manager.advanceGame();
             return;
         }
 
+        // Error único por ronda (solo se marca una vez)
+        if (!session.hasErrorThisRound) {
+            session.registerError();
+        }
 
         setResultColor(ERROR_COLOR);
-        await roundMessage.show("Intentalo de nuevo", 1000, "error");
-
+        await roundMessage.show("Inténtalo de nuevo", 1000, "error");
     };
 
     if (manager.isLoading) {
@@ -160,9 +170,12 @@ function TapNumberGame() {
     return (
         
         <View style={styles.screenContainer}>
-            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%' }}>
-                <BackButton width={215} height={76}></BackButton>
-            </View>
+            <GameBackButton 
+                width={215} 
+                height={76} 
+                alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
+                session={session}
+            />
             <TouchableOpacity 
                 testID="tts-button" 
                 onPress={() => playTTS(targetNumber.toString())}  

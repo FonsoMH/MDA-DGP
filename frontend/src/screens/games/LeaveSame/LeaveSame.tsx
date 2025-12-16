@@ -3,7 +3,7 @@ import { useGameManager } from "../utils/gameManager";
 import { generateEquitableAdjustmentPuzzle } from "../utils/gameUtils";
 import { View, Text, StyleSheet } from "react-native";
 import { useAccessibilitySettings } from "../../../accessibilitySettings/hooks/useAccessibilitySettings";
-import BackButton from "../../../components/common/BackButton/BackButton";
+import GameBackButton from "../components/GameBackButton";
 import NumberDisplay from "../../../components/common/NumberDisplays/NumberDisplay";
 import { CORRECT_COLOR, EMPTY_COLOR, Option, SELECTED_COLOR } from "../../../types/games";
 import FeedbackScreen from "../../../components/FeedBack/Feedback";
@@ -12,6 +12,7 @@ import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
 import Container from "../ContainerSort/Container";
+import { useGameSession } from "../hooks/useGameSession";
 
 const GAME_ID = 4; 
 
@@ -23,6 +24,7 @@ function LeaveSame() {
 
     const accessibilitySettings = useAccessibilitySettings();
     const roundMessage = useRoundMessage();
+    const session = useGameSession({ gameId: GAME_ID });
        
 
     const styles = StyleSheet.create({
@@ -178,18 +180,39 @@ function LeaveSame() {
     }, [selectedNumber]);
 
     const handleItemReturnedFromContainer = useCallback((item: Option, containerIndex: number) => {      
-        
+        // Comienza la ronda al primer movimiento de la ronda
+        session.startRound();
+
         setOptions(prevItems => [...prevItems, item]);
 
         setContainerValues(prevContainers => {
             const newContainers = [...prevContainers];
+            // quitar el elemento del contenedor
             newContainers[containerIndex] = newContainers[containerIndex].filter(
                 val => val.id !== item.id
             );
+
+            // Cierre por fallo para ambas modalidades
+            // Si tras devolver un elemento quedan EXACTAMENTE!!! 2 valores no-cero en el contenedor
+            // y no se ha alcanzado el objetivo, cerramos la ronda como fallo.
+            try {
+                const nonZeroValues = (newContainers[containerIndex] || []).map(v => v.value).filter(v => v !== 0);
+                const isContainerGreen = containerStatuses?.[containerIndex] === CORRECT_COLOR;
+                if (!isContainerGreen && nonZeroValues.length === 2) {
+                    const current = sum(nonZeroValues);
+                    if (targetSum != null && current !== targetSum) {
+                        if (!session.hasErrorThisRound) {
+                            session.registerError();
+                        }
+                        // Cerrar la ronda por fallo
+                    }
+                }
+            } catch {}
+
             return newContainers;
         });
 
-    }, []);
+    }, [session, targetSum, containerStatuses]);
 
     const handleContainerClick = useCallback((containerIndex: number) => {
         if (selectedNumber) {
@@ -215,6 +238,11 @@ function LeaveSame() {
         if(!containerStatuses){
             return;
         }
+        // Evitar re-disparar éxito mientras está el modal de feedback visible
+        // o mientras el juego se está reiniciando/cargando.
+        if (manager.modalVisible || manager.isLoading || roundMessage.isVisible) {
+            return;
+        }
 
         const allGreen = containerStatuses.every(status => status === CORRECT_COLOR);
 
@@ -227,6 +255,10 @@ function LeaveSame() {
                     1000,
                     "success"
                 );
+                // Contabiliza la ronda como exitosa y avanza
+                session.resolveRound();
+                // Romper el estado de éxito antes de avanzar para que el efecto no se vuelva a disparar
+                setContainerStatuses(Array(containers).fill(EMPTY_COLOR));
                 
                 manager.advanceGame();
                 return;
@@ -238,9 +270,12 @@ function LeaveSame() {
 
 
 
-    }, [containerStatuses]);
+    }, [containerStatuses, session, manager.modalVisible, manager.isLoading, roundMessage.isVisible, containers]);
 
     const handlePlayAgain = () => {
+        // Evitar que el efecto de éxito se active por estados antiguos
+        setContainerStatuses(Array(containers).fill(EMPTY_COLOR));
+        session.resetSession();
         manager.resetGame();
     };
 
@@ -249,14 +284,13 @@ function LeaveSame() {
         
         let result: number;
 
-        if (targetSum != null) {
+        if (targetSum != null && isSum) {
             // Lógica de suma original
             result = numbers.reduce((sum, current) => sum + current, 0);
 
         } else {
             // Lógica de resta acumulativa:
             // Toma el primer valor y le resta el resto de los valores.
-            
             if (numbers.length === 1) {
                 result = numbers[0];
             } else {
@@ -377,11 +411,12 @@ function LeaveSame() {
     return (
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
-            <BackButton width={215} 
-            height={76}
-            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
-
-            </BackButton>
+                        <GameBackButton
+                            width={215}
+                            height={76}
+                            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
+                            session={session}
+                        />
             <Text style={styles.titleText} >Deja igual</Text>
             <Text style={styles.instructionText}>Saca los que sobran para que todos tengan la misma cantidad</Text>    
             </View>
