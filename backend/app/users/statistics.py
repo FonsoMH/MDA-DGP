@@ -361,8 +361,6 @@ def create_game_result():
         return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
     finally:
         cur.close()
-
-
 @statistics_bp.route('/statistics/<int:student_id>/<int:game_id>/csv', methods=['GET'])
 def export_student_game_statistics_csv(student_id: int, game_id: int):
     """

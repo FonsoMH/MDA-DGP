@@ -197,5 +197,4 @@ VALUES
     '2025-11-21T15:45:00+00:00',
     55
 )
-
 ON CONFLICT (student_id, game_id, played_at) DO NOTHING;
