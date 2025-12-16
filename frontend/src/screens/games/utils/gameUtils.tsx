@@ -202,7 +202,7 @@ export function generateEquitableFixedSizeArray(
     }
     
     if (attempts > 5000) {
-        console.warn("Se excedieron 5000 intentos para generar un puzle. Podría haber un problema de lógica.");
+        console.warn("Se excedieron 5000 intentos para generar un puzzle. Podría haber un problema de lógica.");
     }
   }
 
@@ -258,6 +258,7 @@ export function generateEquitableFixedSizeArrayDiff(
 
 interface GamePuzzleResult {
   initialContainers: number[][];
+  solutionContainers?: number[][];
   target: number; 
 }
 
@@ -268,7 +269,7 @@ interface GamePuzzleResult {
  * @param targetSum Target sum for each container
  * @returns Array of arrays (the partition) or null if it fails (it shouldn't)
  */
-function findExactPartition(
+export function findExactPartition(
     nums: number[],
     numCont: number,
     targetSum: number
@@ -348,7 +349,7 @@ export function generateEquitableAdjustmentPuzzle(
 
   if ( sum ){
     const { puzzleArray, targetSum } =  generateEquitableFixedSizeArray(
-        maxValue, minValue, arraySize - numExtraElements, numContainers
+        maxValue, minValue, arraySize, numContainers
     );
 
     target = targetSum;
@@ -370,8 +371,8 @@ export function generateEquitableAdjustmentPuzzle(
     target = targetDifference;
 
   }
-      
-  if (!solutionContainers) {
+  
+  if (!solutionContainers || solutionContainers.length == 0) {
       return { initialContainers: [], target: 0};
   }
 
@@ -409,6 +410,7 @@ export function generateEquitableAdjustmentPuzzle(
 
   return {
       initialContainers: initialContainers,
+      solutionContainers: solutionContainers,
       target: target,
   };
 }

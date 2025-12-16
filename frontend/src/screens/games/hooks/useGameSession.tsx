@@ -50,7 +50,9 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     roundStateRef.current = { hasError: false, startedAt: Date.now(), resolved: false };
   }, []);
 
-  const registerError = useCallback(() => { if (!roundStateRef.current.resolved) roundStateRef.current.hasError = true; }, []);
+  const registerError = useCallback(() => { 
+    if (!roundStateRef.current.resolved) roundStateRef.current.hasError = true; 
+  }, []);
 
   const applyRoundResultSync = (): SessionStats => {
     const { hasError } = roundStateRef.current;
@@ -143,5 +145,17 @@ export function useGameSession({ gameId }: UseGameSessionOptions): UseGameSessio
     await completeSession(override);
   }, [stats, completeSession]);
 
-  return { currentRound, startRound, registerError, resolveRound, completeSession, abandonSession, resetSession, hasErrorThisRound: roundStateRef.current.hasError, stats, isSubmitting, submitError };
+  return { 
+    currentRound,
+    startRound,
+    registerError,
+    resolveRound,
+    completeSession,
+    abandonSession,
+    resetSession,
+    hasErrorThisRound: roundStateRef.current.hasError,
+    stats,
+    isSubmitting,
+    submitError
+  };
 }

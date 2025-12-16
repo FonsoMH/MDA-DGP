@@ -42,7 +42,16 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
         
 
         if (!response.data || Object.keys(response.data).length === 0) {
-            throw new Error("No se encontraron datos de estadísticas para los parámetros dados.");
+            return {
+                gameId: gameId,
+                totalPlays: 0,
+                successfulPlays: 0,
+                failedPlays: 0,
+                abandonPlays: 0,
+                times: [],
+                initialDate: initialDate ? initialDate.toISOString() : null,
+                finalDate: finalDate ? finalDate.toISOString() : null,
+            };
         }
 
         const statsData = response.data;

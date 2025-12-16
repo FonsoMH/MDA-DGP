@@ -191,14 +191,12 @@ def get_student_all_game_statistics(student_id: int):
         #Aggregates
         agg_sql = f"""
             SELECT
-                game_id,
                 COALESCE(SUM(successful_plays), 0) AS successful_plays,
                 COALESCE(SUM(failed_plays), 0)     AS failed_plays,
                 COALESCE(SUM(CASE WHEN abandoned THEN 1 ELSE 0 END), 0) AS abandon_plays,
                 COALESCE(SUM(successful_plays + failed_plays + CASE WHEN abandoned THEN 1 ELSE 0 END), 0) AS total_plays
             FROM game_results
             WHERE {where_sql}
-            GROUP BY game_id
         """
         cur.execute(agg_sql, tuple(params))
         agg_row = cur.fetchone()
@@ -229,7 +227,6 @@ def get_student_all_game_statistics(student_id: int):
         ]
 
         payload = {
-            'game_id': agg_row['game_id'],
             'total_plays': int(agg_row['total_plays']),
             'successful_plays': int(agg_row['successful_plays']),
             'failed_plays': int(agg_row['failed_plays']),

@@ -21,6 +21,7 @@ import TextImageButton from '../auth/components/TextImageButton';
 
 import trashCanIcon from '../../../assets/trash_can.png';
 import { EditUserHook } from '../../components/users/hook/EditUserHook';
+import AdvancedPagination from '../../components/common/Pagination/Pagination';
 
 
 type Props = NativeStackScreenProps<AdminStackParamList, 'StudentCreate'>;
@@ -62,6 +63,9 @@ export default function StudentCreateScreen({ navigation, route }: Props) {
   const { 
         teachers,
         isLoading: teachersLoading,
+        totalPages,
+        currentPage,
+        changePage,
     } = useTeacherPagination();
 
   const { isSubmitting: isApiSubmitting, onSubmitFrom } = useCreateStudent();
@@ -186,6 +190,13 @@ export default function StudentCreateScreen({ navigation, route }: Props) {
               );
             })}
           </View>
+
+          <AdvancedPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={changePage}
+            pageLimit={totalPages}
+          />
         </View>
 
         <View style={styles.actionsRow}>

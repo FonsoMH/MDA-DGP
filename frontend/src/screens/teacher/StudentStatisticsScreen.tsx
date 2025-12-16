@@ -7,9 +7,6 @@ import { useStatistics } from './hooks/useStatistics';
 import BackButton from '../../components/common/BackButton/BackButton';
 import DateSelector from './components/DateSelector';
 import GameSelector from './components/GameSelector';
-import { PieChart, pieDataItem, RadarChart } from 'react-native-gifted-charts';
-import Svg, { G } from 'react-native-svg';
-import { useState } from 'react';
 import StatsPieChart from './components/StatsPieChart';
 import StatsLineChart from './components/StatsLineChart';
 import { exportStudentGameStatisticsCsv } from './api/studentStatisticsApi';
@@ -120,6 +117,7 @@ export default function StudentStatisticsScreen({route}: Props) {
                     <GameSelector 
                         selectedGameId={selectedGameId}
                         onGameChange={setSelectedGameId}
+                        style={{ flexDirection: 'column'}}
                     />
                     <Pressable
                         onPress={toggleFilters}
