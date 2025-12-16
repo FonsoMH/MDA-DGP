@@ -175,53 +175,57 @@ export default function TeacherLoginScreen({ navigation }: TeacherLoginProps){
 
  
     return (
-        <View style={styles.container}>
-            
-            <View style={styles.header}>
-                <Text style={{ fontWeight: 'bold', fontSize: 24 }}>Acceso Docente</Text>
-                <Text style={{ marginBottom: 20 , color: '#999'}}>Ingresa tus credenciales</Text>
-            </View>
+        <View>
 
-            <View style={{ width: '100%' , alignItems: 'center' }}>
-                <View style={styles.inputContainer}>
-                    <View style={{ width: '100%'}} >
-                        <Text style={failedPassword ? styles.failedText : null}>
-                            Correo Electrónico
-                        </Text>
-                        <TextInput 
-                            placeholder="" 
-                            testID= "teacher-email-input" 
-                            style={[styles.input, failedPassword ? styles.failedInput : null]} 
-                            onChangeText={handleEmailChange} />
-                    </View>
-                    <View style={{ width: '100%'}} >
-                        <Text style={failedPassword ? styles.failedText : null}>
-                            Contraseña
-                        </Text>
-                        <PasswordInput
-                            style={[styles.input, failedPassword ? styles.failedInput : null]}
-                            onChangeText={handlePasswordChange}
-                            value={password}
-                            testID="teacher-password-input"
-                        />
-                    </View>
+            <View style={styles.container}>
+                
+                <View style={styles.header}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 24 }}>Acceso Docente</Text>
+                    <Text style={{ marginBottom: 20 , color: '#999'}}>Ingresa tus credenciales</Text>
                 </View>
-                <Pressable style={styles.loginButton} onPress={handleLogIn} testID="login-submit-button">
-                    <Text style={{ color: '#fff' }}>Iniciar Sesión</Text>
-                </Pressable>
-                <Pressable style={{marginBottom:20}} onPress={() => { /* Lógica para recuperar contraseña */ }}>
-                    <Text>¿Olvidaste tu contraseña?</Text>
-                </Pressable>
-            </View>
 
-            <BackButton width={130} height={50} alignSelf='center' />
+                <View style={{ width: '100%' , alignItems: 'center' }}>
+                    <View style={styles.inputContainer}>
+                        <View style={{ width: '100%'}} >
+                            <Text style={failedPassword ? styles.failedText : null}>
+                                Correo Electrónico
+                            </Text>
+                            <TextInput 
+                                placeholder="" 
+                                testID= "teacher-email-input" 
+                                style={[styles.input, failedPassword ? styles.failedInput : null]} 
+                                onChangeText={handleEmailChange} />
+                        </View>
+                        <View style={{ width: '100%'}} >
+                            <Text style={failedPassword ? styles.failedText : null}>
+                                Contraseña
+                            </Text>
+                            <PasswordInput
+                                style={[styles.input, failedPassword ? styles.failedInput : null]}
+                                onChangeText={handlePasswordChange}
+                                value={password}
+                                testID="teacher-password-input"
+                                />
+                        </View>
+                    </View>
+                    <Pressable style={styles.loginButton} onPress={handleLogIn} testID="login-submit-button">
+                        <Text style={{ color: '#fff' }}>Iniciar Sesión</Text>
+                    </Pressable>
+                    <Pressable style={{marginBottom:20}} onPress={() => { /* Lógica para recuperar contraseña */ }}>
+                        <Text>¿Olvidaste tu contraseña?</Text>
+                    </Pressable>
+                </View>
+
+                <BackButton width={130} height={50} alignSelf='center' />
+            </View>
             <Alert
                 visible={isAlertVisible}
                 message={alert.message}
                 success={alert.success}
+                duration={1000}
                 color={alert.color}
                 onHide={alert.onHide}
-            />
+                />
         </View>
         
     )

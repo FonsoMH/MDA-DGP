@@ -42,7 +42,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
   useEffect(() => {
     if (error) {
         setAlert({
-            message: "Error al cargar la configuración: " + (error instanceof Error ? error.message : String(error)),
+            message: error.message ? error.message : String(error),
             success: false
         });
         setIsAlertVisible(true);
@@ -52,7 +52,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
   useEffect(() => {
     if (errorSaving) {
         setAlert({
-            message: "Error al guardar la configuración: " + (errorSaving instanceof Error ? errorSaving.message : String(errorSaving)),
+            message: errorSaving.message ? errorSaving.message : String(errorSaving),
             success: false
         });
         setIsAlertVisible(true);

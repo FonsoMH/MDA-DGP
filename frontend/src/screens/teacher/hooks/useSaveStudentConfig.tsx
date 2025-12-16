@@ -16,6 +16,7 @@ export function useSaveStudentConfig(studentId: number, configs: any) {
 
     try {
       setSaving(true);
+      setErrorSaving(null);
 
       const payload = configs[slug]?.settings || {};
       
