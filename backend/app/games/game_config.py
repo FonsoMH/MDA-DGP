@@ -32,6 +32,18 @@ def get_game_config(student_id, game_id):
 def get_all_configs(student_id: int):
     cur = get_db_cursor()
     try:
+        # Get student permission flag
+        cur.execute(
+            """
+            SELECT student_can_configure
+            FROM users
+            WHERE user_id = %s
+            """,
+            (student_id,)
+        )
+        user_row = cur.fetchone()
+        student_can_configure = user_row['student_can_configure'] if user_row else False
+
         cur.execute(
             """
             SELECT g.game_id, g.name,
@@ -63,6 +75,7 @@ def get_all_configs(student_id: int):
 
         return jsonify({
             'student_id': student_id,
+            'student_can_configure': student_can_configure,
             'games': result
         })
     finally:
@@ -143,6 +156,49 @@ def update_one_config(student_id: int, game_id: int):
         conn.rollback()
         return jsonify({'error': str(e)}), 500
 
+    finally:
+        cur.close()
+
+@config_bp.put('/students/<int:student_id>/config/permission')
+def update_student_permission(student_id: int):
+    payload = request.get_json(silent=True) or {}
+    
+    if 'student_can_configure' not in payload:
+        return jsonify({'error': 'Missing student_can_configure field'}), 400
+    
+    student_can_configure = payload.get('student_can_configure')
+    
+    if not isinstance(student_can_configure, bool):
+        return jsonify({'error': 'student_can_configure must be a boolean'}), 400
+    
+    cur = get_db_cursor()
+    conn = get_db()
+    
+    try:
+        cur.execute(
+            """
+            UPDATE users
+            SET student_can_configure = %s
+            WHERE user_id = %s
+            """,
+            (student_can_configure, student_id)
+        )
+        
+        if cur.rowcount == 0:
+            return jsonify({'error': 'Student not found'}), 404
+        
+        conn.commit()
+        
+        return jsonify({
+            'ok': True,
+            'student_id': student_id,
+            'student_can_configure': student_can_configure
+        }), 200
+        
+    except Exception as e:
+        conn.rollback()
+        current_app.logger.error(f"Error updating student permission: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
     finally:
         cur.close()
 

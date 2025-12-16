@@ -10,7 +10,7 @@ export type TeacherStackParamList = {
 	// Listado de estudiantes para tutores (teacherId opcional, se toma del usuario logeado por defecto)
 	TeacherStudentList: { teacherId?: number } | undefined;
 	// Configuración de juegos por estudiante
-	StudentGameConfig: { studentId: number };
+	StudentGameConfig: { studentId: number; isStudentView?: boolean };
 	// Estadísticas del estudiante
 	StudentStatistics: { studentId: number };
 	AccessibilitySettingsConfig: {studentId: number};

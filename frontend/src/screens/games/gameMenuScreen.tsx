@@ -12,6 +12,8 @@ import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useA
 import BackButton from '../../components/common/BackButton/BackButton';
 import { GameStackParamList } from '../../navigation/GameNavigator';
 import { RootStackParamList } from '../../types/navigation';
+import { UserContext } from '../auth/contexts/UserContext';
+import { getAllConfig } from '../../api/studentConfig';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;
 
@@ -47,6 +49,31 @@ const GAMES: Game[] = [
 export default function GameMenuScreen({ navigation }: Props) {
     
     const accessibilitySettings = useAccessibilitySettings();   
+    const userContext = React.useContext(UserContext);
+    const [canConfigure, setCanConfigure] = React.useState(false);
+
+    React.useEffect(() => {
+        const fetchPermission = async () => {
+            if (userContext?.user?.role === 'student' && userContext?.user?.id) {
+                try {
+                    const data = await getAllConfig(userContext.user.id);
+                    setCanConfigure(data.student_can_configure || false);
+                } catch (err) {
+                    console.error('Error fetching student permission:', err);
+                }
+            }
+        };
+        fetchPermission();
+    }, [userContext?.user]);
+
+    const handleConfigPress = () => {
+        if (userContext?.user?.id) {
+            navigation.navigate('Teacher', {
+                screen: 'StudentGameConfig',
+                params: { studentId: userContext.user.id, isStudentView: true }
+            });
+        }
+    };
 
     
     const styles = StyleSheet.create({
@@ -96,6 +123,19 @@ export default function GameMenuScreen({ navigation }: Props) {
             color: '#111',
             textAlign: 'center',
         },
+        configButton: {
+            backgroundColor: '#2563eb',
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            borderRadius: 999,
+            marginTop: 16,
+            alignItems: 'center',
+        },
+        configButtonText: {
+            color: '#fff',
+            fontSize: accessibilitySettings.fontSize,
+            fontWeight: '700',
+        },
     });
 
     return (
@@ -106,6 +146,15 @@ export default function GameMenuScreen({ navigation }: Props) {
                 alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
                 testID="back-button"
             />
+                {canConfigure && (
+                    <Pressable
+                        style={styles.configButton}
+                        onPress={handleConfigPress}
+                        testID="configure-games-button"
+                    >
+                        <Text style={styles.configButtonText}>Configurar mis juegos</Text>
+                    </Pressable>
+                )}
                 <View style={styles.gridContainer}>
                     {GAMES.map((item) => (
                         <Pressable
