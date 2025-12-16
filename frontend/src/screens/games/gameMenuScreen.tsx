@@ -51,17 +51,14 @@ export default function GameMenuScreen({ navigation }: Props) {
     
     const accessibilitySettings = useAccessibilitySettings();   
     const userContext = React.useContext(UserContext);
-    const [canConfigure, setCanConfigure] = React.useState(false);
-    
+    //const [canConfigure, setCanConfigure] = React.useState(false);
+
     const studentId = userContext?.user?.id;
-    const { data: permissionData } = useStudentPermission(studentId);
-    React.useEffect(() => {
-        if (permissionData) {
-            setCanConfigure(permissionData.student_can_configure || false);
-        } else {
-            setCanConfigure(false);
-        }
-    }, [permissionData]);
+    const { data: permissionData, isLoading, isError } = useStudentPermission(studentId);
+
+    // Mientras carga puedes decidir qué hacer (ocultar el botón, skeleton, etc.)
+    const canConfigure =
+    !isLoading && !isError && !!permissionData?.student_can_configure;
 
     const handleConfigPress = () => {
         if (userContext?.user?.id) {
@@ -147,11 +144,7 @@ export default function GameMenuScreen({ navigation }: Props) {
                 />
               
                 {canConfigure && (
-                    <Pressable
-                        
-                        onPress={handleConfigPress}
-                        testID="configure-games-button"
-                    >
+                    <Pressable onPress={handleConfigPress} testID="configure-games-button">
                         <Image
                             source={require('../../../assets/icons/config.png')}
                             style={{ width: 70, height: 70, padding: 10, marginLeft: 10, marginRight: 10 }}
