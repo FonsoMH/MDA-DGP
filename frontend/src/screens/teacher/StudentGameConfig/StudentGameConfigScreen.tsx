@@ -91,12 +91,13 @@ export default function StudentGameConfigScreen({ route }: Props) {
     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     keyboardVerticalOffset={0}
     >
-    <ScrollView
-      contentContainerStyle={styles.content}
-      style={{ flex: 1 }}
+    <View
+      style={styles.content}
     >
-      <BackButton width={130} height={50} />
-      <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
+        <BackButton width={130} height={50} />
+      </View>
 
       {!isStudentView && (
         <View style={styles.permissionContainer}>
@@ -146,7 +147,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
           );
         })}
       </View>
-    </ScrollView>
+    </View>
     </KeyboardAvoidingView>
   );
 }

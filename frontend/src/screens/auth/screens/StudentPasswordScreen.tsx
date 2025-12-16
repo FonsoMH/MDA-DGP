@@ -71,17 +71,18 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
 
     return (
         <View style={styles.safe}>
+            
             <BackButton width={215} height={76} />
             <View style={styles.header}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>¡Selecciona tu contraseña {userParam.name}!</Text>
                 <Text style={{ fontSize: 16, color: '#666' }}>Elige {maxPasswordLength} pictogramas en orden</Text>
             </View>
             
-            <ScrollView style={styles.optionsArea} contentContainerStyle={styles.passwordElementsContent}>
+            <View style={styles.passwordElementsContent} >
                 <View style={styles.passwordElements}>
                     {
                         availableIcons.map((item, index) => {
-                            return <PasswordItem 
+                            return (index >= availableIcons.length / 2) ? null : <PasswordItem 
                             key={index} 
                             icon={item.icon} 
                             text={item.name} 
@@ -93,7 +94,22 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
                         })
                     }
                 </View>
-            </ScrollView>
+                <View style={styles.passwordElements}>
+                    {
+                        availableIcons.map((item, index) => {
+                            return (index < availableIcons.length / 2) ? null : <PasswordItem 
+                            key={index} 
+                            icon={item.icon} 
+                            text={item.name} 
+                            testID={`pictogram-${item.name}`}
+                            onPress={() => addPictogram(item)}
+                            height={130}
+                            width={175}
+                            />
+                        })
+                    }
+                </View>
+            </View>
             
             <View style={styles.passwordBox}>
                 <Text style={styles.passwordHeader}>
@@ -242,15 +258,18 @@ const styles = StyleSheet.create({
     passwordElementsContent: {
         paddingVertical: 10,
         paddingBottom: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        rowGap: 20,
     },
 
     passwordElements:{
         width: '100%',
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        alignItems: 'center',
         justifyContent: 'center', 
-        gap: 15, 
-        rowGap: 20, 
-        padding: 5,
+        gap: 20, 
+        
     },
 });
