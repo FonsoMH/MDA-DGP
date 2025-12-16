@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import {
@@ -6,11 +6,12 @@ import {
     useAnimatedRef,
 } from 'react-native-reanimated';
 import { useAccessibilitySettings } from '../../../accessibilitySettings/hooks/useAccessibilitySettings';
-import BackButton from '../../../components/common/BackButton/BackButton';
+import GameBackButton from '../components/GameBackButton'; //al cambiar el boton habra porblemas con los test<----revisar
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import NumberDisplay from '../../../components/common/NumberDisplays/NumberDisplay';
 import FeedbackScreen from '../../../components/FeedBack/Feedback';
 import { useGameManager } from '../utils/gameManager';
+import { useGameSession } from '../hooks/useGameSession';
 import { generateRandomOptions } from '../utils/gameUtils';
 import DraggableItem from './DraggableItem';
 import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
@@ -134,18 +135,41 @@ function SequenceGame() {
     }, []);
 
     const manager = useGameManager(GAME_ID, initializeGame);
+    // Hook de sesión para registrar aciertos/fallos por ronda y abandono
+    const session = useGameSession({ gameId: GAME_ID });
 
     const topZoneRef = useAnimatedRef<View>();
     const topZoneLayout = useSharedValue<Layout[] | null>(null);
     
     const bottomZoneRef = useAnimatedRef<View>();
     const bottomZoneLayout = useSharedValue<Layout[] | null>(null);
+
+    const [activeHint, setActiveHint] = useState<boolean>(false);
+
+
+    useEffect(() => {
+
+        if (manager.isLoading) return;
+
+        if(activeHint) return;
+
+        const timer = setTimeout(() => {
+            setActiveHint(true);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+
+    }, [selectedNumbers, manager.isLoading, activeHint]);
+
     
     const handlePlayAgain = () => {
         manager.resetGame();
+        session.resetSession();
     };
 
     const handleSelection = async (numberSelected: number) => {
+        // Iniciamos la ronda al primer intento de interacción (idempotente)
+        session.startRound();
         let newSelectedNumbers;
         if (!selectedNumbers.includes(numberSelected)) {
             newSelectedNumbers = [...selectedNumbers, numberSelected];
@@ -154,22 +178,31 @@ function SequenceGame() {
         }
         setSelectedNumbers(newSelectedNumbers);
         
+        // Caso: secuencia completa y correcta => ronda exitosa (solo si no hubo errores previos)
         if (isGameFinished(newSelectedNumbers, options)) {
             await roundMessage.show(
                 "¡Excelente! Has superado la ronda con éxito.", 
                 1000,
                 "success"
             );
+            // Resolución de la ronda: se contabiliza éxito si no hubo intento completo incorrecto antes.
+            session.resolveRound();
             manager.advanceGame();
             return
         }
         
+        // Caso: secuencia completa pero incorrecta => marcamos error de la ronda (una sola vez)
+        // Política: cualquier intento completo incorrecto convierte la ronda en fallo final cuando se resuelva.
         if(newSelectedNumbers.length == options.length){
             await roundMessage.show(
                 "Intentalo de nuevo", 
                 1000,
                 "error"
             );
+            // Registrar error de la ronda sólo el primer intento fallido completo
+            if (!session.hasErrorThisRound) {
+                session.registerError();
+            }
             setSelectedNumbers([]);
             return;
         }
@@ -200,6 +233,15 @@ function SequenceGame() {
 
         return JSON.stringify(selected) === JSON.stringify(correctOrder);
     };
+
+    const includeWrongPlacement = (selected: number[]): boolean => {
+        for (let i = 0; i < selected.length; i++) {
+            if (selected[i] !== undefined && selected[i] !== correctSequence[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     const targetElements: TargetElement[] = correctSequence.map((correctValue, index) => {
         
@@ -241,7 +283,12 @@ function SequenceGame() {
 
     return (
         <View style={styles.screenContainer}>
-            <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'} />
+            <GameBackButton 
+                width={215} 
+                height={76} 
+                alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
+                session={session}
+            />
             <View style={styles.header}>
                 <Text style={styles.title}>{title}</Text>
                 {visualIcon}
@@ -259,7 +306,7 @@ function SequenceGame() {
                     {options.map((num, index) => (
                         <DraggableItem
                             key={`option-${num}-${index}`}
-                            testID={`sequence-item-${num}`}
+                            testID={`sequence-item`}
                             onPress={() => handleSelection(num)} 
                             onDrop={() => handleSelection(num)}
                             dropZonesLayouts={bottomZoneLayout} 
@@ -272,6 +319,8 @@ function SequenceGame() {
                                 size={120}
                                 numberColor={accessibilitySettings.numberColor}
                                 style={[isSelected(num) ? styles.disabled : null, {backgroundColor: accessibilitySettings.boxColor}]} 
+                                activeHint={!includeWrongPlacement(selectedNumbers) && num === correctSequence[selectedNumbers.length] && activeHint}
+                                onEndHint={() => setActiveHint(false)}
                             />
                         </DraggableItem>
                     ))}
@@ -297,7 +346,7 @@ function SequenceGame() {
                             return (
                                 <DraggableItem
                                     key={`selected-${target.value}-${index}`}
-                                    testID={`sequence-item-${target.value}`}
+                                    testID={`sequence-item`}
                                     onPress={() => handleSelection(target.value)}
                                     onDrop={() => handleSelection(target.value)}
                                     dropZonesLayouts={topZoneLayout}
@@ -310,6 +359,8 @@ function SequenceGame() {
                                         size={100}
                                         numberColor={accessibilitySettings.numberColor}
                                         style={{backgroundColor: feedbackColor}} 
+                                        activeHint={includeWrongPlacement(selectedNumbers) && !target.isCorrect && activeHint}
+                                        onEndHint={() => setActiveHint(false)}
                                     />
                                 </DraggableItem>
                             );

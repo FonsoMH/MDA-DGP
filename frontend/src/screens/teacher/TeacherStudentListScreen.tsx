@@ -8,8 +8,12 @@ import type { TeacherStackParamList } from '../../navigation/TeacherNavigator';
 import { useTeacherStudents } from './hooks/useTeacherStudents';
 import StudentRow from '../../components/users/StudentRow';
 import { useUser } from '../../hooks/useUser';
+<<<<<<< HEAD
 import { useEffect, useState } from 'react';
 import Alert from '../../components/FeedBack/Alert';
+=======
+import AdvancedPagination from '../../components/common/Pagination/Pagination';
+>>>>>>> Develop
 
 export default function TeacherStudentListScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<TeacherStackParamList>>();
@@ -23,6 +27,7 @@ export default function TeacherStudentListScreen() {
     return undefined;
   }, [route?.params?.teacherId, user]);
 
+<<<<<<< HEAD
 
   const { students, loading, error, refetch } = useTeacherStudents(teacherId);
 
@@ -58,6 +63,21 @@ export default function TeacherStudentListScreen() {
     });
     return unsubscribe;
   }, [navigation, refetch]);
+=======
+  const { students,
+        loading,
+        totalPages,
+        currentPage,
+        error,
+        changePage } = useTeacherStudents(teacherId);
+
+  // React.useEffect(() => {
+  //   const unsubscribe = navigation.addListener('focus', () => {
+  //     refetch();
+  //   });
+  //   return unsubscribe;
+  // }, [navigation, refetch]);
+>>>>>>> Develop
 
   const onConfigure = (studentId: number) => {
     navigation.navigate('StudentGameConfig', { studentId });
@@ -114,11 +134,20 @@ export default function TeacherStudentListScreen() {
           </ScrollView>
         </View>
       )}
+<<<<<<< HEAD
       <Alert visible={isAlertVisible}
              message={alert.message}
              success={alert.success}
              duration={3000}
              onHide={() => setIsAlertVisible(false)}
+=======
+
+      <AdvancedPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={changePage}
+        pageLimit={totalPages}
+>>>>>>> Develop
       />
     </View>
   );

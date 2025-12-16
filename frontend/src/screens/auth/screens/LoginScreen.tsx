@@ -8,7 +8,7 @@ export default function LoginScreen({ navigation }: LoginProps){
 
     const handleStudentLogin = () => {
         navigation.navigate('Auth', {
-            screen: 'StudentLogin'
+            screen: 'ClassesScreen'
         });
     }
 

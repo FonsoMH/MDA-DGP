@@ -11,13 +11,18 @@ import { getAllConfig } from '../../../api/studentConfig';
  */
 export function useStudentConfigs(studentId : number) {
   const [configs, setConfigs] = React.useState({});
+  const [studentCanConfigure, setStudentCanConfigure] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
     if (!studentId) {
         setConfigs({});
+<<<<<<< HEAD
         setError(new Error("ID de estudiante no recibido"));
+=======
+        setStudentCanConfigure(false);
+>>>>>>> Develop
         setLoading(false);
         return;
     }
@@ -30,11 +35,13 @@ export function useStudentConfigs(studentId : number) {
         const data = await getAllConfig(studentId);
 
         setConfigs(data.games || {});
+        setStudentCanConfigure(data.student_can_configure || false);
         
       } catch (err) {
         
         setError(err);
         setConfigs({});
+        setStudentCanConfigure(false);
         
       } finally {
         
@@ -47,5 +54,5 @@ export function useStudentConfigs(studentId : number) {
     
   }, [studentId]);
 
-  return { configs, loading, error, setConfigs };
+  return { configs, loading, error, setConfigs, studentCanConfigure, setStudentCanConfigure };
 }

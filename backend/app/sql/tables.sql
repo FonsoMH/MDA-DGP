@@ -6,17 +6,23 @@ CREATE TABLE IF NOT EXISTS roles (
     role_name VARCHAR(50) NOT NULL UNIQUE
 );
 
+CREATE TABLE IF NOT EXISTS classes (
+    class_id SERIAL PRIMARY KEY,
+    class_name VARCHAR(100) NOT NULL UNIQUE
+);
+
 -- Users Table (Central)
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    
+    class_id INTEGER REFERENCES classes(class_id) NULL,
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
-    
     -- Relationship Teacher -> Student (only for students)
-    assigned_teacher_id INTEGER REFERENCES users(user_id) NULL
+    assigned_teacher_id INTEGER REFERENCES users(user_id) NULL,
+    -- Permission for students to configure their own games
+    student_can_configure BOOLEAN NOT NULL DEFAULT false
 );
 
 -- Games Table (Catalog)
@@ -56,7 +62,7 @@ CREATE TABLE IF NOT EXISTS student_game_configuration (
 
 -- Game Results
 CREATE TABLE IF NOT EXISTS game_results (
-    result_id SERIAL PRIMARY KEY,
+    result_id SERIAL ,
     student_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     game_id INTEGER NOT NULL REFERENCES games(game_id) ON DELETE RESTRICT,
     abandoned BOOLEAN NOT NULL DEFAULT false,
@@ -66,14 +72,14 @@ CREATE TABLE IF NOT EXISTS game_results (
     played_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     time_seconds INTEGER NOT NULL,
 
-    played_parameters JSONB NOT NULL -- New column to store game parameters as JSONB for historical results
+    PRIMARY KEY (student_id, game_id, played_at)
 );
 
 -- 
 CREATE TABLE IF NOT EXISTS user_deletion (
     deletion_id SERIAL PRIMARY KEY,
     delete_admin_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    delete_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    delete_user_id INTEGER NOT NULL,
     deleted_user_email VARCHAR(255),
     deleted_user_name VARCHAR(255),
     deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -92,6 +98,12 @@ INSERT INTO roles (role_name) VALUES
 ('admin')
 ON CONFLICT (role_name) DO NOTHING;
 
+-- Populate Classes
+INSERT INTO classes (class_name) VALUES
+('Class 1A'),
+('Class 2B')
+ON CONFLICT (class_name) DO NOTHING;
+
 -- 2. Populate Games
 INSERT INTO games (slug, name, description) VALUES
 ('toca-numero', 'Toca el número que suena', 'Se escucha un número y se escoge el correspondiente de entre los mostrados en pantalla.'),
@@ -109,10 +121,10 @@ INSERT INTO users (name, email, password_hash, role_id)
 VALUES ('Professor Paul', 'paul@app.com', 'scrypt:32768:8:1$5IjCMocVblg07UqT$9ff5d3058a93e927c45f62a5658eaa251d14dde68a58ec84b0d2e928a060ed41d493f5e3d41c8122a8d773fcafe6e91b5c3a45301f57f6fce1bcdff417978ebe', (SELECT role_id FROM roles WHERE role_name = 'teacher'))
 ON CONFLICT (email) DO NOTHING;
 
-INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id) 
+INSERT INTO users (name, email, password_hash, role_id, assigned_teacher_id, class_id) 
 VALUES 
-('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$rBvclRmeu1UqPMP6$ced8eefdf634683cf43a15afbb285b41b2e01fe80d8953ac3be17b4a03775aa743303010b41c971ce48231df15c40659062b41b9f47fd48b9117156a1ac9b1eb', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com')),
-('Leo Reader', 'leo@app.com', 'scrypt:32768:8:1$HzRP2dGZaRn7HUUY$2faba6ea80ed475c04241e5e3079ad91889e21dd361e904e48c1b6182511cd77fa7622e9fe9d50aefa5639f6a70246fa9a50c1fcf7d1586d6c12f99b447f3c0d', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'))
+('Eva Student', 'eva@app.com', 'scrypt:32768:8:1$rBvclRmeu1UqPMP6$ced8eefdf634683cf43a15afbb285b41b2e01fe80d8953ac3be17b4a03775aa743303010b41c971ce48231df15c40659062b41b9f47fd48b9117156a1ac9b1eb', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 1A')),
+('Leo Reader', 'leo@app.com', 'scrypt:32768:8:1$HzRP2dGZaRn7HUUY$2faba6ea80ed475c04241e5e3079ad91889e21dd361e904e48c1b6182511cd77fa7622e9fe9d50aefa5639f6a70246fa9a50c1fcf7d1586d6c12f99b447f3c0d', (SELECT role_id FROM roles WHERE role_name = 'student'), (SELECT user_id FROM users WHERE email = 'paul@app.com'), (SELECT class_id FROM classes WHERE class_name = 'Class 2B'))
 ON CONFLICT (email) DO NOTHING;
 
 -- 4. Populate Settings for 1 student (Eva)
@@ -151,17 +163,11 @@ VALUES
     (SELECT game_id FROM games WHERE slug = 'reparte-igual'),
     0, 10, 15, 3, true, true -- sum=true significa que 'reparte' (suma) está activo
 )
-ON CONFLICT (student_id, game_id) DO UPDATE SET
-    min_value = EXCLUDED.min_value,
-    max_value = EXCLUDED.max_value,
-    num_elements = EXCLUDED.num_elements,
-    num_containers = EXCLUDED.num_containers,
-    upward = EXCLUDED.upward,
-    sum = EXCLUDED.sum;
+ON CONFLICT (student_id, game_id) DO NOTHING;
 
 -- 6. Populate Game Results (valid columns)
 -- Inserta varias partidas para Eva Student en dos fechas distintas para pruebas de estadísticas
-INSERT INTO game_results (student_id, game_id, abandoned, successful_plays, failed_plays, played_at, time_seconds, played_parameters)
+INSERT INTO game_results (student_id, game_id, abandoned, successful_plays, failed_plays, played_at, time_seconds)
 VALUES
 -- Eva en 'toca-numero' (día 2025-11-20)
 (
@@ -169,16 +175,14 @@ VALUES
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     false, 3, 1,
     '2025-11-20T10:00:00+00:00',
-    45,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+    45
 ),
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     true, 0, 0,
     '2025-11-20T12:15:00+00:00',
-    30,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+    30
 ),
 -- Eva en 'toca-numero' (día 2025-11-21)
 (
@@ -186,16 +190,13 @@ VALUES
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     false, 4, 2,
     '2025-11-21T09:30:00+00:00',
-    60,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
+    60
 ),
 (
     (SELECT user_id FROM users WHERE email = 'eva@app.com'),
     (SELECT game_id FROM games WHERE slug = 'toca-numero'),
     false, 2, 3,
     '2025-11-21T15:45:00+00:00',
-    55,
-    '{"ranges": 20, "num_elements": 5, "num_containers": 0, "upward": true, "sum": false}'
-);
-ON CONFLICT DO NOTHING;
-
+    55
+)
+ON CONFLICT (student_id, game_id, played_at) DO NOTHING;

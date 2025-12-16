@@ -80,7 +80,11 @@ export async function fetchDefaultAccessibilitySettings(): Promise<Accessibility
             showNumbersMode: configData.show_numbers_mode,
             fontSize: configData.font_size,
         };
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> Develop
         return mappedConfig;
 
     } catch (error) {

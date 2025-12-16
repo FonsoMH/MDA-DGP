@@ -1,26 +1,31 @@
 import * as React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, useWindowDimensions, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, useWindowDimensions, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { TeacherStackParamList } from '../../../navigation/TeacherNavigator';
 import BackButton from '../../../components/common/BackButton/BackButton';
 import { CONFIG_COMPONENTS_JSX } from './ConfigGameComponent';
 import { useSaveStudentConfig } from '../hooks/useSaveStudentConfig';
 import { useStudentConfigs } from '../hooks/useStudentConfig';
+<<<<<<< HEAD
 import { useEffect , useState} from 'react';
 import Alert from '../../../components/FeedBack/Alert';
+=======
+import { updateStudentPermission } from '../../../api/studentConfig';
+import { number } from 'yup';
+>>>>>>> Develop
 
-// Add route type in navigation types: StudentGameConfig: { studentId: number }
+// Add route type in navigation types: StudentGameConfig: { studentId: number, isStudentView?: boolean }
 type Props = NativeStackScreenProps<TeacherStackParamList, 'StudentGameConfig'>;
 
 const CONFIG_MAP = {
-  'toca-numero': ['min_value', 'max_value', 'num_elements'],
-  'ordena-secuencia': ['min_value', 'max_value', 'num_elements', 'upward'], 
-  'deja-igual': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
-  'reparte-igual': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
+  '1': ['min_value', 'max_value', 'num_elements'],
+  '2': ['min_value', 'max_value', 'num_elements', 'upward'], 
+  '4': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
+  '3': ['min_value', 'max_value', 'num_elements', 'num_containers', 'sum'],
 };
 
 export default function StudentGameConfigScreen({ route }: Props) {
-  const { studentId } = route.params;
+  const { studentId, isStudentView = false } = route.params;
 
   // Responsive: medidas
   const { width } = useWindowDimensions();
@@ -28,8 +33,10 @@ export default function StudentGameConfigScreen({ route }: Props) {
 
   const titleSize = width >= 1024 ? 24 : width >= 768 ? 22 : 20;
 
-  const { configs, loading, error, setConfigs } = useStudentConfigs(studentId);
+  const { configs, loading, error, setConfigs, studentCanConfigure, setStudentCanConfigure } = useStudentConfigs(studentId);
+  const [updatingPermission, setUpdatingPermission] = React.useState(false);
 
+<<<<<<< HEAD
   const { saveOne, saving , errorSaving } = useSaveStudentConfig(studentId, configs);
 
   const [isAlertVisible, setIsAlertVisible] = React.useState(false);
@@ -60,6 +67,9 @@ export default function StudentGameConfigScreen({ route }: Props) {
   }, [errorSaving]);
 
   const handleChange = React.useCallback((slug: string, key: string, value: string) => {
+=======
+  const handleChange = React.useCallback((gameId: number, key: string, value: string) => {
+>>>>>>> Develop
     
     const rawValue = value.trim() === '' ? '0' : value;
 
@@ -67,23 +77,40 @@ export default function StudentGameConfigScreen({ route }: Props) {
 
     setConfigs((prev: any) => ({ 
         ...prev, 
-        [slug]: { 
-            ...prev[slug], 
+        [gameId]: { 
+            ...prev[gameId], 
             settings: { 
-                ...prev[slug].settings, 
+                ...prev[gameId].settings, 
                 [key]: numericValue 
             } 
         } 
     }));
   }, []);
 
-  const handleToggle = (slug: string, key: string) => {
+  const handleToggle = (gameId: number, key: string) => {
     setConfigs((prev: any) => {
-      const cur = Boolean(prev[slug]?.settings?.[key]);
-      return { ...prev, [slug]: { ...prev[slug], settings: { ...prev[slug].settings, [key]: !cur } } };
+      const cur = Boolean(prev[gameId]?.settings?.[key]);
+      return { ...prev, [gameId]: { ...prev[gameId], settings: { ...prev[gameId].settings, [key]: !cur } } };
     });
   };
 
+<<<<<<< HEAD
+=======
+  const { saveOne, saving } = useSaveStudentConfig(studentId, configs);
+
+  const handlePermissionToggle = async (value: boolean) => {
+    try {
+      setUpdatingPermission(true);
+      await updateStudentPermission(studentId, value);
+      setStudentCanConfigure(value);
+    } catch (err) {
+      console.error('Error updating permission:', err);
+    } finally {
+      setUpdatingPermission(false);
+    }
+  };
+
+>>>>>>> Develop
   if (loading) {
     return (
       <View style={styles.center}> 
@@ -110,18 +137,29 @@ export default function StudentGameConfigScreen({ route }: Props) {
         <BackButton width={130} height={50} />
       </View>
 
+      {!isStudentView && (
+        <View style={styles.permissionContainer}>
+          <Text style={styles.permissionLabel}>Permitir que el estudiante configure sus juegos</Text>
+          <Switch
+            value={studentCanConfigure}
+            onValueChange={handlePermissionToggle}
+            disabled={updatingPermission}
+            testID="student-permission-toggle"
+          />
+        </View>
+      )}
+
       <View style={[styles.gridContainer, { gap: GAP }]}>
-        {entries.map(([slug, info]) => {
+        {entries.map(([gameId, info]) => {
           
-          const requiredKeys = CONFIG_MAP[slug as keyof typeof CONFIG_MAP] || []; 
+          const requiredKeys = CONFIG_MAP[gameId as keyof typeof CONFIG_MAP] || []; 
           
           
-          const renderProps = { slug, info, handleChange, handleToggle};
+          const renderProps = { gameId: Number(gameId), info, handleChange, handleToggle};
 
           return (
-            <View key={slug} style={styles.card}>
-              <Text style={styles.cardTitle}>{info.name || slug}</Text>
-
+            <View key={gameId} style={styles.card}   testID={`game-card-${gameId}`}>
+              <Text style={styles.cardTitle}>{info.name || gameId}</Text>
               {requiredKeys.map((key) => {
                 const componentEntry = CONFIG_COMPONENTS_JSX[key];
                 if (!componentEntry) return null; 
@@ -136,8 +174,14 @@ export default function StudentGameConfigScreen({ route }: Props) {
               })}
 
               <View style={[styles.actions, { marginTop: 'auto' }]}>
+<<<<<<< HEAD
                 <Pressable style={[styles.btn, styles.btnPrimary]} onPress={async () => { await saveOne(slug); setIsAlertVisible(true); }} disabled={saving}
                   accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name || slug}`}
+=======
+                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => saveOne(Number(gameId))} disabled={saving}
+                  accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name }`}
+                  testID={`save-config-${gameId}`}
+>>>>>>> Develop
                 >
                   <Text style={styles.btnText}>{saving ? 'Guardando…' : 'Guardar'}</Text>
                 </Pressable>
@@ -196,4 +240,22 @@ const styles = StyleSheet.create({
   stepBtn: { backgroundColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center' },
   stepBtnText: { fontWeight: '700' },
   stepValue: { minWidth: 28, textAlign: 'center', fontWeight: '700' },
+  permissionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E6E8EB',
+    marginBottom: 12,
+  },
+  permissionLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#14213d',
+    flex: 1,
+    marginRight: 12,
+  },
 });

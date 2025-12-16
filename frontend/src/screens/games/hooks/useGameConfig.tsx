@@ -1,5 +1,7 @@
+import { useCallback, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchGameConfiguration } from '../api/gameConfigApi';
+import { getStudentPermission } from '../../../api/studentConfig';
 
 /**
  * A custom React hook to fetch the configuration for a specific game and student.
@@ -30,4 +32,41 @@ export const useGameConfig = (studentId: number, gameId: number) => {
 
         enabled: !!studentId && !!gameId,
     });
+};
+
+export const useStudentPermission = (studentId: number) => {
+    const [data, setData] = useState<any | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isError, setIsError] = useState(false);
+    const [error, setError] = useState<unknown>(null);
+
+    const loadPermission = useCallback(async () => {
+        if (!studentId) {
+            setData(null);
+            setIsError(false);
+            setError(null);
+            setIsLoading(false);
+            return;
+        }
+
+        setIsLoading(true);
+        setIsError(false);
+        setError(null);
+
+        try {
+            const response = await getStudentPermission(studentId);
+            setData(response);
+        } catch (err) {
+            setIsError(true);
+            setError(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [studentId]);
+
+    useEffect(() => {
+        loadPermission();
+    }, [loadPermission]);
+
+    return { data, isLoading, isError, error, refetch: loadPermission };
 };

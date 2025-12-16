@@ -1,13 +1,10 @@
 import * as React from 'react';
 import { updateConfig } from '../../../api/studentConfig'; // Asegúrate de que la ruta sea correcta
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-/**
- * Hook personalizado para manejar el guardado de la configuración de un juego
- * específico para un estudiante.
- * @param studentId El ID del estudiante.
- * @param configs El objeto de configuración completo del estudiante.
- */
+
 export function useSaveStudentConfig(studentId: number, configs: any) {
+<<<<<<< HEAD
   const [saving, setSaving] = React.useState(false);
   const [errorSaving, setErrorSaving] = React.useState<Error | null>(null);
   
@@ -19,15 +16,53 @@ export function useSaveStudentConfig(studentId: number, configs: any) {
       setErrorSaving(null);
 
       const payload = configs[slug]?.settings || {};
+=======
+  
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: ({ gameId, payload }: { gameId: number , payload: any }) => 
+        updateConfig(studentId, Number(gameId), payload),
+
+    onSuccess: (data, variables) => {
+      const queryKeyToInvalidate = ['gameConfig', studentId, Number(variables.gameId)];
+>>>>>>> Develop
       
-      await updateConfig(studentId, slug, payload);
+      queryClient.invalidateQueries({ 
+          queryKey: queryKeyToInvalidate,
+          refetchType: 'active'
+      });
       
+<<<<<<< HEAD
     } catch (error) {
       setErrorSaving(error);
     } finally {
       setSaving(false);
+=======
+    },
+    
+    onError: (error) => {
+        console.error("Fallo la mutación del juego:", error);
+>>>>>>> Develop
     }
-  }, [studentId, configs, saving]); 
+  });
 
+<<<<<<< HEAD
   return { saveOne, saving , errorSaving };
+=======
+  const saveOne = React.useCallback(async (gameId: number ) => {
+    
+    const payload = configs[gameId]?.settings || {};
+
+    mutation.mutate({ gameId, payload });
+
+  }, [studentId, configs, mutation.mutate]); 
+  
+  return { 
+    saveOne, 
+    saving: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError
+  };
+>>>>>>> Develop
 }

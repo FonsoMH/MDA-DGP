@@ -12,6 +12,9 @@ import { useAccessibilitySettings } from '../../accessibilitySettings/hooks/useA
 import BackButton from '../../components/common/BackButton/BackButton';
 import { GameStackParamList } from '../../navigation/GameNavigator';
 import { RootStackParamList } from '../../types/navigation';
+import { UserContext } from '../auth/contexts/UserContext';
+import { useStudentPermission } from './hooks/useGameConfig';
+import { useUser } from '../../hooks/useUser';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;
 
@@ -38,7 +41,7 @@ const GAMES: Game[] = [
         image: require('../../../assets/icons/games_icons/icon_game3.png'),
     },
     {
-        id: 'Game4',
+        id: 'LeaveSame',
         title: 'Deja el mismo número',
         image: require('../../../assets/icons/games_icons/icon_game4.png'),
     },
@@ -47,6 +50,25 @@ const GAMES: Game[] = [
 export default function GameMenuScreen({ navigation }: Props) {
     
     const accessibilitySettings = useAccessibilitySettings();   
+    const userContext = React.useContext(UserContext);
+    //const [canConfigure, setCanConfigure] = React.useState(false);
+
+    const studentId = userContext?.user?.id;
+    const { data: permissionData, isLoading, isError } = useStudentPermission(studentId);
+
+    // Mientras carga puedes decidir qué hacer (ocultar el botón, skeleton, etc.)
+    const canConfigure =
+    !isLoading && !isError && !!permissionData?.student_can_configure;
+
+    const handleConfigPress = () => {
+        if (userContext?.user?.id) {
+            navigation.navigate('Teacher', {
+                screen: 'StudentGameConfig',
+                params: { studentId: userContext.user.id, isStudentView: true }
+            });
+        }
+    };
+    const student = useUser().user;
 
     
     const styles = StyleSheet.create({
@@ -96,16 +118,51 @@ export default function GameMenuScreen({ navigation }: Props) {
             color: '#111',
             textAlign: 'center',
         },
+        configButton: {
+            backgroundColor: '#2563eb',
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            borderRadius: 999,
+            marginTop: 16,
+            alignItems: 'center',
+        },
+        configButtonText: {
+            color: '#fff',
+            fontSize: accessibilitySettings.fontSize,
+            fontWeight: '700',
+        },
     });
 
     return (
-        <View style={styles.safe}>
-			<BackButton
-                width={215}
-                height={76}
-                alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}
-                testID="back-button"
-            />
+        <View style={styles.safe}>     
+            <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%' }}>
+                        
+                <BackButton
+                    width={215}
+                    height={76}
+                    testID="back-button"
+                />
+              
+                {canConfigure && (
+                    <Pressable onPress={handleConfigPress} testID="configure-games-button">
+                        <Image
+                            source={require('../../../assets/icons/config.png')}
+                            style={{ width: 70, height: 70, padding: 10, marginLeft: 10, marginRight: 10 }}
+                        />
+                    </Pressable>
+                )}
+              
+                <Pressable
+                    onPress={() => navigation.navigate('Student', { screen: 'StudentStatistics', params: { student: student } })}
+                    accessibilityRole="button"
+                    accessibilityLabel="Ver estadísticas del estudiante"
+                >
+                    <Image
+                        source={require('../../../assets/icons/stats.png')}
+                        style={{ width: 76, height: 76 }}
+                    />
+                </Pressable>
+            </View>
                 <View style={styles.gridContainer}>
                     {GAMES.map((item) => (
                         <Pressable
@@ -122,7 +179,6 @@ export default function GameMenuScreen({ navigation }: Props) {
                         </Pressable>
                     ))}
                 </View>
-  
         </View>
     );
 }

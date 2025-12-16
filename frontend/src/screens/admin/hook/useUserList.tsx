@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchUsers } from "../api/userApi";
 import { useFocusEffect } from "@react-navigation/native";
-import { UserFrontend } from "../../../types/users";
+import { UserFrontend, PaginatedUsersResponse } from "../../../types/users";
 
 /**
  * Custom Hook para cargar y manejar la lista de usuarios.
  * @returns {{ users: UserFrontend[]; isLoading: boolean }}
  */
-export function useUsers() {
-  const [users, setUsers] = useState<UserFrontend[]>([]);
+export function useUsers(page: number, limit:number, name:string) {
+  const [users, setUsers] = useState<PaginatedUsersResponse>({ items: [], total_count: 0, total_pages: 0, current_page: 0 });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -26,14 +26,17 @@ export function useUsers() {
   const loadUsersData = useCallback(async () => {
     setIsLoading(true);
     try {
-        const data = await fetchUsers();
+
+        const offset = (page - 1)* limit;
+        const data = await fetchUsers(page, offset, limit, name);
+        
         setUsers(data);
     } catch (error) {
         setError(error as Error);
     } finally {
         setIsLoading(false);
     }
-  }, []);
+  }, [page, name]);
 
   useFocusEffect(
       useCallback(() => {

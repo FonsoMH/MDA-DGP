@@ -4,7 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import StudentLoginCard from '../components/StudentLoginCard';
 import BackButton from '../../../components/common/BackButton/BackButton';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
-import { StudentLogin } from '../../../types/login';
+import { Classes, StudentLogin } from '../../../types/login';
 import { useStudentsData } from '../hook/usersList';
 import { useEffect, useState } from 'react';
 import Alert from '../../../components/FeedBack/Alert';
@@ -12,9 +12,11 @@ import Alert from '../../../components/FeedBack/Alert';
 
 type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
 
-export default function StudentLoginScreen({ navigation }: StudentLoginProps){
+export default function StudentLoginScreen({ route, navigation }: StudentLoginProps){
 
-    const { users, isLoading, refetch , error } = useStudentsData();
+    const classParam: Classes = route.params.clasParam; 
+
+    const { users, isLoading, refetch , error} = useStudentsData(classParam.id);
 
     const [isAlertVisible, setIsAlertVisible] = useState(false);
 
@@ -22,6 +24,7 @@ export default function StudentLoginScreen({ navigation }: StudentLoginProps){
         message: 'Cambios guardados con éxito',
         success: true
     });
+
 
     const handleSubmit = (user: StudentLogin) => {
         navigation.navigate('StudentPassword', { userParam: user });
@@ -55,7 +58,8 @@ export default function StudentLoginScreen({ navigation }: StudentLoginProps){
                             key={user.id} 
                             id={user.id} 
                             user={user.name} 
-                            onPress={() => handleSubmit(user)} 
+                            onPress={() => handleSubmit(user)}
+                            
                         />
                     ))
                 }

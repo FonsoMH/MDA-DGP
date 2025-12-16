@@ -14,8 +14,6 @@ export function useCreateStudent() {
     setError(null);
     setIsSubmitting(true);
     
-    console.log("hola?");
-    
 
     try {
       await createStudentApi(payload);

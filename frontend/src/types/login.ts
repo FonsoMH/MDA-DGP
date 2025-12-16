@@ -1,9 +1,25 @@
+export interface Classes {
+  name: string;
+  id: number;
+};
+
 export interface StudentLogin {
   name: string;
   email: string
   id: number;
-  role: string
 };
+
+export interface ClassesLogin {
+  id: number;
+  students: StudentLogin[]
+};
+
+export interface PaginatedStudentsResponse {
+    items: StudentLogin[];
+    total_count: number;
+    total_pages: number;
+    current_page: number;
+}
 
 export type StudentLoginCardProps = {
   user: string;
