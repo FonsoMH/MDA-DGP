@@ -202,4 +202,31 @@ def update_student_permission(student_id: int):
     finally:
         cur.close()
 
+@config_bp.get('/students/<int:student_id>/config/permission')
+def get_student_permission(student_id: int):
+    cur = get_db_cursor()
+    try:
+        cur.execute(
+            """
+            SELECT student_can_configure
+            FROM users
+            WHERE user_id = %s
+            """,
+            (student_id,)
+        )
+        user_row = cur.fetchone()
+        if not user_row:
+            return jsonify({'error': 'Student not found'}), 404
+        
+        student_can_configure = user_row['student_can_configure']
+        
+        return jsonify({
+            'student_id': student_id,
+            'student_can_configure': student_can_configure
+        }), 200
+    except Exception as e:
+        current_app.logger.error(f"Error fetching student permission: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+    finally:
+        cur.close()
 

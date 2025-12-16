@@ -13,7 +13,7 @@ import BackButton from '../../components/common/BackButton/BackButton';
 import { GameStackParamList } from '../../navigation/GameNavigator';
 import { RootStackParamList } from '../../types/navigation';
 import { UserContext } from '../auth/contexts/UserContext';
-import { getAllConfig } from '../../api/studentConfig';
+import { getStudentPermission} from '../../api/studentConfig';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameMenu'>;
 
@@ -51,12 +51,12 @@ export default function GameMenuScreen({ navigation }: Props) {
     const accessibilitySettings = useAccessibilitySettings();   
     const userContext = React.useContext(UserContext);
     const [canConfigure, setCanConfigure] = React.useState(false);
-
+    
     React.useEffect(() => {
         const fetchPermission = async () => {
             if (userContext?.user?.role === 'student' && userContext?.user?.id) {
                 try {
-                    const data = await getAllConfig(userContext.user.id);
+                    const data = await getStudentPermission(userContext.user.id);
                     setCanConfigure(data.student_can_configure || false);
                 } catch (err) {
                     console.error('Error fetching student permission:', err);
@@ -171,7 +171,6 @@ export default function GameMenuScreen({ navigation }: Props) {
                         </Pressable>
                     ))}
                 </View>
-  
         </View>
     );
 }

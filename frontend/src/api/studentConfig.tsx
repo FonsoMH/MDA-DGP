@@ -27,3 +27,9 @@ export async function updateStudentPermission(studentId: number, canConfigure: b
   const res = await axios.put(url, { student_can_configure: canConfigure });
   return res.data;
 }
+
+export async function getStudentPermission(studentId: number) {
+  const url = `${BASE_URL}/api/students/${studentId}/config/permission`;
+  const res = await axios.get(url);
+  return res.data;
+}
