@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, use, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useAccessibilitySettings } from '../../../accessibilitySettings/hooks/useAccessibilitySettings';
 import BackButton from '../../../components/common/BackButton/BackButton';
@@ -11,6 +11,7 @@ import { getRandomNumber, generateOptionsWithTarget } from '../utils/gameUtils';
 import { CORRECT_COLOR, EMPTY_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
+import AudioInstruction from '../../../components/common/AudioInstruction/AudioInstruction';
 
 //TODO calcular puntuacion
 const GAME_ID = 1; 
@@ -97,6 +98,10 @@ function TapNumberGame() {
 
     const [activeHint, setActiveHint] = useState<boolean>(false);
 
+    // para resolver conflicto de audio al iniciar ronda
+    const isFirstLoad = useRef(true);
+    const currentTargetRef = useRef(0);
+
     const initializeGame = useCallback((minValue: number, maxValue: number, optionsCount: number) => {    
         
         const newTarget = getRandomNumber(minValue, maxValue);
@@ -104,12 +109,23 @@ function TapNumberGame() {
         
         setTargetNumber(newTarget);
         setOptions(newOptions);
+
+        currentTargetRef.current = newTarget;
+
         setSelectedDisplay(null);
         setActiveHint(false);
-        
-        playTTS(newTarget.toString());
+        if (!isFirstLoad.current) {
+            playTTS(newTarget.toString());
+        }
     }, []);
 
+    const handleInstructionsFinished = () => {
+        if (isFirstLoad.current) {
+            isFirstLoad.current = false;
+            playTTS(currentTargetRef.current.toString());
+        }
+    };
+    
     const manager = useGameManager(GAME_ID, initializeGame);
 
     useEffect(() => {
@@ -163,6 +179,16 @@ function TapNumberGame() {
             <View style={{flexDirection: accessibilitySettings.iconPosition === 'derecha' ? 'row-reverse' : 'row', alignItems: 'center', width: '100%' }}>
                 <BackButton width={215} height={76}></BackButton>
             </View>
+
+            <View style={styles.header}>
+                <AudioInstruction
+                    text="Escucha atentamente y toca el número correcto"
+                    textStyle={styles.title}
+                    iconSize={30}
+                    onFinish={handleInstructionsFinished}
+                />
+            </View>
+
             <TouchableOpacity 
                 testID="tts-button" 
                 onPress={() => playTTS(targetNumber.toString())}  
@@ -182,9 +208,7 @@ function TapNumberGame() {
                 {targetNumber}
             </Text>
 
-            <View style={styles.header}>
-                <Text style={styles.title}>Escucha atentamente y toca el número correcto</Text>
-            </View>
+            {/* */}
 
             <View style={styles.optionsGrid}>
                 {options.map((num, index) => {

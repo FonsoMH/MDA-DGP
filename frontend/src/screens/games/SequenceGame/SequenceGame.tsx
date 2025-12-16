@@ -16,7 +16,7 @@ import DraggableItem from './DraggableItem';
 import { CORRECT_COLOR, ERROR_COLOR } from '../../../types/games';
 import { useRoundMessage } from '../../../components/RoundMessage/useRoundMessage';
 import RoundMessage from '../../../components/RoundMessage/RoundMessage';
-
+import AudioInstruction from '../../../components/common/AudioInstruction/AudioInstruction';
 
 type TargetElement = {
     value: number | null; // El número colocado o null si está vacío
@@ -269,10 +269,21 @@ function SequenceGame() {
     return (
         <View style={styles.screenContainer}>
             <BackButton width={215} height={76} alignSelf={accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'} />
+            
+            <View style={styles.header}>
+                <AudioInstruction
+                    text={title}
+                    textStyle={styles.title}
+                    iconSize={30}
+                    onFinish={() => {}}
+                />
+            </View>
+            {/*}
             <View style={styles.header}>
                 <Text style={styles.title}>{title}</Text>
                 {visualIcon}
             </View>
+            */}
             <View
                 style={[styles.gridContainer, { height: '40%' },{backgroundColor: accessibilitySettings.containerColor}]}
                 ref={topZoneRef}

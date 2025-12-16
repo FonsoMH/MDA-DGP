@@ -5,7 +5,7 @@ let isSpeaking = false;
 
 
 
-export const playTTS = async (message: string) => {
+export const playTTS = async (message: string, onDoneCallBack?: () => void) => {
   if (!message) return;
 
   
@@ -23,6 +23,9 @@ export const playTTS = async (message: string) => {
     },
     onDone: () => {
       isSpeaking = false;
+      if (onDoneCallBack) {
+        onDoneCallBack();
+      }
     },
     onStopped: () => {
       isSpeaking = false;
@@ -32,4 +35,11 @@ export const playTTS = async (message: string) => {
       console.error('❌ Error en TTS:', error);
     },
   });
+};
+
+export const stopTTS = () => {
+  if (isSpeaking) {
+    Speech.stop();
+    isSpeaking = false;
+  }
 };

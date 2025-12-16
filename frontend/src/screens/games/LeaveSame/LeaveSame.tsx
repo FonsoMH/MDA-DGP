@@ -12,6 +12,7 @@ import DraggableItem from "../SequenceGame/DraggableItem";
 import RoundMessage from "../../../components/RoundMessage/RoundMessage";
 import { useRoundMessage } from "../../../components/RoundMessage/useRoundMessage";
 import Container from "../ContainerSort/Container";
+import AudioInstruction from "../../../components/common/AudioInstruction/AudioInstruction";
 
 const GAME_ID = 4; 
 
@@ -32,6 +33,23 @@ function ContainerSort() {
             alignItems: 'center',
             paddingVertical: 30,
             paddingHorizontal: 20
+        },
+
+        header: {
+            width: '100%',
+            paddingVertical: 5,
+            alignItems: 'center',
+            flexDirection: 'row',
+            gap: 20,
+            justifyContent: 'center',
+        },
+
+        title: {
+            fontSize: accessibilitySettings.fontSize + 10,
+            fontWeight: '900',
+            color: accessibilitySettings.foregroundColor,
+            marginBottom: 10,
+            textAlign: 'center',
         },
 
         headerContainer: {
@@ -378,14 +396,23 @@ function ContainerSort() {
         <View style={styles.screenContainer}>
             <View style={styles.headerContainer}>
             <BackButton width={215} 
-            height={76}
-            alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
-
+                height={76}
+                alignSelf={ accessibilitySettings.iconPosition === 'derecha' ? 'flex-end' : 'flex-start'}>
             </BackButton>
+            <View style={styles.header}>
+                <AudioInstruction
+                    text="Saca los que sobran para que todos tengan la misma cantidad"
+                    textStyle={styles.title}
+                    iconSize={30}
+                    onFinish={() => {}}
+                />
+            </View> 
+            {/*
             <Text style={styles.titleText} >Deja igual</Text>
             <Text style={styles.instructionText}>Saca los que sobran para que todos tengan la misma cantidad</Text>    
+            */}
             </View>
-                
+            
 
             <View
                 style={[styles.gridContainer, { height: '25%' }, {backgroundColor: accessibilitySettings.containerColor}]}
