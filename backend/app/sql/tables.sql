@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS users (
     class_id INTEGER REFERENCES classes(class_id) NULL,
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
     -- Relationship Teacher -> Student (only for students)
-    assigned_teacher_id INTEGER REFERENCES users(user_id)
+    assigned_teacher_id INTEGER REFERENCES users(user_id) NULL,
+    -- Permission for students to configure their own games
+    student_can_configure BOOLEAN NOT NULL DEFAULT false
 );
 
 -- Games Table (Catalog)

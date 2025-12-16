@@ -21,3 +21,15 @@ export async function updateConfig(studentId: number, gameId: number, payload: P
   const res = await axios.put(url, payload);
   return res.data;
 }
+
+export async function updateStudentPermission(studentId: number, canConfigure: boolean) {
+  const url = `${BASE_URL}/api/students/${studentId}/config/permission`;
+  const res = await axios.put(url, { student_can_configure: canConfigure });
+  return res.data;
+}
+
+export async function getStudentPermission(studentId: number) {
+  const url = `${BASE_URL}/api/students/${studentId}/config/permission`;
+  const res = await axios.get(url);
+  return res.data;
+}
