@@ -152,11 +152,14 @@ export default function GameMenuScreen({ navigation }: Props) {
               
                 {canConfigure && (
                     <Pressable
-                        style={styles.configButton}
+                        
                         onPress={handleConfigPress}
                         testID="configure-games-button"
                     >
-                        <Text style={styles.configButtonText}>Configurar mis juegos</Text>
+                        <Image
+                            source={require('../../../assets/icons/config.png')}
+                            style={{ width: 70, height: 70, padding: 10, marginLeft: 10, marginRight: 10 }}
+                        />
                     </Pressable>
                 )}
               
