@@ -42,7 +42,7 @@ export function UserProvider({ children }: UserProviderProps) {
 
             return loggedInUser; 
             
-        } catch (err: any) {
+        } catch (err) {
             setUser(null);
             setUserError(err);
             return null;

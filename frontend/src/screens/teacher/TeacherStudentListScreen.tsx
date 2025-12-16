@@ -34,7 +34,7 @@ export default function TeacherStudentListScreen() {
   useEffect(() => {
     if (userError) {
       setAlert({
-        message: `Error: ${userError.message}`,
+        message: userError.message ? userError.message : String(userError),
         success: false
       });
       setIsAlertVisible(true);
@@ -44,7 +44,7 @@ export default function TeacherStudentListScreen() {
   useEffect(() => {
     if (error) {
       setAlert({
-        message: `Error: ${error}`,
+        message: error.message ? error.message : String(error),
         success: false
       });
       setIsAlertVisible(true);
@@ -86,10 +86,6 @@ export default function TeacherStudentListScreen() {
         <View style={styles.center}> 
           <ActivityIndicator size="large" color="#2563eb" />
         </View>
-      )}
-
-      {error && !loading && (
-        <Text style={styles.error}>Error: {error}</Text>
       )}
 
       {!loading && students.length === 0 && (

@@ -12,12 +12,13 @@ import { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { useUsers } from './hook/useUserList';
 import { set } from 'react-hook-form';
 import { useUser } from '../../hooks/useUser';
+import Alert from '../../components/FeedBack/Alert';
 
 type UserListProps = NativeStackScreenProps<any, 'UserList'>;
 
 export default function UserListScreen({ navigation }: UserListProps) { 
   const {user} = useUser();
-  const { users, isLoading, refetch } = useUsers();
+  const { users, isLoading, refetch, error } = useUsers();
   const [filteredUsers, setFilteredUsers] = useState<UserFrontend[]>([]);
   const [filter, setFilter] = useState<FilterOption>('todos');
 
@@ -25,7 +26,22 @@ export default function UserListScreen({ navigation }: UserListProps) {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState<UserApiData | null>(null);
 
+
+  const [alert, setAlert] = useState({
+      message: '',
+      success: true
+  });
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
   
+  useEffect(() => {
+      if (error) {
+        setAlert({
+          message: error.message ? error.message : String(error),
+          success: false
+        });
+        setIsAlertVisible(true);
+      }
+    }, [error]);
 
   const handleOpenEditModal = (user: UserApiData) => {
     setSelectedUserForEdit(user);
@@ -165,6 +181,13 @@ export default function UserListScreen({ navigation }: UserListProps) {
               onSaved={handleSavedUser}
           />
       )} */}
+
+      <Alert visible={isAlertVisible}
+              message={alert.message}
+              success={alert.success}
+              duration={3000}
+              onHide={() => setIsAlertVisible(false)}
+      />
     </View>
     
   );

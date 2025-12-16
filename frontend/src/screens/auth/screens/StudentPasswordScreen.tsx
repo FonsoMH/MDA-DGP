@@ -26,7 +26,7 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
 
     const rootNavigation = useNavigation<RootStackNavigationProp>(); 
     const userParam: StudentParam = route.params.userParam; 
-    const { login } = useUser();
+    const { login, userError } = useUser();
     const [failedPassword, setFailedPassword] =  useState(false);
 
     const [alert, setAlert] = useState({
@@ -36,18 +36,30 @@ export default function StudentPasswordScreen({ route, navigation }: StudentPass
         onHide: () => {}
     });
 
+    // useEffect(() => {
+    //     if (failedPassword) {
+    //         setAlert({
+    //             ...alert,
+    //             message: 'Contraseña incorrecta. Inténtalo de nuevo.',
+    //             success: false,
+    //             onHide: () => setIsAlertVisible(false)
+    //         });
+    //         setIsAlertVisible(true);
+    //         setFailedPassword(false);
+    //     }
+    // }, [failedPassword]);
+
     useEffect(() => {
-        if (failedPassword) {
+        if (userError) {
             setAlert({
                 ...alert,
-                message: 'Contraseña incorrecta. Inténtalo de nuevo.',
+                message: userError.message,
                 success: false,
                 onHide: () => setIsAlertVisible(false)
             });
             setIsAlertVisible(true);
-            setFailedPassword(false);
         }
-    }, [failedPassword]);
+    }, [userError]);
 
     const [isAlertVisible, setIsAlertVisible] = useState(false);
     

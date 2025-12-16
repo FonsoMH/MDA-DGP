@@ -10,6 +10,7 @@ import { UserFrontend } from "../../../types/users";
 export function useUsers() {
   const [users, setUsers] = useState<UserFrontend[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // useEffect(() => {
   //   const loadUsers = async () => {
@@ -28,7 +29,7 @@ export function useUsers() {
         const data = await fetchUsers();
         setUsers(data);
     } catch (error) {
-        console.error("Error al cargar usuarios:", error);
+        setError(error as Error);
     } finally {
         setIsLoading(false);
     }
@@ -40,5 +41,5 @@ export function useUsers() {
       }, [loadUsersData])
   );
 
-  return { users, isLoading , refetch: loadUsersData};
+  return { users, isLoading , refetch: loadUsersData, error};
 }

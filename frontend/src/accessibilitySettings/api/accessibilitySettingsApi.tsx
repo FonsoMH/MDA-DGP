@@ -33,6 +33,11 @@ export async function fetchAccessibilitySettings( studentId: number): Promise<Ac
         return mappedConfig;
 
     } catch (error) {
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
         throw error;
     }
 }
@@ -45,6 +50,11 @@ export async function updateAccessibilitySettings(studentId: number, payload: Ac
         const res = await axios.put(url, payload);
         return res.data;
     } catch (error) {
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
         throw error;
     }
 }
@@ -74,6 +84,11 @@ export async function fetchDefaultAccessibilitySettings(): Promise<Accessibility
         return mappedConfig;
 
     } catch (error) {
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
         throw error;
     }
 }

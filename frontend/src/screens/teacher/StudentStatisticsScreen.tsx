@@ -40,7 +40,7 @@ export default function StudentStatisticsScreen({route}: Props) {
     useEffect(() => {
         if (error) {
             setAlert({
-                message: 'Error al cargar las estadísticas: ' + error.message,
+                message: error.message ? error.message : String(error),
                 success: false
             });
             setIsAlertVisible(true);

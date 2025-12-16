@@ -5,7 +5,7 @@ import type { Student } from '../../../types/users';
 export function useTeacherStudents(teacherId?: number) {
   const [students, setStudents] = React.useState<Student[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<Error | null>(null);
 
   const load = React.useCallback(async () => {
     if (!teacherId) return;
@@ -14,8 +14,8 @@ export function useTeacherStudents(teacherId?: number) {
     try {
       const data = await getStudentsForTeacher(teacherId);
       setStudents(data);
-    } catch (e: any) {
-      setError(e?.message || 'Error cargando estudiantes');
+    } catch (e) {
+      setError(e as Error);
     } finally {
       setLoading(false);
     }

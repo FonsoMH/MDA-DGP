@@ -53,7 +53,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
     useEffect(() => {
         if (submitError) {
             setAlert({
-                message: "Error al guardar los cambios: " + (submitError instanceof Error ? submitError.message : String(submitError)),
+                message: submitError.message ? submitError.message : String(submitError),
                 success: false
             });
             setIsAlertVisible(true);
@@ -65,7 +65,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
         if (error) {
             
             setAlert({
-                message: "Error al cargar las configuraciones: " + (error instanceof Error ? error.message : String(error)),
+                message: error.message ? error.message : String(error),
                 success: false
             });
             setIsAlertVisible(true);

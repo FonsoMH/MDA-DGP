@@ -55,7 +55,7 @@ export async function performLogin(credentials: LoginCredentials): Promise<AuthR
             const status = error.response?.status;
             const message = error.response?.data?.message || 'Authentication failed.'; 
 
-            throw new Error(`Login Error ${status || 'Network'}: ${message}`);
+            throw new Error(message);
         }
         throw error;
     }
