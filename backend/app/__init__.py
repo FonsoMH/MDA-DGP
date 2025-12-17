@@ -4,6 +4,7 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
+from .utils.responses import error_response
 # from .students import bp as students_bp
 # from .users import users_bp
 
@@ -65,5 +66,38 @@ def create_app():
     # Statistics endpoints
     from .users.statistics import statistics_bp
     app.register_blueprint(statistics_bp)
+
+    # Global error handlers to provide consistent and accessible messages
+
+    @app.errorhandler(400)
+    def handle_400_error(error):  # pylint: disable=unused-argument
+        return error_response(
+            message="Solicitud inválida.",
+            http_status=400,
+        )
+
+    @app.errorhandler(404)
+    def handle_404_error(error):  # pylint: disable=unused-argument
+        return error_response(
+            message="Recurso no encontrado.",
+            http_status=404,
+        )
+
+    @app.errorhandler(500)
+    def handle_500_error(error):
+        app.logger.exception("Error interno del servidor: %s", error)
+        return error_response(
+            message="Ha ocurrido un error interno. Inténtalo de nuevo más tarde.",
+            http_status=500,
+        )
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_exception(error):  # pylint: disable=unused-argument
+        # Log the real error but return a generic, non-sensitive message
+        app.logger.exception("Excepción no controlada: %s", error)
+        return error_response(
+            message="Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde.",
+            http_status=500,
+        )
 
     return app

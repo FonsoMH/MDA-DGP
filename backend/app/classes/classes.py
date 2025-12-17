@@ -3,6 +3,7 @@ from ..db import get_db_cursor
 from psycopg2 import sql
 from werkzeug.security import generate_password_hash
 # from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
+from ..utils.responses import success_response, error_response
 
 classes_bp = Blueprint('classes', __name__, url_prefix='/api')
 
@@ -17,10 +18,18 @@ def get_classes():
             'id': row['class_id'], 
             'name': row['class_name'
                         ]} for row in classes]
+
+        # Mantener forma de lista "desnuda" para no romper el frontend actual
         return jsonify(classes_list), 200
+
     except Exception as e:
         current_app.logger.error(f"Error fetching classes: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+        # Respuesta homogénea de error
+        return error_response(
+            message="Ha ocurrido un error interno al obtener las clases.",
+            http_status=500,
+            error="Internal server error",
+        )
     finally:
         cur.close()
 
@@ -43,13 +52,20 @@ def get_students_by_class(class_id):
             'email': s['email']
         } for s in students]
 
-        return jsonify({
-            'class_id': class_id,
-            'students': students_list
-        }), 200
+        # Homogeneizar respuesta sin romper los datos usados por el frontend
+        return success_response(
+            message="Lista de estudiantes de la clase obtenida correctamente.",
+            http_status=200,
+            class_id=class_id,
+            students=students_list,
+        )
 
     except Exception as e:
         current_app.logger.error(f"Error fetching students for class {class_id}: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message="Ha ocurrido un error interno al obtener los estudiantes de la clase.",
+            http_status=500,
+            error="Internal server error",
+        )
     finally:
         cur.close()

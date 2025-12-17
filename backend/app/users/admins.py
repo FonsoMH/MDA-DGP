@@ -3,6 +3,7 @@ from psycopg2 import sql
 from ..db import get_db_cursor
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
 from werkzeug.security import generate_password_hash
+from ..utils.responses import success_response, error_response
 
 admin_bp = Blueprint('admins', __name__, url_prefix='/api')
 
@@ -17,19 +18,32 @@ def create_admin():
     password = (data.get('password') or '').strip()
 
     if not name or not email or not password:
-        return jsonify({'error': 'Name, email, and password are required.'}), 400
+        # Mantener el campo "error" para compatibilidad, pero usar el formato estándar
+        return error_response(
+            message="Nombre, correo electrónico y contraseña son obligatorios.",
+            http_status=400,
+            error="Name, email, and password are required.",
+        )
 
     cur = get_db_cursor()
     try:
         # Validar email único
         if email_in_use(cur, email):
-            return jsonify({'error': 'Email is already in use.'}), 400
+            return error_response(
+                message="El correo electrónico ya está en uso.",
+                http_status=400,
+                error="Email is already in use.",
+            )
 
         # Obtener role_id del rol "admin" para evitar hardcodeos
         cur.execute("SELECT role_id FROM roles WHERE role_name = %s", ('admin',))
         role_row = cur.fetchone()
         if not role_row:
-            return jsonify({'error': 'admin role not found in the database.'}), 500
+            return error_response(
+                message="No se encontró el rol de administrador en la base de datos.",
+                http_status=500,
+                error="admin role not found in the database.",
+            )
         admin_role_id = role_row['role_id']
 
         # Hashear password y crear el usuario admin
@@ -47,12 +61,20 @@ def create_admin():
         new_user_id = cur.fetchone()['user_id']
 
         commit_or_rollback(cur, True)
-        return jsonify({'message': 'Admin created successfully.', 'user_id': new_user_id}), 201
+        return success_response(
+            message="Administrador creado correctamente prueba.",
+            http_status=201,
+            user_id=new_user_id,
+        )
 
     except Exception as e:
         commit_or_rollback(cur, False)
         current_app.logger.error(f"Error creating admin: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message="Ha ocurrido un error interno. Inténtalo de nuevo más tarde.",
+            http_status=500,
+            error="Internal server error",
+        )
     finally:
         cur.close()
 
@@ -64,9 +86,11 @@ def get_admins():
         page = int(request.args.get('page', 1))
         page_size = int(request.args.get('page_size', 10))
         offset = int(request.args.get('offset', default=0))
-
-        if per_page < 1: per_page = 10
-        if page < 1: page = 1
+        # Normalización básica de parámetros de paginación
+        if page_size < 1:
+            page_size = 10
+        if page < 1:
+            page = 1
 
         if offset is not None:
             offset = max(0, int(offset))
@@ -88,16 +112,24 @@ def get_admins():
 
         total_pages = (total_count + page_size - 1) // page_size if total_count else 0
         
-        return jsonify({
-            'items': admin_list,
-            'total_count': total_count,
-            'total_pages': total_pages,
-            'current_page': page
-        }), 200
+        # Para no romper el frontend, mantenemos la estructura actual y
+        # añadimos solo los campos estándar en la raíz.
+        return success_response(
+            message="Lista de administradores obtenida correctamente.",
+            http_status=200,
+            items=admin_list,
+            total_count=total_count,
+            total_pages=total_pages,
+            current_page=page,
+        )
     
     except Exception as e:
         current_app.logger.error(f"Error fetching admins: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message="Ha ocurrido un error interno al obtener los administradores.",
+            http_status=500,
+            error="Internal server error",
+        )
     finally:
         cur.close()
 
@@ -117,14 +149,25 @@ def update_admin(user_id):
     try:
         user = get_user_by_id(cur, user_id)
         if not user:
-            return jsonify({'error': 'Admin not found.'}), 404
+            return error_response(
+                message="Administrador no encontrado.",
+                http_status=404,
+                error="Admin not found.",
+            )
 
         fields, values = [], []
 
         fields, values = check_basic_values(cur, name, email, password_hash, user_id)
 
         if isinstance(fields, dict) and 'error' in fields:
-            return jsonify(fields), values  # values contains the status code in this case
+            # check_basic_values ya devuelve un dict de error y un status code
+            error_payload, status_code = fields, values
+            # Adaptamos al nuevo formato sin romper la estructura esperada en otros módulos
+            return error_response(
+                message="El correo electrónico ya está en uso.",
+                http_status=status_code,
+                **error_payload,
+            )
 
         if fields:
             query = f"UPDATE users SET {', '.join(fields)} WHERE user_id = %s"
@@ -132,12 +175,19 @@ def update_admin(user_id):
             cur.execute(query, tuple(values))
 
         commit_or_rollback(cur, True)
-        return jsonify({'message': 'Admin updated successfully.'}), 200
+        return success_response(
+            message="Administrador actualizado correctamente.",
+            http_status=200,
+        )
 
     except Exception as e:
         commit_or_rollback(cur, False)
         current_app.logger.error(f"Error updating admin {user_id}: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message="Ha ocurrido un error interno al actualizar el administrador.",
+            http_status=500,
+            error="Internal server error",
+        )
     finally:
         cur.close()
 
@@ -148,23 +198,38 @@ def delete_admin(user_id):
     try:
         user = get_user_by_id(cur, user_id)
         if not user:
-            return jsonify({'error': 'Admin not found.'}), 404
+            return error_response(
+                message="Administrador no encontrado.",
+                http_status=404,
+                error="Admin not found.",
+            )
         
         # Check if this is the last admin, and prevent deletion if so
         cur.execute("SELECT COUNT(*) FROM users WHERE role = 'admin'")
         admin_count = cur.fetchone()[0]
         if admin_count <= 1:
-            return jsonify({'error': 'Cannot delete the last admin user.'}), 400
+            return error_response(
+                message="No se puede eliminar el último usuario administrador.",
+                http_status=400,
+                error="Cannot delete the last admin user.",
+            )
         
 
         cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
 
         commit_or_rollback(cur, True)
-        return jsonify({'message': 'Admin deleted successfully.'}), 200
+        return success_response(
+            message="Administrador eliminado correctamente.",
+            http_status=200,
+        )
 
     except Exception as e:
         commit_or_rollback(cur, False)
         current_app.logger.error(f"Error deleting admin {user_id}: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message="Ha ocurrido un error interno al eliminar el administrador.",
+            http_status=500,
+            error="Internal server error",
+        )
     finally:
         cur.close()

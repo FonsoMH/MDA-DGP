@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from .user_common import commit_or_rollback
 from ..db import get_db_cursor
+from ..utils.responses import success_response, error_response
 
 users_bp = Blueprint('users', __name__, url_prefix='/api')
 
@@ -86,24 +87,35 @@ def get_users():
 
         total_pages = (total_count + page_size - 1) // page_size if total_count else 0
         cur.close()
-        return jsonify({
-            'items': users,
-            'total_count': total_count,
-            'total_pages': total_pages,
-            'current_page': page,
-            'page_size': page_size
-        })
+        return success_response(
+            message='Lista de usuarios obtenida correctamente.',
+            http_status=200,
+            items=users,
+            total_count=total_count,
+            total_pages=total_pages,
+            current_page=page,
+            page_size=page_size,
+        )
 
     except Exception as e:
         current_app.logger.error(f"Error fetching users: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message='Ha ocurrido un error interno al obtener los usuarios.',
+            http_status=500,
+            error='Internal server error',
+            detail=str(e),
+        )
 
 
 @users_bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     admin_id = request.args.get('admin_id', type=int)
     if not admin_id:
-        return jsonify({'error': 'admin_id query parameter is required.'}), 400
+        return error_response(
+            message='El parámetro de consulta admin_id es obligatorio.',
+            http_status=400,
+            error='admin_id query parameter is required.',
+        )
 
     cur = get_db_cursor()
     try:
@@ -111,7 +123,11 @@ def delete_user(user_id):
         cur.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
         user = cur.fetchone()
         if not user:
-            return jsonify({'error': 'User not found.'}), 404
+            return error_response(
+                message='Usuario no encontrado.',
+                http_status=404,
+                error='User not found.',
+            )
 
         # Registrar la eliminación antes de borrar
         cur.execute("""
@@ -128,14 +144,20 @@ def delete_user(user_id):
         commit_or_rollback(cur, True)
 
         # Devolver mensaje + registro para test
-        return jsonify({
-            'message': f'User {user_id} deleted successfully.',
-            'user_deletion_record': deletion_record
-        }), 200
+        return success_response(
+            message=f'Usuario {user_id} eliminado correctamente.',
+            http_status=200,
+            user_deletion_record=deletion_record,
+        )
 
     except Exception as e:
         commit_or_rollback(cur, False)
         current_app.logger.error(f"Error deleting user: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message='Ha ocurrido un error interno al eliminar el usuario.',
+            http_status=500,
+            error='Internal server error',
+            detail=str(e),
+        )
     finally:
         cur.close()

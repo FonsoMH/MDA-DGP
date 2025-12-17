@@ -2,6 +2,7 @@ from app.db import get_db_cursor
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash 
 from ..users.user_common import get_user_by_email, get_role_by_id
+from ..utils.responses import success_response, error_response
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api')
 
@@ -12,10 +13,11 @@ def login():
     submitted_password = data.get('password')
 
     if not email or not submitted_password:
-        return jsonify({
-            'success': False, 
-            'message': 'Se requiere email y contraseña.'
-        }), 400
+        return error_response(
+            message='Se requiere email y contraseña.',
+            http_status=400,
+            success=False,
+        )
 
     try:
         cursor = get_db_cursor()
@@ -26,21 +28,30 @@ def login():
         cursor.close()
     except Exception as e:
         print(f"Database error during login: {e}")
-        return jsonify({
-            'success': False, 
-            'message': 'Error de servidor. Inténtalo más tarde.'
-        }), 500
+        return error_response(
+            message='Error de servidor. Inténtalo más tarde.',
+            http_status=500,
+            success=False,
+        )
     
     
     if not user_record:
-        return jsonify({'success': False, 'message': 'Credenciales inválidas.'}), 401
+        return error_response(
+            message='Credenciales inválidas.',
+            http_status=401,
+            success=False,
+        )
     
     
     stored_hash = user_record.get('password_hash')
     
 
     if not stored_hash:
-         return jsonify({'success': False, 'message': 'Credenciales inválidas.'}), 401 
+         return error_response(
+             message='Credenciales inválidas.',
+             http_status=401,
+             success=False,
+         ) 
 
     submitted_bytes = submitted_password.encode('utf-8')
     stored_bytes = stored_hash.encode('utf-8')
@@ -57,14 +68,23 @@ def login():
                 'role': role_name
             }
 
-            return jsonify({
-                'success': True, 
-                'message': 'Login successful', 
-                'user': response_user
-            }), 200
+            return success_response(
+                message='Inicio de sesión exitoso.',
+                http_status=200,
+                success=True,
+                user=response_user,
+            )
         else:
-            return jsonify({'success': False, 'message': 'Credenciales inválidas.'}), 401
+            return error_response(
+                message='Credenciales inválidas.',
+                http_status=401,
+                success=False,
+            )
             
     except ValueError as e:
         print(f"Error de verificación de hash (hash malformado): {e}")
-        return jsonify({'success': False, 'message': 'Error interno de autenticación.'}), 500
+        return error_response(
+            message='Error interno de autenticación.',
+            http_status=500,
+            success=False,
+        )

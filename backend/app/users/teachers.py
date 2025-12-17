@@ -3,6 +3,7 @@ from ..db import get_db_cursor
 from psycopg2 import sql
 from werkzeug.security import generate_password_hash
 from .user_common import get_user_by_id, email_in_use, commit_or_rollback, check_basic_values
+from ..utils.responses import success_response, error_response
 
 teacher_bp = Blueprint('teachers', __name__, url_prefix='/api')
 
@@ -19,17 +20,29 @@ def create_teacher():
     assigned_students_ids = data.get('assigned_students_ids') or []
 
     if not name or not email:
-        return jsonify({'error': 'Name and email are required.'}), 400
+        return error_response(
+            message='El nombre y el correo electrónico son obligatorios.',
+            http_status=400,
+            error='Name and email are required.',
+        )
 
     if password:
         password_hash = generate_password_hash(password)
     else:
-        return jsonify({'error': 'Password is required.'}), 400
+        return error_response(
+            message='La contraseña es obligatoria.',
+            http_status=400,
+            error='Password is required.',
+        )
     
     temp_cur = get_db_cursor()
     if email_in_use(temp_cur, email):
         temp_cur.close()
-        return jsonify({'error': 'Email already in use.'}), 400
+        return error_response(
+            message='El correo electrónico ya está en uso.',
+            http_status=400,
+            error='Email already in use.',
+        )
     temp_cur.close()
 
     cur = get_db_cursor()
@@ -38,7 +51,11 @@ def create_teacher():
         cur.execute("SELECT role_id FROM roles WHERE role_name = %s", ('teacher',))
         role_row = cur.fetchone()
         if not role_row:
-            return jsonify({'error': 'teacher role not found in the database.'}), 500
+            return error_response(
+                message='No se encontró el rol de profesor en la base de datos.',
+                http_status=500,
+                error='teacher role not found in the database.',
+            )
         role_id = role_row['role_id']
 
         # Insertar nuevo profesor
@@ -62,20 +79,27 @@ def create_teacher():
         # Confirmar la transacciÃ³n
         cur.connection.commit()
 
-        return jsonify({
-            'id': new_teacher_id,
-            'name': name,
-            'email': email,
-            'assigned_students_ids': assigned_students_ids
-        }), 201
+        return success_response(
+            message='Profesor creado correctamente.',
+            http_status=201,
+            id=new_teacher_id,
+            name=name,
+            email=email,
+            assigned_students_ids=assigned_students_ids,
+        )
 
     except Exception as e:
         try:
             cur.connection.rollback()
-        except:
+        except Exception:
             pass
         current_app.logger.error(f"Error creating teacher: {e}")
-        return jsonify({'error': 'internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message='Ha ocurrido un error interno al crear el profesor.',
+            http_status=500,
+            error='internal server error',
+            detail=str(e),
+        )
     finally:
         cur.close()
 
@@ -88,8 +112,10 @@ def get_teachers():
         page_size = int(request.args.get('page_size', 10))
         offset = int(request.args.get('offset', default=0))
 
-        if page_size < 1: page_size = 10
-        if page < 1: page = 1
+        if page_size < 1:
+            page_size = 10
+        if page < 1:
+            page = 1
 
         if offset is not None:
             offset = max(0, int(offset))
@@ -134,16 +160,23 @@ def get_teachers():
 
         cur.close()
 
-        return jsonify({
-            'items': teachers,
-            'total_count': total_count,
-            'total_pages': total_pages,
-            'current_page': page
-        }), 200
+        return success_response(
+            message='Lista de profesores obtenida correctamente.',
+            http_status=200,
+            items=teachers,
+            total_count=total_count,
+            total_pages=total_pages,
+            current_page=page,
+        )
 
     except Exception as e:
-        print(f"Error al listar estudiantes: {e}")
-        return jsonify({"error": "Error interno del servidor", "details": str(e)}), 500
+        print(f"Error al listar profesores: {e}")
+        return error_response(
+            message='Ha ocurrido un error interno al listar los profesores.',
+            http_status=500,
+            error='Error interno del servidor',
+            details=str(e),
+        )
 
 # Update a teacher
 @teacher_bp.route('/teachers/<int:user_id>', methods=['PUT'])
@@ -167,14 +200,23 @@ def update_teacher(user_id):
     try:
         user = get_user_by_id(cur, user_id)
         if not user:
-            return jsonify({'error': 'Teacher not found.'}), 404
+            return error_response(
+                message='Profesor no encontrado.',
+                http_status=404,
+                error='Teacher not found.',
+            )
 
         fields, values = [], []
 
         fields, values = check_basic_values(cur, name, email, password_hash, user_id)
 
         if isinstance(fields, dict) and 'error' in fields:
-            return jsonify(fields), values  # values contains the status code in this case
+            error_payload, status_code = fields, values
+            return error_response(
+                message='El correo electrónico ya está en uso.',
+                http_status=status_code,
+                **error_payload,
+            )
 
         if fields:
             query = f"UPDATE users SET {', '.join(fields)} WHERE user_id = %s"
@@ -193,12 +235,20 @@ def update_teacher(user_id):
                     WHERE user_id = ANY(%s)
                 """, (user_id, assigned_ids))
         commit_or_rollback(cur, True)
-        return jsonify({'message': 'Teacher updated successfully.'}), 200
+        return success_response(
+            message='Profesor actualizado correctamente.',
+            http_status=200,
+        )
 
     except Exception as e:
         commit_or_rollback(cur, False)
         current_app.logger.error(f"Error updating teacher {user_id}: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message='Ha ocurrido un error interno al actualizar el profesor.',
+            http_status=500,
+            error='Internal server error',
+            detail=str(e),
+        )
     finally:
         cur.close()
 
@@ -210,24 +260,40 @@ def delete_teacher(user_id):
         user = get_user_by_id(cur, user_id)
         # Check if user exists
         if not user:
-            return jsonify({'error': 'Teacher not found.'}), 404
+            return error_response(
+                message='Profesor no encontrado.',
+                http_status=404,
+                error='Teacher not found.',
+            )
 
         # Check for assigned students
         cur.execute("SELECT COUNT(*) FROM users WHERE assigned_teacher_id = %s", (user_id,))
         assigned_count = cur.fetchone()[0]
         if assigned_count > 0:
-            return jsonify({'error': 'Cannot delete teacher with assigned students.'}), 400
+            return error_response(
+                message='No se puede eliminar un profesor con estudiantes asignados.',
+                http_status=400,
+                error='Cannot delete teacher with assigned students.',
+            )
 
         # Delete the teacher
         cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
 
         commit_or_rollback(cur, True)
-        return jsonify({'message': 'Teacher deleted successfully.'}), 200
+        return success_response(
+            message='Profesor eliminado correctamente.',
+            http_status=200,
+        )
 
     except Exception as e:
         commit_or_rollback(cur, False)
         current_app.logger.error(f"Error deleting teacher {user_id}: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message='Ha ocurrido un error interno al eliminar el profesor.',
+            http_status=500,
+            error='Internal server error',
+            detail=str(e),
+        )
     finally:
         cur.close()
 
@@ -240,8 +306,10 @@ def get_assigned_students_by_teacher(user_id):
         page_size = int(request.args.get('page_size', 10))
         offset = int(request.args.get('offset', default=0))
 
-        if page_size < 1: page_size = 10
-        if page < 1: page = 1
+        if page_size < 1:
+            page_size = 10
+        if page < 1:
+            page = 1
 
         if offset is not None:
             offset = max(0, int(offset))
@@ -251,7 +319,11 @@ def get_assigned_students_by_teacher(user_id):
         cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (user_id,))
         teacher = cur.fetchone()
         if not teacher:
-            return jsonify({'error': 'Teacher not found.'}), 404
+            return error_response(
+                message='Profesor no encontrado.',
+                http_status=404,
+                error='Teacher not found.',
+            )
 
         cur.execute("""SELECT COUNT(*) AS count
             FROM users
@@ -277,21 +349,28 @@ def get_assigned_students_by_teacher(user_id):
 
         total_pages = (total_count + page_size - 1) // page_size if total_count else 0
 
-        return jsonify({
-            'teacher': {
+        return success_response(
+            message='Lista de estudiantes asignados obtenida correctamente.',
+            http_status=200,
+            teacher={
                 'id': teacher['user_id'],
                 'name': teacher['name'],
-                'email': teacher['email']
+                'email': teacher['email'],
             },
-            'items': students_list,
-            'total_count': total_count,
-            'total_pages': total_pages,
-            'current_page': page
-        }), 200
+            items=students_list,
+            total_count=total_count,
+            total_pages=total_pages,
+            current_page=page,
+        )
 
     except Exception as e:
         current_app.logger.error(f"Error fetching students for teacher {user_id}: {e}")
-        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
+        return error_response(
+            message='Ha ocurrido un error interno al obtener los estudiantes asignados.',
+            http_status=500,
+            error='Internal server error',
+            detail=str(e),
+        )
     finally:
         cur.close()
 

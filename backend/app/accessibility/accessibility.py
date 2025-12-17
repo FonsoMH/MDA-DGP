@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.db import get_db_cursor, get_db
 import re
+from ..utils.responses import success_response, error_response
 
 accessibility_bp = Blueprint("accessibility", __name__, url_prefix="/api")
 
@@ -36,10 +37,19 @@ def get_default_accessibility():
             "font_size": 16
         }
 
-        return jsonify(default_settings), 200
+        # Mantener las claves originales y añadir la envoltura estándar
+        return success_response(
+            message="Configuración de accesibilidad por defecto obtenida correctamente.",
+            http_status=200,
+            **default_settings,
+        )
 
     except Exception as e:
-        return jsonify({"error": "Error al obtener configuración por defecto"}), 500
+        return error_response(
+            message="Error al obtener configuración por defecto.",
+            http_status=500,
+            error="Error al obtener configuración por defecto",
+        )
     finally:
         cur.close()
 
@@ -50,15 +60,29 @@ def get_accessibility(student_id):
     settings = cur.fetchone()
     cur.close()
     if not settings:
-        return jsonify({"error": "No se encontró configuración"}), 404
-    return jsonify(settings), 200
+        return error_response(
+            message="No se encontró configuración de accesibilidad para el estudiante.",
+            http_status=404,
+            error="No se encontró configuración",
+        )
+
+    # Devolvemos los settings tal cual más los campos estándar
+    return success_response(
+        message="Configuración de accesibilidad obtenida correctamente.",
+        http_status=200,
+        **settings,
+    )
 
 # --- PUT ---
 @accessibility_bp.route("/accessibility/<int:student_id>", methods=["PUT"])
 def update_accessibility(student_id):
     data = request.get_json()
     if not data:
-        return jsonify({"error": "No se recibió ningún dato"}), 400
+        return error_response(
+            message="No se recibió ningún dato de configuración de accesibilidad.",
+            http_status=400,
+            error="No se recibió ningún dato",
+        )
 
     # --- Obtener valores con default ---
     background_color = data.get("background_color", "#D9D9D9")
@@ -92,7 +116,11 @@ def update_accessibility(student_id):
         errores.append("font_size debe ser un número mayor a 8")
 
     if errores:
-        return jsonify({"errors": errores}), 400
+        return error_response(
+            message="Los datos de accesibilidad proporcionados no son válidos.",
+            http_status=400,
+            errors=errores,
+        )
 
     cur = get_db_cursor()
     db = get_db()
@@ -123,7 +151,11 @@ def update_accessibility(student_id):
     if cur.rowcount == 0:
         #  No student_id found
         cur.close()
-        return jsonify({"error": "No existe configuración para ese student_id"}), 404
+        return error_response(
+            message="No existe configuración de accesibilidad para ese estudiante.",
+            http_status=404,
+            error="No existe configuración para ese student_id",
+        )
 
     db.commit()
     cur.close()
@@ -134,9 +166,9 @@ def update_accessibility(student_id):
     updated_settings = cur.fetchone()
     cur.close()
 
-
-    return jsonify({
-        "message": "Configuración actualizada correctamente",
-        "updated_settings": updated_settings
-    }), 200
+    return success_response(
+        message="Configuración de accesibilidad actualizada correctamente.",
+        http_status=200,
+        updated_settings=updated_settings,
+    )
 
