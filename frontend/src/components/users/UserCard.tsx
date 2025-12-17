@@ -58,6 +58,7 @@ export default function UserCard({ user, onUserDeleted, onEdit, navigation, admi
   const handleEditClick = () => {
 
     if (user.role == 'teacher'){
+      console.log('Navigating to TeacherCreate with user:', user);
       navigation.navigate('TeacherCreate', { teacher: user })
     }
 

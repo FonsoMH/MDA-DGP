@@ -10,12 +10,12 @@ interface UseSubmitChangesProps {
 interface UseSubmitChangesResult {
   submitChanges: () => Promise<void>;
   isSubmitting: boolean;
-  submitError: any;
+  submitError: Error | null;
 }
 
 export const useSubmitAccessibilityChanges = ({ studentId, settings }: UseSubmitChangesProps): UseSubmitChangesResult => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<any>(null);
+  const [submitError, setSubmitError] = useState<Error | null>(null);
 
   const submitChanges = async () => {
     if (!settings) return; 
@@ -36,13 +36,10 @@ export const useSubmitAccessibilityChanges = ({ studentId, settings }: UseSubmit
       };
 
       await updateAccessibilitySettings(studentId, payload);
-      
-      //TODO cambiar a una alerta mejor
-      alert("La configuración de accesibilidad se guardó correctamente.");
+
 
     } catch (error) {
       setSubmitError(error);
-        alert(`Error cambiando configuracion: ${error.message}`);
 
     } finally {
       setIsSubmitting(false);

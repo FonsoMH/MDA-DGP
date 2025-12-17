@@ -13,6 +13,8 @@ export const useStatistics = (studentId: number, gameId: number, initialDate: Da
         enabled: !!studentId && gameId !== undefined,
     
         staleTime: 10 * 60 * 1000, // 10 minutes
+
+        retry: false,
     });
 }
 

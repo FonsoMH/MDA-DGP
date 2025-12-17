@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { AccessibilitySettingsFrontend } from '../../../types/accessibility';
-import { fetchAccessibilitySettings } from '../../../accessibilitySettings/api/accessibilitySettingsApi';
+import { fetchAccessibilitySettings, fetchDefaultAccessibilitySettings } from '../../../accessibilitySettings/api/accessibilitySettingsApi';
 
 interface UseAccessibilitySettingsResult {
   settings: AccessibilitySettingsFrontend | undefined;
   defaultValue: AccessibilitySettingsFrontend | null;
   isLoading: boolean;
-  error: any;
+  error: Error | null;
   setSettings: React.Dispatch<React.SetStateAction<AccessibilitySettingsFrontend | undefined>>;
   resetToDefaults: () => void;
 }
@@ -15,16 +15,18 @@ export const useAccessibilitySettings = (studentId: number): UseAccessibilitySet
   const [settings, setSettings] = useState<AccessibilitySettingsFrontend | undefined>(undefined);
   const [defaultValue, setDefaultValue] = useState<AccessibilitySettingsFrontend | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
+        setError(null);
+        setIsLoading(true);
         const fetched = await fetchAccessibilitySettings(studentId);
-        setDefaultValue(fetched);
+        const defaultSettings = await fetchDefaultAccessibilitySettings();
+        setDefaultValue(defaultSettings);
         setSettings(fetched);
       } catch (err) {
-        console.error("Error al cargar configuración de accesibilidad:", err);
         setError(err);
       } finally {
         setIsLoading(false);
@@ -35,7 +37,7 @@ export const useAccessibilitySettings = (studentId: number): UseAccessibilitySet
 
   const resetToDefaults = () => {
     if (!defaultValue) {
-      console.error("Valores por defecto no cargados aún");
+      setError(new Error("Valores por defecto no cargados aún"));
       return;
     }
     setSettings(defaultValue);

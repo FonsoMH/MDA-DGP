@@ -8,7 +8,7 @@ import { createTeacherApi } from '../api/userApi';
  */
 export function useCreateTeacher() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const onSubmitFrom = async (payload: CreateTeacherPayload): Promise<boolean> => {
     setError(null);
@@ -17,13 +17,10 @@ export function useCreateTeacher() {
     try {
       await createTeacherApi(payload);
       
-      alert('Tutor creado correctamente');
       return true;
 
     } catch (e: any) {
-      const errorMessage = e?.response?.data?.message || e.message || 'Error desconocido';
-      setError(errorMessage);
-      alert(`Error creando tutor: ${errorMessage}`);
+      setError(e);
       return false;
 
     } finally {
@@ -34,6 +31,6 @@ export function useCreateTeacher() {
   return { 
     isSubmitting, 
     error,
-    onSubmitFrom 
+    onSubmitFrom
   };
 }

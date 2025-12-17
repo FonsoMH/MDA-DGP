@@ -7,6 +7,7 @@ interface UseStudentsDataResult {
     users: StudentLogin[];
     isLoading: boolean;
     refetch: () => void;
+    error: Error | null;
 }
 
 interface UseClassesDataResult {
@@ -23,23 +24,32 @@ interface UseClassesDataResult {
 export const useStudentsData = (idClass: number): UseStudentsDataResult => {
     const [users, setUsers] = useState<StudentLogin[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
 
     const loadStudents = useCallback(async () => {
-        setIsLoading(true);
+        try {
+            setError(null);
+            setIsLoading(true);
+            
+            const data = await fetchStudentsByClass(idClass);
+            
+            setUsers(data);
+            
+            setIsLoading(false);
         
-        const data = await fetchStudentsByClass(idClass);
-        
-        setUsers(data);
-        
-        setIsLoading(false);
-        
+        } catch (err: any) {
+            setError(err);
+        }
+        finally {
+            setIsLoading(false);
+        }
     }, []);
 
     useEffect(() => {
         loadStudents();
     }, [loadStudents]);
 
-    return { users, isLoading, refetch: loadStudents };
+    return { users, isLoading, refetch: loadStudents, error };
 };
 
 export const useClassesData = (): UseClassesDataResult => {

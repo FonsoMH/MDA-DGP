@@ -9,7 +9,7 @@ export function useTeacherPagination() {
   const [isLoading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchTeachers = useCallback(async (p: number) => {
     setLoading(true);
@@ -31,8 +31,7 @@ export function useTeacherPagination() {
       setTotalPages(response.total_pages || 1);
       
     } catch (e: any) {
-      console.error('Error en hook:', e);
-      setError('No se pudieron cargar los profesores.');
+      setError(e);
       setTeachers([]);
       
     } finally {

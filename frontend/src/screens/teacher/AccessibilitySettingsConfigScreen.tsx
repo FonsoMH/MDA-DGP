@@ -10,6 +10,7 @@ import { TeacherStackParamList } from "../../navigation/TeacherNavigator";
 import LoadingSpinner from "../../components/common/LoadingSpinner/LoadingSpinner";
 import { useAccessibilitySettings } from "./hooks/useAccessibilitySettings";
 import { useSubmitAccessibilityChanges } from "./hooks/useSubmitAccessibilityChanges";
+import Alert from "../../components/FeedBack/Alert";
 
 type Props = NativeStackScreenProps<TeacherStackParamList, 'AccessibilitySettingsConfig'>;
 
@@ -25,10 +26,15 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
         setSettings, 
         resetToDefaults 
     } = useAccessibilitySettings(studentId);
-
-    const { submitChanges, isSubmitting } = useSubmitAccessibilityChanges({ studentId, settings });
-
     
+    const { 
+        submitChanges, 
+        isSubmitting , 
+        submitError 
+    } = useSubmitAccessibilityChanges({ studentId, settings });
+    
+    const [isAlertVisible, setIsAlertVisible] = useState(false);
+
     const setBackgroundColor = (color: string) => setSettings(s => ({ ...s, backgroundColor: color }));
     const setForegroundColor = (color: string) => setSettings(s => ({ ...s, foregroundColor: color }));
     const setContainerColor = (color: string) => setSettings(s => ({ ...s, containerColor: color }));
@@ -38,24 +44,50 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
     const setShowNumbersMode = (val: boolean) => setSettings(s => ({ ...s, showNumbersMode: val }));
     const setFontSize = (size: number) => setSettings(s => ({ ...s, fontSize: size }));
 
+    const [alert, setAlert] = useState({
+        message: 'Cambios guardados con éxito',
+        success: true
+    });
+    
+
+    useEffect(() => {
+        if (submitError) {
+            setAlert({
+                message: submitError.message ? submitError.message : String(submitError),
+                success: false
+            });
+            setIsAlertVisible(true);
+        }
+    }, [submitError]);
+
+    useEffect(() => {
+        
+        if (error) {
+            
+            setAlert({
+                message: error.message ? error.message : String(error),
+                success: false
+            });
+            setIsAlertVisible(true);
+            return null;
+        }
+    }, [error]);
+
+    const handleSubmit = async () => {
+        await submitChanges();
+        setIsAlertVisible(true);
+    }
+
+    const handleResetToDefaults = () => {
+        resetToDefaults();
+    }
+
     if (isLoading) {
         return (
             <LoadingSpinner/>
         );
     }
     
-    if (error) {
-         return (
-            <View>
-                <Text>Error al cargar: {error.message}</Text>
-            </View>
-        );
-    }
-
-    const handleSubmit = () => {
-        submitChanges();
-        navigation.goBack();
-    }
 
     const exampleStyle = StyleSheet.create({
         background: {
@@ -245,7 +277,7 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                             </Text>
                         </Pressable>
 
-                        <Pressable style={styles.btnSecondary} onPress={resetToDefaults}>
+                        <Pressable style={styles.btnSecondary} onPress={handleResetToDefaults}>
                             <Text style={styles.btnTextSecondary}>
                                 Restablecer valores predeterminados
                             </Text>
@@ -260,6 +292,13 @@ export default function AccessibilitySettingsConfigScreen({ route, navigation }:
                     </View>
                 </View>
             </View>          
+            <Alert 
+                visible={isAlertVisible} 
+                message={alert.message}
+                success={alert.success}
+                duration={2000}
+                onHide={() => { setIsAlertVisible(false); navigation.goBack(); }}
+            />
         </View>
     );
 

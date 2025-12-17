@@ -8,7 +8,7 @@ const PAGE_SIZE = 1;
 export function useTeacherStudents(teacherId?: number) {
   const [students, setStudents] = React.useState<Student[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<Error | null>(null);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -26,7 +26,7 @@ export function useTeacherStudents(teacherId?: number) {
       setTotalPages(data.total_pages || 1);
 
     } catch (e: any) {
-      setError(e?.message || 'Error cargando estudiantes');
+      setError(e);
     } finally {
       setLoading(false);
     }

@@ -25,7 +25,11 @@ export async function fetchStudentsByClass(idClass:number): Promise<StudentLogin
         return data.students;
 
     } catch (error) {
-        return [];
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+            throw new Error(message);
+        }
+        throw error;
     }
 }
 
@@ -41,13 +45,12 @@ export async function fetchClasses(): Promise<Classes[]> {
         const response = await axios.get<Classes[]>(endpoint, { 
             timeout: API_TIMEOUT 
         });
-
         
         const data: Classes[] = response.data;
         return data;
 
     } catch (error) {
-        return []
+        throw error;
     }
 }
 
@@ -64,7 +67,7 @@ export async function performLogin(credentials: LoginCredentials): Promise<AuthR
         const response = await axios.post<AuthResponse>(
             endpoint, 
             credentials,
-            { 
+            {
                 timeout: API_TIMEOUT 
             }
         );
@@ -76,7 +79,7 @@ export async function performLogin(credentials: LoginCredentials): Promise<AuthR
             const status = error.response?.status;
             const message = error.response?.data?.message || 'Authentication failed.'; 
 
-            throw new Error(`Login Error ${status || 'Network'}: ${message}`);
+            throw new Error(message);
         }
         throw error;
     }

@@ -6,6 +6,8 @@ import BackButton from '../../../components/common/BackButton/BackButton';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { Classes, StudentLogin } from '../../../types/login';
 import { useStudentsData } from '../hook/usersList';
+import { useEffect, useState } from 'react';
+import Alert from '../../../components/FeedBack/Alert';
 
 
 type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
@@ -13,15 +15,34 @@ type StudentLoginProps = NativeStackScreenProps<any, 'StudentLogin'>;
 export default function StudentLoginScreen({ route, navigation }: StudentLoginProps){
 
     const classParam: Classes = route.params.clasParam; 
-    const { users, isLoading, refetch } = useStudentsData(classParam.id);
+
+    const { users, isLoading, refetch , error} = useStudentsData(classParam.id);
+
+    const [isAlertVisible, setIsAlertVisible] = useState(false);
+
+    const [alert, setAlert] = useState({
+        message: 'Cambios guardados con éxito',
+        success: true
+    });
+
 
     const handleSubmit = (user: StudentLogin) => {
         navigation.navigate('StudentPassword', { userParam: user });
     }
+
+    useEffect(() => {
+        if (error) {
+            setAlert({
+                message: error.message,
+                success: false
+            });
+            setIsAlertVisible(true);
+        }
+    }, [error]);
     
     if (isLoading) {
         return (
-            <LoadingSpinner></LoadingSpinner>
+            <LoadingSpinner />
         );
     }
     
@@ -50,6 +71,12 @@ export default function StudentLoginScreen({ route, navigation }: StudentLoginPr
                     <Button title="Recargar" onPress={refetch} color="#4A90E2" />
                 </View>
             )}
+            <Alert
+                visible={isAlertVisible}
+                message={alert.message}
+                success={alert.success}
+                onHide={() => setIsAlertVisible(false)}
+            />
         </View>
         
     );

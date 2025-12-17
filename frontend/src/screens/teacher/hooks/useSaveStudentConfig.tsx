@@ -5,6 +5,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export function useSaveStudentConfig(studentId: number, configs: any) {
   
+  const [savingError, setErrorSaving] = React.useState<Error | null>(null);
+
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -22,7 +24,11 @@ export function useSaveStudentConfig(studentId: number, configs: any) {
     },
     
     onError: (error) => {
-        console.error("Fallo la mutación del juego:", error);
+      if (error instanceof Error) {
+        setErrorSaving(error);
+      } else {
+        setErrorSaving(new Error('An unknown error occurred'));
+      }
     }
   });
 
@@ -38,6 +44,7 @@ export function useSaveStudentConfig(studentId: number, configs: any) {
     saveOne, 
     saving: mutation.isPending,
     isSuccess: mutation.isSuccess,
-    isError: mutation.isError
+    isError: mutation.isError, 
+    errorSaving: savingError
   };
 }

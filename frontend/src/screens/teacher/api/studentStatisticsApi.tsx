@@ -51,7 +51,7 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
                 times: [],
                 initialDate: initialDate ? initialDate.toISOString() : null,
                 finalDate: finalDate ? finalDate.toISOString() : null,
-            };
+            }
         }
 
         const statsData = response.data;
@@ -71,7 +71,12 @@ export async function fetchStudentStatistics(studentId: number, gameId: number, 
 
         return mappedStats;
     } catch (error) {
-        throw new Error(error);
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
+        throw error;
     }
 }
 

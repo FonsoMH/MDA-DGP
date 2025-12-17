@@ -6,6 +6,8 @@ import BackButton from '../../../components/common/BackButton/BackButton';
 import { CONFIG_COMPONENTS_JSX } from './ConfigGameComponent';
 import { useSaveStudentConfig } from '../hooks/useSaveStudentConfig';
 import { useStudentConfigs } from '../hooks/useStudentConfig';
+import { useEffect , useState} from 'react';
+import Alert from '../../../components/FeedBack/Alert';
 import { updateStudentPermission } from '../../../api/studentConfig';
 import { number } from 'yup';
 
@@ -31,7 +33,37 @@ export default function StudentGameConfigScreen({ route }: Props) {
   const { configs, loading, error, setConfigs, studentCanConfigure, setStudentCanConfigure } = useStudentConfigs(studentId);
   const [updatingPermission, setUpdatingPermission] = React.useState(false);
 
+  const { saveOne, saving , errorSaving } = useSaveStudentConfig(studentId, configs);
+
+  const [isAlertVisible, setIsAlertVisible] = React.useState(false);
+
+  const [alert, setAlert] = useState({
+      message: 'Cambios guardados con éxito',
+      success: true
+  });
+  
+  useEffect(() => {
+    if (error) {
+        setAlert({
+            message: error.message ? error.message : String(error),
+            success: false
+        });
+        setIsAlertVisible(true);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (errorSaving) {
+        setAlert({
+            message: errorSaving.message ? errorSaving.message : String(errorSaving),
+            success: false
+        });
+        setIsAlertVisible(true);
+    }
+  }, [errorSaving]);
+
   const handleChange = React.useCallback((gameId: number, key: string, value: string) => {
+
     
     const rawValue = value.trim() === '' ? '0' : value;
 
@@ -56,7 +88,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
     });
   };
 
-  const { saveOne, saving } = useSaveStudentConfig(studentId, configs);
 
   const handlePermissionToggle = async (value: boolean) => {
     try {
@@ -79,10 +110,6 @@ export default function StudentGameConfigScreen({ route }: Props) {
     );
   }
 
-  if (error) {
-     return <View style={styles.center}><Text>❌ Error al cargar las configuraciones.</Text></View>;
-  }
-
   const entries = Object.entries(configs) as [string, any][];
 
   return (
@@ -95,8 +122,10 @@ export default function StudentGameConfigScreen({ route }: Props) {
       contentContainerStyle={styles.content}
       style={{ flex: 1 }}
     >
-      <BackButton width={130} height={50} />
-      <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+        <Text style={[styles.title, { fontSize: titleSize }]}>Configuración de juegos</Text>
+        <BackButton width={130} height={50} />
+      </View>
 
       {!isStudentView && (
         <View style={styles.permissionContainer}>
@@ -135,7 +164,7 @@ export default function StudentGameConfigScreen({ route }: Props) {
               })}
 
               <View style={[styles.actions, { marginTop: 'auto' }]}>
-                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() => saveOne(Number(gameId))} disabled={saving}
+                <Pressable style={[styles.btn, styles.btnPrimary]} onPress={() =>{ saveOne(Number(gameId)); setIsAlertVisible(true); }} disabled={saving}
                   accessibilityRole="button" accessibilityLabel={`Guardar configuración de ${info.name }`}
                   testID={`save-config-${gameId}`}
                 >
@@ -146,6 +175,13 @@ export default function StudentGameConfigScreen({ route }: Props) {
           );
         })}
       </View>
+      <Alert
+        visible={isAlertVisible}
+        message={alert.message}
+        success={alert.success}
+        duration={1000} 
+        onHide={() => setIsAlertVisible(false)}
+      />
     </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -8,7 +8,7 @@ import { createStudentApi } from '../api/userApi';
  */
 export function useCreateStudent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const onSubmitFrom = async (payload: CreateStudentPayload): Promise<boolean> => {
     setError(null);
@@ -17,14 +17,10 @@ export function useCreateStudent() {
 
     try {
       await createStudentApi(payload);
-      
-      alert('Estudiante creado correctamente');
       return true;
 
     } catch (e: any) {
-      const errorMessage = e?.response?.data?.message || e.message || 'Error desconocido';
-      setError(errorMessage);
-      alert(`Error creando estudiante: ${errorMessage}`);
+      setError(e);
       return false;
 
     } finally {

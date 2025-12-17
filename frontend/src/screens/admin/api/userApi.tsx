@@ -51,13 +51,12 @@ export async function fetchUsers(page: number, offset: number, limit: number, na
       page_size: apiData.page_size
     }
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    return {
-      items: [],
-      total_count: 0,
-      total_pages: 0,
-      current_page: 0
-    };
+    if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.message; 
+
+          throw new Error(message);
+      }
+    throw error;
   }
 }
 
@@ -80,8 +79,12 @@ export async function fetchuserDeletion(): Promise<UserDeletionData[]> {
 
     return mappedDeletions;
   } catch (error) {
-    console.error("Error al obtener el historial de eliminaciones:", error);
-    return [];
+    if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.message; 
+
+          throw new Error(message);
+      }
+    throw error;
   }
 }
 
@@ -98,13 +101,12 @@ export async function loadStudentsApi(page :number, pageSize : number, offset: n
 
     return apiData;
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    return {
-      current_page: 0,
-      items: [],
-      total_count: 0,
-      total_pages: 0
-    };
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
+    throw error;
   }
 }
 
@@ -120,13 +122,13 @@ export async function loadTeachersApi(page :number, pageSize : number, offset: n
 
     return apiData;
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    return {
-      current_page: 0,
-      items: [],
-      total_count: 0,
-      total_pages: 0
-    };
+    
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
+        throw error;
   }
 }
 
@@ -140,8 +142,13 @@ export async function createTeacherApi(payload: CreateTeacherPayload): Promise<v
 
 
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
+    
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
 
+            throw new Error(message);
+        }
+    throw error;
   }
 }
 
@@ -155,8 +162,13 @@ export async function createStudentApi(payload: CreateStudentPayload): Promise<v
 
 
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
 
+            throw new Error(message);   
+
+    }
+    throw error;
   }
 }
 
@@ -169,7 +181,11 @@ export async function createAdminApi(payload: { name: string; email: string; pas
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
   } catch (error) {
-    console.error('Error creando administrador:', error);
+        if (axios.isAxiosError(error)) {
+            const message = error.response?.data?.message; 
+
+            throw new Error(message);
+        }
     throw error;
   }
 }

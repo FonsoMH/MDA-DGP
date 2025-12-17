@@ -12,6 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { useUsers } from './hook/useUserList';
 import { useUser } from '../../hooks/useUser';
+import Alert from '../../components/FeedBack/Alert';
 import AdvancedPagination from '../../components/common/Pagination/Pagination';
 
 type UserListProps = NativeStackScreenProps<any, 'UserList'>;
@@ -21,21 +22,38 @@ const ITEMS_PER_PAGE = 10;
 export default function UserListScreen({ navigation }: UserListProps) { 
   const {user} = useUser();
 
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState(''); // <-- 2. Nuevo estado para búsqueda
   
-  const { users, isLoading, refetch } = useUsers(currentPage, ITEMS_PER_PAGE, searchTerm);
-
+  const { users, isLoading, refetch , error} = useUsers(currentPage, ITEMS_PER_PAGE, searchTerm);
+  
   const [filteredUsers, setFilteredUsers] = useState<PaginatedUsersResponse>({ 
-      items: [], 
-      total_count: 0, 
-      total_pages: 0, 
-      current_page: 0 
+    items: [], 
+    total_count: 0, 
+    total_pages: 0, 
+    current_page: 0 
   });
   
   const [filter, setFilter] = useState<FilterOption>('todos');
   const [showMenu, setShowMenu] = useState(false);
   
+  const [alert, setAlert] = useState({
+      message: '',
+      success: true
+  });
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  
+  useEffect(() => {
+      if (error) {
+        setAlert({
+          message: error.message ? error.message : String(error),
+          success: false
+        });
+        setIsAlertVisible(true);
+      }
+    }, [error]);
+
   const handleNavigation = (screen: keyof AdminStackParamList) => {
     navigation.navigate('Admin', { screen: screen });
   }
@@ -206,6 +224,12 @@ export default function UserListScreen({ navigation }: UserListProps) {
       >
           <Text style={styles.fabText}>{showMenu ? '✕' : '+'}</Text>
       </TouchableOpacity>
+      <Alert visible={isAlertVisible}
+              message={alert.message}
+              success={alert.success}
+              duration={3000}
+              onHide={() => setIsAlertVisible(false)}
+      />
     </View>
   );
 }
