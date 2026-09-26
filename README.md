@@ -1,5 +1,6 @@
 # Equipo Los Especialistas
 
+
 Bienvenido al repositorio oficial del grupo **Los especialistas**.  
 Este espacio está dedicado al desarrollo colaborativo de nuestro proyecto dentro de la asignatura **Metodologías de Desarrollo Ágiles** (Grado en Ingeniería Informática, Universidad de Granada, curso 2025/2026).  
 
@@ -44,10 +45,10 @@ Nuestro grupo está compuesto por seis integrantes, cada uno con un rol específ
 docker-compose up --build
 ```
 
-3. Verificar /hello
+3. Verificar
 
 ```bash
-http://localhost:5000/hello
+http://localhost:5000
 ```
 
 ### Configuración inicial frontend
@@ -72,8 +73,10 @@ npm start
 
 - Presiona w → web, a → Android, i → iOS, o escanea QR con Expo Go.
 
-4. Cambiar URL en App.tsx si es necesario
 
-```
-http://TU_IP_LOCAL:5000/hello
-```
+
+
+### IMPORTANTE:
+Para probar las cosas hay que reiniciar las tablas porque ya las tendreis creadas y faltaran columnas.
+Ejecutar este Script de la siguiente forma:
+docker compose exec -T db psql -U TU_USER -h localhost -d tato_db < app/sql/cleanup.sql

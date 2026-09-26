@@ -27,7 +27,7 @@ def close_db(e=None):
         db.close()
 
 def init_db():
-    res = exec_script('./sql/tablas.sql')
+    res = exec_script('./sql/tables.sql')
 
     if not res:
         mensaje = "Ha ocurrido un error al inicializar la base de datos"

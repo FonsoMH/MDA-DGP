@@ -1,11 +1,13 @@
-
 from dotenv import load_dotenv
 import os
-
 
 from flask import Flask, jsonify
 from flask_cors import CORS
 from .db import init_app, get_db_cursor, init_db
+# from .students import bp as students_bp
+# from .users import users_bp
+
+
 
 load_dotenv()  # carga las variables del .env
 
@@ -25,13 +27,43 @@ def create_app():
     init_app(app)
     with app.app_context():
         init_db()
+    
+    from .feedback import feedback
+    app.register_blueprint(feedback.feedback_bp)
 
-    @app.route("/hello")
-    def hello():
-        cur = get_db_cursor()
-        cur.execute("SELECT user_id, name FROM users")
-        rows = cur.fetchall()
-        cur.close()
-        return jsonify(rows)
+    from .games import game_config
+    app.register_blueprint(game_config.config_bp)
+
+    from .login import auth
+    app.register_blueprint(auth.auth_bp)
+
+    from .accessibility.accessibility import accessibility_bp
+    app.register_blueprint(accessibility_bp)
+
+    from .accessibility.accessibilitySettings import accessibility_settings_bp
+    app.register_blueprint(accessibility_settings_bp)
+
+
+    from .users.teachers import teacher_bp
+    app.register_blueprint(teacher_bp)
+
+    from .users.students import students_bp
+    app.register_blueprint(students_bp)
+
+    from .users.admins import admin_bp
+    app.register_blueprint(admin_bp)
+
+    from .users.general_users import users_bp
+    app.register_blueprint(users_bp)
+
+    from .users.user_deletion import users_deletion_bp
+    app.register_blueprint(users_deletion_bp)
+
+    from .classes.classes import classes_bp
+    app.register_blueprint(classes_bp)
+
+    # Statistics endpoints
+    from .users.statistics import statistics_bp
+    app.register_blueprint(statistics_bp)
 
     return app

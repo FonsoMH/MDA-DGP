@@ -1,35 +1,67 @@
 import * as React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'; 
 
-import { RootStackParamList } from '../types/navigation'; 
-import HomeScreen from '../screens/HomeScreen';
-import DetailsScreen from '../screens/DetailsScreen';
+import { RootStackParamList } from '../types/navigation';
+import GameNavigator from './GameNavigator';
+import LoginNavigator from './LoginNavigator';
+import AdminNavigator from './AdminNavigator';
+import GameMenuScreen from '../screens/games/gameMenuScreen';
+import LoginScreen from '../screens/auth/screens/LoginScreen';
+import TeacherNavigator from './TeacherNavigator';
+import StudentNavigator from './StudentNavigator';
+
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
     <Stack.Navigator 
-      initialRouteName="Home"
+      id={undefined}
+      initialRouteName="Login"
+      screenOptions={{
+            headerShown: false
+        }}
     >
-      <Stack.Screen 
-        name="Home" 
-        component={HomeScreen} 
-        options={{ 
-            title: 'Listado Principal',
-            headerShown: false
-        }} 
 
-      />
       <Stack.Screen 
-        name="Details" 
-        component={DetailsScreen} 
-        options={{ 
-            title: 'Detalles del Ítem',
-            headerShown: false
-        }} 
-
+         name="GameMenu" 
+        component={GameMenuScreen}
       />
+
+      <Stack.Screen 
+        name="Games" 
+        component={GameNavigator}
+      />
+
+      <Stack.Screen
+        name="Student"
+        component={StudentNavigator}
+      />
+      
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{
+          title: 'Iniciar Sesión',
+          headerShown: false
+        }}
+      />
+
+      <Stack.Screen 
+        name="Auth" 
+        component={LoginNavigator}
+      />
+
+      <Stack.Screen 
+        name="Admin" 
+        component={AdminNavigator}
+      />
+
+      <Stack.Screen 
+        name="Teacher" 
+        component={TeacherNavigator}
+      />
+      {/** Pantalla alternativa eliminado: GameSelected */}
     </Stack.Navigator>
   );
 }
